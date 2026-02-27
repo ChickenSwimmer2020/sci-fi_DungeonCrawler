@@ -45,6 +45,13 @@ class Save {
         }else Main.showError("SAVENOTCACHED", sve);
         return null;
     }
+    public static function readFieldFromSaveADV(sve:String, field:String, varible:String):Dynamic {
+        if(saveExists(sve)) {
+            var data:Dynamic=Json.parse(File.getContent('${Paths.savePath}/$sve.sav'));
+            return Reflect.field(Reflect.field(data, field), varible);
+        }else Main.showError('SAVENOTCACHED', sve);
+        return null;
+    }
     public static function readFieldFromSave(sve:String, field:SaveField, varible:String):Dynamic{
         if(saveExists(sve)){
             var data:Dynamic=Json.parse(File.getContent('${Paths.savePath}/$sve.sav'));
@@ -63,7 +70,10 @@ class Save {
         return null;
     }
     public static inline function saveExists(s:String):Bool return (Main.saveFiles.contains(s)||Main.saveFiles.contains('$s.sav'));
-    public static inline function findSaves()for(save in FileSystem.readDirectory(Paths.savePath))if(save.endsWith('.sav'))Main.saveFiles.push(save);
+    public static inline function findSaves(){
+        Main.saveFiles=[]; //clear the array and start again
+        for(save in FileSystem.readDirectory(Paths.savePath))if(save.endsWith('.sav'))Main.saveFiles.push(save);
+    }
     public static inline function writeSaveFile(?save:Save, name:String) File.saveContent('${Paths.savePath}/$name.sav', Json.stringify(save));
 
     #if debug

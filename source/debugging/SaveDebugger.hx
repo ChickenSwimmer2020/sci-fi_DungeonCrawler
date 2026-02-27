@@ -1,6 +1,5 @@
 package debugging;
-
-
+#if debug
 import flixel.text.FlxText;
 import states.MainMenuState;
 import backend.Language;
@@ -22,6 +21,7 @@ class SaveDebugger extends FlxUIState{
     var returnText:FlxUIText;
     public function new() {
         super();
+        Save.findSaves(); //just because its smart to do this everytime we load the state.
         var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.exit"), 24, true);
         add(text);
 
@@ -46,7 +46,12 @@ class SaveDebugger extends FlxUIState{
             Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Custom")
 		]);
         READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.parse"), ()->{
-            returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, tabs_radio_1.selectedId, READING_textInputOther.text)}';
+            if(tabs_radio_1.selectedId=="OTHER"&&READING_textInputOther.text.contains('.')) { //now we can read varibles inside of structures
+                //TODO: array support.
+                returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSaveADV(READING_saveDropdown.selectedId, READING_textInputOther.text.split('.')[0], READING_textInputOther.text.split('.')[1])}';
+            }else{
+                returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, tabs_radio_1.selectedId, READING_textInputOther.text)}';
+            }
         });
 
         returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned"), 8, true);
@@ -55,10 +60,11 @@ class SaveDebugger extends FlxUIState{
         for(save in Main.saveFiles) {
             dropdownList.push(new StrNameLabel(save.remove('.sav'), save));
         }
+        if(dropdownList[0]==null) //fallback.
+            dropdownList[0]=new StrNameLabel("", Language.getTranslatedKey(Main.curLanguage, "debugger.save.nosaves"));
 
-        
 
-        READING_saveDropdown = new FlxUIDropDownMenu(0, 0, dropdownList??[new StrNameLabel("", Language.getTranslatedKey(Main.curLanguage, "debugger.save.nosaves"))]);
+        READING_saveDropdown = new FlxUIDropDownMenu(0, 0, dropdownList);
         
 		var tab_group_1 = new FlxUI(null, tab_menu, null);
 		tab_group_1.name = "tab_1";
@@ -83,10 +89,10 @@ class SaveDebugger extends FlxUIState{
         super.update(elapsed);
         READING_textInputOther.visible = READING_textInputOther.active = (tabs_radio_1.selectedId=="OTHER"||tabs_radio_1.selectedId=="INVENTORY");
 
-        if(FlxG.keys.justPressed.BACKSPACE) {
+        if(!READING_textInputOther.hasFocus && FlxG.keys.justPressed.BACKSPACE) {
             FlxG.switchState(MainMenuState.new);
             openSubState(new DebuggerChooser());
         }
     }
-    
 }
+#end

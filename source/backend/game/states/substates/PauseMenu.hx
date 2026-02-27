@@ -36,7 +36,7 @@ class PauseMenu extends FlxSubState {
 
 
         //TODO: buttons
-        for(i in 0...(Main.loadedTestedState?6:5)) {
+        for(i in 0...(#if debug Main.loadedTestedState?6:5 #else 5 #end)) {
             var button:FlxButton = new FlxButton(1195, 720, [
                 Language.getTranslatedKey(Main.curLanguage, "pause.resume"),
                 "",

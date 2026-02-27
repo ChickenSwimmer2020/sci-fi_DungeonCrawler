@@ -18,15 +18,18 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         tiles = file.tiles;
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
-    public function generate(){
+    public function generate(?testingState:Bool=false){
         for (y in 0...tiles.length){
             tileObjects[y] = [];
             for (x in 0...tiles[y].length){
                 add(generateObjectViaTile(tiles[y][x], x, y));
             }
         }
-        add(plr = new Player());
-        plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
+        if(!testingState){
+            add(plr = new Player());
+            plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
+            plr.camera = Main.camGame;
+        }
         
         for(row in tileObjects){
             for(tile in row){
@@ -34,7 +37,6 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 else @:privateAccess tile.checkNeighbors(tileObjects, Math.floor(tile.x), Math.floor(tile.y));
             }
         }
-        plr.camera = Main.camGame;
     }
     private inline function generateObjectViaTile(type:TilePointer, x:Int, y:Int){
         if(type==null) { //:3
@@ -67,7 +69,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        FlxG.watch.addQuick('player position:', plr.getPosition());
+        FlxG.watch.addQuick('player position:', plr?.getPosition());
         FlxG.watch.addQuick('word boundries:', FlxG.worldBounds);
         for(row in tileObjects){
             for(tile in row){
@@ -76,11 +78,11 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                     tile.active=tile.alive=tile.visible=tile.isOnScreen(Main.camGame);
                 }
                 if(tile!=null && tile.allowCollisions == ANY){
-                    if ((Math.abs(Math.floor(plr.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE))) <= COLLISION_RADIUS && (Math.abs(Math.floor(plr.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE))) <= COLLISION_RADIUS){
-                        FlxG.collide(plr, tile);
-                        FlxG.collide(plr.weapon, tile); //to hopefully move the weapon so it doesnt shoot through blocks
+                    if ((Math.abs(Math.floor(plr?.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE))) <= COLLISION_RADIUS && (Math.abs(Math.floor(plr.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE))) <= COLLISION_RADIUS){
+                        FlxG.collide(plr??null, tile);
+                        FlxG.collide(plr?.weapon, tile); //to hopefully move the weapon so it doesnt shoot through blocks
                     }
-                    for(bullet in plr.weapon.activeProjectiles) {
+                    for(bullet in plr?.weapon.activeProjectiles) {
                         var vx = Math.abs(Math.floor(bullet.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE));
                         var vy = Math.abs(Math.floor(bullet.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE));
                         if(vx <= COLLISION_RADIUS && vy <= COLLISION_RADIUS){
@@ -90,7 +92,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                                 var effect:FlxSprite = new FlxSprite(bullet.x, bullet.y).makeGraphic(5, 5, 0xFFFFFFFF); //TODO: real graphic
                                 effect.setPosition(bullet.x-effect.width/2, bullet.y-effect.height/2);
                                 FlxG.state.add(effect);
-                                effect.camera=plr.camera;
+                                effect.camera=plr?.camera;
                                 new FlxTimer().start(0.5, (_)->{ //TODO until animation length
                                     effect.destroy();
                                     _.destroy();

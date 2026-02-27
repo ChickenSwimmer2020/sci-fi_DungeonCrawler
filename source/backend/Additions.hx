@@ -22,7 +22,14 @@ final class Additions{
         else for(number in Std.parseInt(nums[0])...Std.parseInt(nums[1]))toReturn.push(number);
         return toReturn;
     }
-    //arrays?
+    //arrays
+    public static function getFirstNull(a:Array<Dynamic>):Int {
+        for(i in 0...a.length) {
+            if(a[i]!=null) continue;
+            else return i; //technically, this should return length+1, but im too lazy to just do that math.
+        }
+        return -1; //return negative one if the entire array is full.
+    }
     public static function flip(a:Array<Dynamic>):Array<Dynamic>{
         var reversed:Array<Dynamic>=new Array<Dynamic>();
         for(object in a.length...0)reversed[object] = a[object];

@@ -49,6 +49,7 @@ class Player extends FlxSprite {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
             FlxG.watch.addQuick("inventory open: ", inventory?.fullOpen);
             FlxG.watch.addQuick("inventory selected hotbar item: ", inventory?.selectedItem);
+            FlxG.watch.addQuick("inventory hotbar slot ", curHotbarSlot);
 
             FlxG.watch.addQuick("health", health??0);
             FlxG.watch.addQuick("stamina", stamina??0);
@@ -56,6 +57,7 @@ class Player extends FlxSprite {
         }
     #end
     var isWeapon:Bool=false;
+    //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
         super.update(elapsed);
         #if debug
@@ -105,7 +107,7 @@ class Player extends FlxSprite {
             if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
                 curHotbarSlot=i;
                 @:privateAccess
-                    if(inventory.slots[curHotbarSlot].curItem?.type==RANGED || (inventory.slots[curHotbarSlot].curItem?.type==MEELEE || inventory.slots[curHotbarSlot].curItem?.type==MAGIC))
+                    if(inventory.slots[curHotbarSlot]?.curItem?.type==RANGED || (inventory.slots[curHotbarSlot]?.curItem?.type==MEELEE || inventory.slots[curHotbarSlot]?.curItem?.type==MAGIC))
                         WeaponParser.recycleWeapon(weapon, inventory.slots[curHotbarSlot].curItem?.item);
                 break;
             }else continue;

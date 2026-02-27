@@ -226,7 +226,7 @@ class HUDSubstate extends FlxSubState {
     override public function update(elapsed:Float) {
         super.update(elapsed);
         @:privateAccess weaponText.visible=Player.instance.isWeapon;
-        selectedItem=slots[Player.curHotbarSlot].curItem??{
+        selectedItem=slots[Player.curHotbarSlot]?.curItem??{
             type: NULL,
             weaponType: NULL,
             gunType: NULL,
@@ -238,7 +238,7 @@ class HUDSubstate extends FlxSubState {
         healthFlask.y=(fullOpen?(InventorySlot.SIZE*(slots.length/10)):0+InventorySlot.SIZE)+10;
         for(i in 0...slots.length){ //im going to make sure i only have ONE for loop in the update function, since these get out of hand QUICKLY.
             slots[i].color=0xFFFFFFFF;
-            slots[Player.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
+            if(slots[Player.curHotbarSlot]!=null) slots[Player.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
             if(fullOpen){
                 if(slots[i].visible==false)slots[i].visible=true;
             }else{

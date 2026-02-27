@@ -3,7 +3,7 @@
     <meta build-number="0" company="ChickenSwimmer2020" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="0.0.0"/>
     <app preloader="flixel.system.FlxPreloader" Path="export" file="[NAME]" main="Main"/>
 
-    <define name="debug"/> <!--the fact that i have to do this just for my code to show debug shit is stupid af.-->
+    <!--<define name="debug"/> the fact that i have to do this just for my code to show debug shit is stupid af.-->
 
     <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> <!-- these should default? if im correct everything should set as platforms are built.-->
     <section if="android">
