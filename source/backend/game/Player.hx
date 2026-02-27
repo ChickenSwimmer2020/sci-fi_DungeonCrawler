@@ -51,6 +51,7 @@ class Player extends FlxSprite {
             FlxG.watch.addQuick("inventory selected hotbar item: ", inventory?.selectedItem);
             FlxG.watch.addQuick("inventory hotbar slot ", curHotbarSlot);
 
+            FlxG.watch.addQuick("velocity", velocity);
             FlxG.watch.addQuick("health", health??0);
             FlxG.watch.addQuick("stamina", stamina??0);
             FlxG.watch.addQuick("xp", xp??0);
@@ -60,6 +61,9 @@ class Player extends FlxSprite {
     //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
         super.update(elapsed);
+        //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
+        if(velocity.x > 0 || velocity.x < 0)velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 4 * 1));
+        if(velocity.y > 0 || velocity.y < 0)velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 4 * 1));
         #if debug
             addWatchObjects();
             if(FlxG.keys.pressed.LBRACKET) health--;

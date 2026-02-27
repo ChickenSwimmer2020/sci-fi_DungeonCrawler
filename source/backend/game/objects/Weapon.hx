@@ -51,6 +51,7 @@ class Weapon extends FlxSprite{
     public static final BULLET_SPEED:Float = 500.0;
     public static final MAX_BULLETSPREAD:Float = 25.2;
     public static final POWER_INCREMENT:Float = 0.5;
+    public static final KICKBACK_STRENGTH:Float=30; //reversed, higher value means less kickback. TODO: possibly make this weaponfile dependant
     public var activeProjectiles:Array<Bullet>=[]; // for tracking, editing, and removal purposes.
     public var onLeftClick:Void->Void;
     public var onRightClick:Void->Void;
@@ -108,9 +109,14 @@ class Weapon extends FlxSprite{
         final sin:Float=Math.sin(angle*Math.PI/180)*BULLET_SPEED*railPower;
         final shotgunSpreads:Array<Float>=[-15,-12,-6,-2,0,2,6,12,15];
         bullet.velocity.set(FlxG.random.float(-MAX_BULLETSPREAD, MAX_BULLETSPREAD)+cos+shotgunSpreads[shotgunIndex], FlxG.random.float(-MAX_BULLETSPREAD, MAX_BULLETSPREAD)+sin+shotgunSpreads[shotgunIndex]); //yay, math!
+        //if we're firing the shotgun we want to times KICKBACK_STRENGTH by the number of pellets, because otherwise it jumps back WAY to far.
+        setPosition(x-(cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)), y-(sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH))); //do this **after** we set the velocity to hopefuly prevent bullets from spawning behind the player
+        Player.instance.velocity.set( //should add some kickback to the player. hopefully.
+            Player.instance.velocity.x - cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH),
+            Player.instance.velocity.y - sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)
+        );
     }
-    private function setUpWeapon(data:WeaponData) {
-        trace(data);        
+    private function setUpWeapon(data:WeaponData) { 
         animation.destroy();
         animation = new FlxAnimationController(this);
         damageTypes = [];

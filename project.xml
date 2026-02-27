@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
-    <meta build-number="0" company="ChickenSwimmer2020" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="0.0.0"/>
+    <meta build-number="0" company="ChickenSwimmer2020" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="PROTOTYPE: 0.01.2"/>
     <app preloader="flixel.system.FlxPreloader" Path="export" file="[NAME]" main="Main"/>
 
     <!--<define name="debug"/> the fact that i have to do this just for my code to show debug shit is stupid af.-->
