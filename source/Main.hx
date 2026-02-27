@@ -24,6 +24,7 @@ class Main extends openfl.display.Sprite {
         "SAVENOTCACHED"=>["error.cachefault", "error.cachefault.message"],
         "MISSINGLANG"=>["error.languagemissing", "error.languagemissing.mesage"],
         "MISSINGMAP"=>["error.mapnotfound", "error.mapnotfound.message"],
+        "NULLITEM"=>["error.nullitem", "error.nullitem.message"],
     ];
     //hehe we can store static varibles here to be accessed EVERYWHERE.
     public static var foundMaps:Array<String> = []; //we can store all the currently found maps from the game files and mods (if implemented.)

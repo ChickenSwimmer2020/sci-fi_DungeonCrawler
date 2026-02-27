@@ -15,6 +15,9 @@
     "debugger.save.returned": "Returned Value:",
     "debugger.save.nosaves": "NO SAVES",
 
+
+    "error.nullitem": "Null Item Exception",
+    "error.nullitem.message": "An Pickup attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL.",
     "error.renderfailure": "Engine Render Failure",
     "error.renderfailure.message": "A graphic({OBJ}) could not be loaded.\n\nTHIS ERROR IS NOT FATAL.",
     "error.nullio": "Null I/O Exception",

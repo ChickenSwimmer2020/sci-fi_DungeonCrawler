@@ -181,50 +181,14 @@ class HUDSubstate extends FlxSubState {
         healthFlask=new HealthFlask(0, 0+InventorySlot.SIZE);
         add(healthFlask);
         healthFlask.camera=Main.camHUD;
-
-
-        #if debug
-            slots[0].setItem(WeaponParser.buildWeaponItemPointer(WeaponParser.parse('pistol'))); //JUST A TEST
-            slots[1].setItem({
-                type: RANGED,
-                weaponType: GUN,
-                gunType: BALLISTIC,
-                item: "shotgun",
-                durability: 100.0,
-                damage: [],
-                charges: 100.0,
-            });
-            slots[2].setItem({
-                type: RANGED,
-                weaponType: GUN,
-                gunType: BALLISTIC,
-                item: "rifle",
-                durability: 100.0,
-                damage: [],
-                charges: 100.0,
-            });
-            slots[3].setItem({
-                type: RANGED,
-                weaponType: GUN,
-                gunType: BALLISTIC,
-                item: "burstgun",
-                durability: 100.0,
-                damage: [],
-                charges: 100.0,
-            });
-            slots[4].setItem({
-                type: RANGED,
-                weaponType: GUN,
-                gunType: BALLISTIC,
-                item: "railgun",
-                durability: 100.0,
-                damage: [],
-                charges: 100.0,
-            });
-        #end
     }
     override public function update(elapsed:Float) {
         super.update(elapsed);
+        for(i in 0...inventory.length) {
+            if(slots[i].curItem != inventory[i]) {
+                slots[i].setItem(inventory[i]);
+            }
+        }
         @:privateAccess weaponText.visible=Player.instance.isWeapon;
         selectedItem=slots[Player.curHotbarSlot]?.curItem??{
             type: NULL,

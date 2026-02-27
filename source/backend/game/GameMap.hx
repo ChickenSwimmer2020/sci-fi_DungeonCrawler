@@ -1,5 +1,6 @@
 package backend.game;
 
+import backend.game.objects.Pickup;
 import flixel.util.FlxTimer;
 import backend.game.objects.Tile;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -27,6 +28,11 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         }
         if(!testingState){
             add(plr = new Player());
+            add(new Pickup(0, 0, { //for testing.
+                type: RANGED,
+                item: "pistol",
+                damage: []
+            }));
             plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
             plr.camera = Main.camGame;
         }

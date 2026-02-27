@@ -86,9 +86,5 @@ class Tile extends FlxSprite {
     private function initTileGraphic(image:String) {
         curImage=image;
         frames = FlxTileFrames.fromGraphic(FlxG.bitmap.add(Paths.tiles(curImage)), FlxPoint.get(16, 16), null, FlxPoint.weak(1, 1));
-
-        //loadGraphic('${Paths.tiles(image)}', true, GameMap.TILE_SIZE, GameMap.TILE_SIZE); //doesnt do antything for now i guess.
-        //frame = frames.getByIndex(mapTiles.get(image).get(graph));
-        //TODO: code for checking what tiles surround my object.
     }
 }

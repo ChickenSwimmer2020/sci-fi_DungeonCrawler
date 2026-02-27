@@ -35,7 +35,8 @@ class Player extends FlxSprite {
         "zoomIN" => [PLUS],
         "zoomOUT" => [MINUS],
         "pause" => [ESCAPE, BACKSPACE],
-        "inventory" => [I]
+        "inventory" => [I],
+        "interact" => [E, ENTER],
     ]; 
     var targetWeaponPosition:FlxPoint;
     public function new() {
