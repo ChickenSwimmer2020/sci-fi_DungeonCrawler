@@ -186,12 +186,12 @@ class WeaponParser {
     }
     public static function recycleWeapon(weapon:Weapon, path:String) {
         @:privateAccess
-        if(path!=""&&(weapon!=null&&FileSystem.exists('assets/items/weapons/$path.weapon'))) weapon.setUpWeapon(parse(path));
-        else if(weapon==null||!FileSystem.exists('assets/items/weapons/$path.weapon')) Main.showError("IOERROR", 'assets/items/weapons/$path.weapon');
+        if(path!=""&&(weapon!=null&&FileSystem.exists(Paths.weapon(path)))) weapon.setUpWeapon(parse(path));
+        else if(weapon==null||!FileSystem.exists(Paths.weapon(path))) Main.showError("IOERROR", Paths.weapon(path));
     }
     public static function parse(path:String):WeaponData {
-        if(FileSystem.exists('assets/items/weapons/$path.weapon'))return parseXML('assets/items/weapons/$path.weapon');
-        else Main.showError("IOERROR", 'assets/items/weapons/$path.weapon');
+        if(FileSystem.exists(Paths.weapon(path)))return parseXML(Paths.weapon(path));
+        else Main.showError("IOERROR", Paths.weapon(path));
         return null;
     }
     private static function parseXML(path:String):WeaponData {

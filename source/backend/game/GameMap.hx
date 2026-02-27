@@ -54,7 +54,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
             switch(type.specialType) {
                 case SPAWN:
                     #if debug
-                        tile.loadGraphic('assets/debug/entry.png');
+                        tile.loadGraphic(Paths.DEBUG('entry'));
                         tile.color=0x7100FF00;
                     #end
                     playerSpawnPoint=FlxPoint.weak(tile.x, tile.y);

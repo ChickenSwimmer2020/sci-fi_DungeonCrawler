@@ -86,20 +86,20 @@ class InventorySlot extends FlxSprite {
 
     public function new(x:Float,y:Float) {
         super(x, y);
-        loadGraphic('assets/ui/inventory/slot.png');
+        loadGraphic(Paths.image('ui/inventory', 'slot'));
         setGraphicSize(SIZE, SIZE);
         updateHitbox();
         scrollFactor.set();
         camera=Main.camHUD;
     }
     private function loadItemGraphic(item:String) {
-        if(FileSystem.exists('assets/ui/items/$item.png')) {
+        if(FileSystem.exists(Paths.image('ui/items', item))) {
             var outputBitmapData:BitmapData = new BitmapData(Math.floor(width), Math.floor(height), true, 0xFFFFFF);
             var scaleMatrix:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
             scaleMatrix.scale(2, 2);
             outputBitmapData.draw(pixels, scaleMatrix);
             scaleMatrix.scale(1.5, 1.5);
-            outputBitmapData.draw(BitmapData.fromFile('assets/ui/items/$item.png'), scaleMatrix);
+            outputBitmapData.draw(BitmapData.fromFile(Paths.image('ui/items', item)), scaleMatrix);
             loadGraphic(outputBitmapData); //hehehehaw! now we *hopefully* can update the hitbox
             setGraphicSize(SIZE, SIZE);
             updateHitbox();
@@ -127,7 +127,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
     var innerHealthShader:MaskShader;
     public function new(x:Float, y:Float) {
         super(x, y);
-        outline = new FlxSprite(0, 0).loadGraphic('assets/ui/health/flask_outline.png');
+        outline = new FlxSprite(0, 0).loadGraphic(Paths.image('ui/health', 'flask_outline'));
 
         innerHealth = new FlxSprite(0, 0);
         innerHealth.makeGraphic(32, 32, 0xFFFF0000);
@@ -142,7 +142,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
         //add(outerXP);
         add(outline);
         scale.set(2, 2);
-        innerHealth.shader = innerHealthShader = new MaskShader(BitmapData.fromFile("assets/ui/health/flask_inner-MASK.png"));
+        innerHealth.shader = innerHealthShader = new MaskShader(BitmapData.fromFile(Paths.image('ui/health', "flask_inner-MASK")));
         //outerXP.shader = new MaskShader(BitmapData.fromFile("assets/ui/health/flask_outer-MASK.png"));
     }
 

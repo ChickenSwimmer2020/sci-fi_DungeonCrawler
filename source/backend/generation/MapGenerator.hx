@@ -86,7 +86,7 @@ class MapGenerator {
 
         //we can make these files SUPER small by compressing them.
         //TODO: support for other platforms
-        File.saveContent('assets/maps/PLACEHOLDER.map', Json.stringify(toMapFile, null, "    "));
+        File.saveContent(Paths.map("PLACEHOLDER"), Json.stringify(toMapFile, null, "    "));
     }
     private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){
         var hallwayLength:Int = FlxG.random.int(HALLWAY_MIN_LENGTH, HALLWAY_MAX_LENGTH);
