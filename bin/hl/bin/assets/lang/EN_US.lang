@@ -1,0 +1,16 @@
+{
+    "TODO": "THIS",
+
+
+
+    "error.renderfailure": "Engine Render Failure",
+    "error.renderfailure.message": "A graphic({OBJ}) could not be loaded.\n\nTHIS ERROR IS NOT FATAL.",
+    "error.nullio": "Null I/O Exception",
+    "error.nullio.message": "The object {OBJ} couldnt be loaded.",
+    "error.cachefault": "Save Cache Fault",
+    "error.cachefault.message": "The save file {OBJ} could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game.",
+    "error.languagemissing": "Language Fault",
+    "error.languagemissing.mesage": "The language file for {OBJ} could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]",
+    "error.mapnotfound": "Map read Failure",
+    "error.mapnotfound.message": "The map file {OBJ} could not be loaded. This error is not fatal, and you will be returned to the main menu.[MENU]"
+}

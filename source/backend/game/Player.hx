@@ -1,0 +1,136 @@
+package backend.game;
+
+import flixel.math.FlxMath;
+import backend.game.objects.Weapon;
+import backend.game.states.substates.HUDSubstate;
+import flixel.FlxCamera.FlxCameraFollowStyle;
+import flixel.input.keyboard.FlxKey;
+
+class Player extends FlxSprite {
+    public static var instance:Player;
+    public static var health:Float = 100;
+    public static var stamina:Float = 100;
+    public static var xp:Float = 0;
+
+    public static var curHotbarSlot:Int=0;
+    public var inventory:HUDSubstate; //for easy access without a bunch of extra stuff.
+    public var weapon:Weapon;
+    public static var INVENTORY_SLOTS:Int = 50; //default to ten for like, idk (CAN BE CHANGED BY SAVE FILE)
+
+
+    public static var playerPauseRequested:Bool = false; //for easier pausing since i cant just do like FlxG.pause.
+    public static var onPlayerPause:Void->Void = null; //JUST in-case i ever need it.
+
+    private static final MAX_ZOOM:Float=10;
+    private static final MIN_ZOOM:Float=1;
+    private static final WEAPON_OFFSET:Map<String, FlxPoint> = [
+        "DEBUG"=>FlxPoint.weak(0, 0)
+    ];
+    public static final controls:Map<String, Array<FlxKey>> = [ //TODO: controls schemes
+        "moveUP" => [UP, W],
+        "moveDOWN" => [DOWN, S],
+        "moveRIGHT" => [RIGHT, D],
+        "moveLEFT" => [LEFT, A],
+
+        "zoomIN" => [PLUS],
+        "zoomOUT" => [MINUS],
+        "pause" => [ESCAPE, BACKSPACE],
+        "inventory" => [I]
+    ]; 
+    var targetWeaponPosition:FlxPoint;
+    public function new() {
+        super(0, 0);
+        targetWeaponPosition=new FlxPoint(x, y);
+        makeGraphic(4, 4, 0xFFFF0000);
+        instance=this;
+    }
+    #if debug
+        function addWatchObjects() {
+            FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
+            FlxG.watch.addQuick("inventory open: ", inventory?.fullOpen);
+            FlxG.watch.addQuick("inventory selected hotbar item: ", inventory?.selectedItem);
+
+            FlxG.watch.addQuick("health", health??0);
+            FlxG.watch.addQuick("stamina", stamina??0);
+            FlxG.watch.addQuick("xp", xp??0);
+        }
+    #end
+    var isWeapon:Bool=false;
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
+        #if debug
+            addWatchObjects();
+            if(FlxG.keys.pressed.LBRACKET) health--;
+            if(FlxG.keys.pressed.RBRACKET) health++;
+
+            if(FlxG.keys.pressed.SEMICOLON) stamina--;
+            if(FlxG.keys.pressed.QUOTE) stamina++;
+
+            if(FlxG.keys.pressed.COMMA) xp--;
+            if(FlxG.keys.pressed.PERIOD) xp++;
+        #end
+        if(inventory==null) {
+            inventory=new HUDSubstate();
+            FlxG.state.persistentUpdate=true;
+            FlxG.state.openSubState(inventory); //open the inventory. (which is also technically the hotbar)
+        }
+        if(weapon==null) {
+            weapon=new Weapon(0, 0, WeaponParser.parse('DEBUG'));
+            weapon.camera=camera; //move the weapn to the player camera;
+            FlxG.state.add(weapon);
+            weapon.setActions(
+                ()->{weapon.playAnimation('a', true); weapon.shoot();},
+                ()->{weapon.playAnimation('b', true);}
+            );
+            weapon.visible=weapon.active=false;
+        }else{
+            isWeapon=((inventory.selectedItem.type==RANGED||inventory.selectedItem.type==MEELEE)||inventory.selectedItem.type==MAGIC);
+            weapon.active=weapon.visible=isWeapon;
+            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?FlxG.mouse.pressed:FlxG.mouse.justPressed) && (weapon.visible && weapon.active)) weapon.onLeftClick();
+            if(FlxG.mouse.justPressedRight && (weapon.visible && weapon.active)) weapon.onRightClick();
+            if((FlxG.mouse.justPressedMiddle && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
+
+            if(weapon.visible && weapon.active){
+                targetWeaponPosition.set(x+WEAPON_OFFSET.get(weapon.name)?.x,y+WEAPON_OFFSET.get(weapon.name)?.y);
+                weapon.x=FlxMath.lerp(targetWeaponPosition.x, weapon.x, Math.exp(-elapsed*3.125*4*1)); //this should make it that the weapon can collide with the blocks too, HOPEFULLY to prevent hsooting through blocks.
+                weapon.y=FlxMath.lerp(targetWeaponPosition.y, weapon.y, Math.exp(-elapsed*3.125*4*1));
+                weapon.angle = Math.atan2(FlxG.mouse.getWorldPosition(Main.camGame).y-weapon.y, FlxG.mouse.getWorldPosition(Main.camGame).x-weapon.x) * 180 / Math.PI;
+            }
+        }
+        Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
+
+
+        curHotbarSlot.clamp(0, 9); //actually 1-10;
+        for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)
+            if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
+                curHotbarSlot=i;
+                @:privateAccess
+                    if(inventory.slots[curHotbarSlot].curItem?.type==RANGED || (inventory.slots[curHotbarSlot].curItem?.type==MEELEE || inventory.slots[curHotbarSlot].curItem?.type==MAGIC))
+                        WeaponParser.recycleWeapon(weapon, inventory.slots[curHotbarSlot].curItem?.item);
+                break;
+            }else continue;
+
+        //HORRIBLE way to do it, but good enough.
+        if(inventory.weaponText.text!='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}')
+            inventory.weaponText.text='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
+
+        //TODO: make these better
+        if(FlxG.keys.anyPressed(controls.get('moveUP'))) y-=1;
+        if(FlxG.keys.anyPressed(controls.get('moveDOWN'))) y+=1;
+        if(FlxG.keys.anyPressed(controls.get('moveRIGHT'))) x+=1;
+        if(FlxG.keys.anyPressed(controls.get('moveLEFT'))) x-=1;
+
+        Main.camGame.zoom.clamp(MIN_ZOOM, MAX_ZOOM);
+        if(FlxG.keys.anyPressed(controls.get('zoomOUT'))){
+            if(Main.camGame.zoom>MIN_ZOOM)Main.camGame.zoom-=0.25;
+        }
+        if(FlxG.keys.anyPressed(controls.get('zoomIN'))){
+            if(Main.camGame.zoom<MAX_ZOOM)Main.camGame.zoom+=0.25;
+        }
+
+        //MOVED PAUSING LOGIC TO INVENTORY
+        if(FlxG.keys.anyJustPressed(controls.get('inventory'))) {
+            inventory.fullOpen=!inventory.fullOpen;
+        }
+    }
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
+    <meta build-number="0" company="ChickenSwimmer2020" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="0.0.0"/>
+    <app preloader="flixel.system.FlxPreloader" file="[NAME]" main="Main"/>
+
+    <define name="debug"/> <!--the fact that i have to do this just for my code to show debug shit is stupid af.-->
+
+    <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> <!-- these should default? if im correct everything should set as platforms are built.-->
+    <section if="android">
+        <android install-location="perferExternal" target-sdk-version="36"/>
+        <config type="android" install-location="preferExternal" minimum-sdk-version="21" gradle-version="8.9" gradle-plugin="8.7.3" target-sdk-version="36"/>
+    </section>
+
+    <section if="hl">
+        <window allow-high-dpi="true" hardware="true" vsync="true" width="1280" height="720"/> <!--default window params-->
+    </section>
+    <!--TODO: possible support for more platforms? i'll have to completely re-write the way the UI works since multiwindow doesnt exist on android-->
+
+    <haxelib name="flixel"/>
+    <haxelib name="flixel-ui"/>
+    <haxelib name="flixel-addons"/>
+    <haxelib name="openfl"/>
+
+    <source path="source" />
+    <source path="source/debug" if="debug"/>
+    <assets path="assets"/>
+    <assets path="assets/debug" include="*.png" if="debug" /> <!-- for only debug assets. -->
+
+    <haxedef name="FLX_NO_DEBUG" unless="debug"/>
+    <haxedef name="FLX_NO_HEALTH"/> <!--because im doing it myself.-->
+    <haxedef name="FLX_NO_FOCUS_LOST_SCREEN"/>
+    <haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
+
+    <language name="en-US" />
+</project>
