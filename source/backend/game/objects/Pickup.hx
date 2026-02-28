@@ -45,7 +45,7 @@ class Pickup extends FlxSprite {
         var inv:Array<Item> = Player.instance.inventory.inventory;
         var it:Item = item;
         if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
-        inv.push(it); //TODO: make sure inventory isnt full.
+        if(inv.length<Player.INVENTORY_SLOTS) inv.push(it);
     }
 
     var ranonce:Bool=false;
