@@ -32,20 +32,25 @@ class Pickup extends FlxSprite {
         if(Player.instance.overlaps(this)) {
             interactionPopup(true);
             if(FlxG.keys.anyJustPressed(Player.controls.get('interact'))) {
-                if(onPickup!=null&&data!=null) onPickup(data);
-                sendToInventory(data);
-                destroy();
-                interactionPopup(false);
+                if(!inventoryFull()){
+                    if(onPickup!=null&&data!=null) onPickup(data);
+                    sendToInventory(data);
+                    destroy();
+                    interactionPopup(false);
+                }else{
+                    trace('TODO: logic for showing the text telling you taht your inventory is full');
+                }
             }
         }else{
             interactionPopup(false);
         }
     }
+    private function inventoryFull():Bool return (Player.instance.inventory.inventory.length<Player.INVENTORY_SLOTS);
     private function sendToInventory(item:Item) {
         var inv:Array<Item> = Player.instance.inventory.inventory;
         var it:Item = item;
         if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
-        if(inv.length<Player.INVENTORY_SLOTS) inv.push(it);
+        inv.push(it);
     }
 
     var ranonce:Bool=false;
