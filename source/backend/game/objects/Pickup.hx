@@ -15,7 +15,7 @@ class Pickup extends FlxSprite {
             Main.showError('NULLITEM');
             destroy();
         }
-        makeGraphic(10, 10, 0xFF00FF00); //placeholder
+        makeGraphic(10, 10, 0xFF00FF00);
         camera=Main.camGame; //just gonna do this automatically.
         //TODO: graphic loading system
     }
