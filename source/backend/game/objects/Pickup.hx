@@ -59,7 +59,7 @@ class Pickup extends FlxSprite {
     var ranonce:Bool=false;
     private function interactionPopup(enable:Bool) {
         if(interactionSprite==null) {
-            interactionSprite = new FlxSprite(x, y).loadGraphic(Paths.DEBUG('pickupinteraction', 'png'));
+            interactionSprite = new FlxSprite(x, y)#if debug .loadGraphic(Paths.DEBUG('pickupinteraction', 'png'));#else.makeGraphic(16, 16, 0xFF00FFFF);#end
             FlxG.state.add(interactionSprite);
             interactionSprite.camera=Main.camGame;
         }else{
