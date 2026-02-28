@@ -1,13 +1,10 @@
 package backend.game.objects;
 
 import flixel.animation.FlxAnimationController;
-import hscript.Expr.Error;
 import flixel.math.FlxMath;
 import backend.shaders.RailFire;
 import openfl.filters.ShaderFilter;
-import openfl.filters.BitmapFilter;
 import flixel.util.FlxTimer;
-import haxe.io.Error;
 import backend.game.states.substates.HUDSubstate;
 
 typedef WeaponData = {

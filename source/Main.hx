@@ -1,6 +1,5 @@
 package;
 
-import haxe.macro.Context.Message;
 import backend.Language;
 import states.MainMenuState;
 import lime.app.Application;

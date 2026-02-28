@@ -5,13 +5,8 @@ import flixel.addons.ui.FlxUINumericStepper;
 import flixel.text.FlxText;
 import states.MainMenuState;
 import backend.Language;
-import flixel.addons.ui.FlxUIText;
-import flixel.addons.ui.StrNameLabel;
-import flixel.addons.ui.FlxUIDropDownMenu;
-import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUIButton;
 import flixel.addons.ui.FlxUI;
-import flixel.addons.ui.FlxUIRadioGroup;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUIState;
 

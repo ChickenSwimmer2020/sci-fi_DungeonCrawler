@@ -1,6 +1,5 @@
 package backend;
 
-import lime.app.Application;
 import flixel.util.FlxTimer;
 import backend.shaders.RailFire;
 import backend.shaders.MaskShader;

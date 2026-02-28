@@ -1,13 +1,8 @@
 package backend.game.states.substates;
 
-import backend.game.objects.Weapon;
 import flixel.text.FlxText;
 import openfl.geom.Matrix;
-import flixel.text.FlxInputTextManager;
-import openfl.geom.Rectangle;
-import openfl.display.Bitmap;
 import backend.shaders.MaskShader;
-import flixel.util.FlxSpriteUtil;
 import flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer;
 import flixel.FlxSubState;
 

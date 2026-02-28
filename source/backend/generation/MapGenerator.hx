@@ -1,10 +1,7 @@
 package backend.generation;
 
-import flixel.math.FlxRect;
 import flixel.util.FlxTimer;
-import haxe.io.Error;
 import backend.game.GameMap;
-import lime.app.Application;
 
 enum abstract SpecialTileType(Int) from Int to Int {
     var NONE=-1; //JUST incase.
