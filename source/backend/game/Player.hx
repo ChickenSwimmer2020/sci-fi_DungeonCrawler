@@ -26,19 +26,8 @@ class Player extends FlxSprite {
     private static final WEAPON_OFFSET:Map<String, FlxPoint> = [
         "DEBUG"=>FlxPoint.weak(0, 0)
     ];
-    public static final controls:Map<String, Array<FlxKey>> = [ //TODO: controls schemes
-        "moveUP" => [UP, W],
-        "moveDOWN" => [DOWN, S],
-        "moveRIGHT" => [RIGHT, D],
-        "moveLEFT" => [LEFT, A],
-
-        "zoomIN" => [PLUS],
-        "zoomOUT" => [MINUS],
-        "pause" => [ESCAPE, BACKSPACE],
-        "inventory" => [I],
-        "interact" => [E, ENTER],
-    ]; 
     var targetWeaponPosition:FlxPoint;
+    var mousePosition:FlxPoint=new FlxPoint(0, 0);
     public function new() {
         super(0, 0);
         targetWeaponPosition=new FlxPoint(x, y);
@@ -62,6 +51,7 @@ class Player extends FlxSprite {
     //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
         super.update(elapsed);
+        mousePosition = FlxG.mouse.getWorldPosition(Main.camGame);
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(velocity.x > 0 || velocity.x < 0)velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(velocity.y > 0 || velocity.y < 0)velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 4 * 1));
@@ -101,7 +91,7 @@ class Player extends FlxSprite {
                 targetWeaponPosition.set(x+WEAPON_OFFSET.get(weapon.name)?.x,y+WEAPON_OFFSET.get(weapon.name)?.y);
                 weapon.x=FlxMath.lerp(targetWeaponPosition.x, weapon.x, Math.exp(-elapsed*3.125*4*1)); //this should make it that the weapon can collide with the blocks too, HOPEFULLY to prevent hsooting through blocks.
                 weapon.y=FlxMath.lerp(targetWeaponPosition.y, weapon.y, Math.exp(-elapsed*3.125*4*1));
-                weapon.angle = Math.atan2(FlxG.mouse.getWorldPosition(Main.camGame).y-weapon.y, FlxG.mouse.getWorldPosition(Main.camGame).x-weapon.x) * 180 / Math.PI;
+                weapon.angle = Math.atan2(mousePosition.y-weapon.y, mousePosition.x-weapon.x) * 180 / Math.PI;
             }
         }
         Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
@@ -122,21 +112,21 @@ class Player extends FlxSprite {
             inventory.weaponText.text='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
 
         //TODO: make these better
-        if(FlxG.keys.anyPressed(controls.get('moveUP'))) y-=1;
-        if(FlxG.keys.anyPressed(controls.get('moveDOWN'))) y+=1;
-        if(FlxG.keys.anyPressed(controls.get('moveRIGHT'))) x+=1;
-        if(FlxG.keys.anyPressed(controls.get('moveLEFT'))) x-=1;
+        if(FlxG.keys.anyPressed(Main.controls.get('moveUP'))) y-=1;
+        if(FlxG.keys.anyPressed(Main.controls.get('moveDOWN'))) y+=1;
+        if(FlxG.keys.anyPressed(Main.controls.get('moveRIGHT'))) x+=1;
+        if(FlxG.keys.anyPressed(Main.controls.get('moveLEFT'))) x-=1;
 
         Main.camGame.zoom.clamp(MIN_ZOOM, MAX_ZOOM);
-        if(FlxG.keys.anyPressed(controls.get('zoomOUT'))){
+        if(FlxG.keys.anyPressed(Main.controls.get('zoomOUT'))){
             if(Main.camGame.zoom>MIN_ZOOM)Main.camGame.zoom-=0.25;
         }
-        if(FlxG.keys.anyPressed(controls.get('zoomIN'))){
+        if(FlxG.keys.anyPressed(Main.controls.get('zoomIN'))){
             if(Main.camGame.zoom<MAX_ZOOM)Main.camGame.zoom+=0.25;
         }
 
         //MOVED PAUSING LOGIC TO INVENTORY
-        if(FlxG.keys.anyJustPressed(controls.get('inventory'))) {
+        if(FlxG.keys.anyJustPressed(Main.controls.get('inventory'))) {
             inventory.fullOpen=!inventory.fullOpen;
         }
     }

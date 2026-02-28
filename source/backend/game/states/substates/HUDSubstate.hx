@@ -1,5 +1,6 @@
 package backend.game.states.substates;
 
+import flixel.util.typeLimit.OneOfTwo;
 import flixel.text.FlxText;
 import openfl.geom.Matrix;
 import backend.shaders.MaskShader;
@@ -74,6 +75,8 @@ typedef Item = {
 }
 
 class InventorySlot extends FlxSprite {
+    public var onItemMoveStart:Void->Void;
+    public var onItemMoveEnd:Void->Void;
     public static final SIZE:Int = 64;
     public var hasItem:Bool=false;
     public var curItem:Null<Item>;
@@ -105,7 +108,31 @@ class InventorySlot extends FlxSprite {
             Main.showError("RENDERFAILURE", item);
         }
     }
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
+        FlxG.watch.addQuick('held item', Main.curHeldItem);
 
+        //pickup logic
+        if(FlxG.mouse.overlaps(this) && FlxG.mouse.justPressed) {
+            if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
+                Main.curHeldItem=curItem;
+                unloadItem();
+                onItemMoveStart();
+            }else if(Main.curHeldItem!=null){
+                setItem(Main.curHeldItem);
+                onItemMoveEnd();
+                Main.curHeldItem=null;
+            }
+        }
+    }
+    public function unloadItem() {
+        curItem=null;
+        hasItem=false;
+        graphic.bitmap.fillRect(graphic.bitmap.rect, 0x00000000);
+        loadGraphic(Paths.image('ui/inventory', 'slot'));
+        setGraphicSize(SIZE, SIZE);
+        updateHitbox();
+    }
     public function setItem(item:Item) {
         hasItem=true;
         curItem=item;
@@ -152,7 +179,7 @@ class HUDSubstate extends FlxSubState {
     public var weaponText:FlxText;
     public var fullOpen:Bool=false; //so that we can have the hotbar
     private static final MAX_SLOTS:Int = 10;
-    public var inventory:Null<Array<Item>>;
+    public var inventory:Null<Array<OneOfTwo<String, Item>>>;
     public var slots:Array<InventorySlot> = [];
 
     public var selectedItem:Item;
@@ -166,6 +193,12 @@ class HUDSubstate extends FlxSubState {
             var slot:InventorySlot=new InventorySlot(0+(InventorySlot.SIZE*index), 0+(InventorySlot.SIZE*(Math.floor(i/MAX_SLOTS))));
             slots.push(slot);
             add(slot);
+            slot.onItemMoveStart = ()->{
+                inventory[slots.indexOf(slot)] = "EMPTY";
+            };
+            slot.onItemMoveEnd = ()->{
+                inventory[slots.indexOf(slot)] = Main.curHeldItem;
+            };
             index++;
         }
 
@@ -176,12 +209,18 @@ class HUDSubstate extends FlxSubState {
         healthFlask=new HealthFlask(0, 0+InventorySlot.SIZE);
         add(healthFlask);
         healthFlask.camera=Main.camHUD;
+
+        for(i in 0...Player.INVENTORY_SLOTS){ //fill the inventory with empty slots
+            inventory[i]="EMPTY";
+        }
     }
     override public function update(elapsed:Float) {
         super.update(elapsed);
         for(i in 0...inventory.length) {
-            if(slots[i].curItem != inventory[i]) {
-                slots[i].setItem(inventory[i]);
+            if(!(inventory[i] is String)){ //only do the item writing IF the inventory slot isnt a string.
+                if(slots[i].curItem != inventory[i]) {
+                    slots[i].setItem(inventory[i]);
+                }
             }
         }
         @:privateAccess weaponText.visible=Player.instance.isWeapon;
@@ -205,7 +244,7 @@ class HUDSubstate extends FlxSubState {
             }
         }
         
-        if(FlxG.keys.anyJustPressed(Player.controls.get('pause'))) { //swapped for anyJustPressed so it doesnt run multiple times in a frame
+        if(FlxG.keys.anyJustPressed(Main.controls.get('pause'))) { //swapped for anyJustPressed so it doesnt run multiple times in a frame
             if(Player.onPlayerPause!=null)Player.onPlayerPause(); //so we can pause enemy and object ai/animations/tweens/everything
             Player.playerPauseRequested = true;
             openSubState(new PauseMenu()); //open the substate IN the substate. simple fix!

@@ -1,5 +1,6 @@
 package backend.game.objects;
 
+import flixel.util.typeLimit.OneOfTwo;
 import backend.game.objects.Weapon.WeaponParser;
 import backend.game.states.substates.HUDSubstate.Item;
 import flixel.math.FlxMath;
@@ -31,14 +32,14 @@ class Pickup extends FlxSprite {
         }
         if(Player.instance.overlaps(this)) {
             interactionPopup(true);
-            if(FlxG.keys.anyJustPressed(Player.controls.get('interact'))) {
+            if(FlxG.keys.anyJustPressed(Main.controls.get('interact'))) {
                 if(!inventoryFull()){
                     if(onPickup!=null&&data!=null) onPickup(data);
                     sendToInventory(data);
                     destroy();
                     interactionPopup(false);
                 }else{
-                    trace('TODO: logic for showing the text telling you taht your inventory is full');
+                    trace('TODO: logic for showing the text telling you that your inventory is full');
                 }
             }
         }else{
@@ -47,10 +48,12 @@ class Pickup extends FlxSprite {
     }
     private function inventoryFull():Bool return (Player.instance.inventory.inventory.length<Player.INVENTORY_SLOTS);
     private function sendToInventory(item:Item) {
-        var inv:Array<Item> = Player.instance.inventory.inventory;
+        var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
         var it:Item = item;
         if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
-        inv.push(it);
+        if(inv[inv.getFirstEmpty()]!=null && ((inv[inv.getFirstEmpty()] is String) && inv[inv.getFirstEmpty()]=="EMPTY")){
+            inv[inv.getFirstEmpty()] = it;
+        }
     }
 
     var ranonce:Bool=false;

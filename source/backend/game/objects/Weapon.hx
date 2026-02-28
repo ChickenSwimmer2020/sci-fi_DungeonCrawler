@@ -77,6 +77,7 @@ class Weapon extends FlxSprite{
     var increment:Int=0;
     var power:Float=0;
     public function shoot() {
+        if(FlxG.mouse.overlaps(Player.instance.inventory)) return; //cancel if holding an item. much simpler fix than anything else honestly.
         if(charges<=0)return; //cancel if we have no ammo.
         increment=0;
         if(coolDownTimer.finished){

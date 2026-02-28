@@ -1,5 +1,6 @@
 package backend;
 
+import backend.game.states.substates.HUDSubstate.Item;
 import flixel.util.typeLimit.OneOfTwo;
 
 final class Additions{
@@ -23,12 +24,18 @@ final class Additions{
         return toReturn;
     }
     //arrays
-    public static function getFirstNull(a:Array<Dynamic>):Int {
-        for(i in 0...a.length) {
-            if(a[i]!=null) continue;
-            else return i; //technically, this should return length+1, but im too lazy to just do that math.
+    /**
+     * Specifically made for the inventory system as im implementing item movement between slots in a very basic way now.
+     * @param a inventory array (must be Array<OneOfTwo<String, Item>>)
+     * @return Int index of first empty.
+     * WILL RETURN -1 IF THERE ARE NO EMPTY SLOTS.
+     */
+    public static function getFirstEmpty(a:Array<OneOfTwo<String, Item>>):Int {
+        for(index in 0...a.length) {
+            if(a[index]!="EMPTY")continue;
+            else return index;
         }
-        return -1; //return negative one if the entire array is full.
+        return -1;
     }
     public static function flip(a:Array<Dynamic>):Array<Dynamic>{
         var reversed:Array<Dynamic>=new Array<Dynamic>();

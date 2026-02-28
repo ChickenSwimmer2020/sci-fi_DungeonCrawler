@@ -1,5 +1,6 @@
 package backend.game.states.substates;
 
+import flixel.addons.ui.FlxUIAssets;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUISubState;
 import flixel.addons.ui.FlxUI;
@@ -21,7 +22,6 @@ class OptionsMenuSubstate extends FlxUISubState{
 		tab_menu.y = 40;
         tab_menu.resize(500, 400);
         tab_menu.screenCenter();
-
 
 
         //quickly init the groups and everything

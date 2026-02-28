@@ -23,6 +23,7 @@ class TestingState extends flixel.FlxState {
             MapGenerator.generateMap(100, 100);
             Save.DEBUGSAVE('fucker');
             add(MapGenerator.createMap('PLACEHOLDER'));
+            Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
         #else
             trace('not in a debug build. functionality disabled.\nHow\'d you even load this state??');
         #end

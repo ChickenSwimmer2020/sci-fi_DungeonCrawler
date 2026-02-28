@@ -1,5 +1,6 @@
 package backend.save;
 
+import flixel.input.keyboard.FlxKey;
 import backend.game.states.substates.HUDSubstate.Item;
 
 typedef SaveFile = {
@@ -7,6 +8,7 @@ typedef SaveFile = {
     var stamina:Int;
     var xp:Int;
     var position:{x:Float, y:Float};
+    var controls:Array<{c:String, keys:Array<FlxKey>}>;
     var inventory:Array<Array<Item>>; //Items are a typedef, we can save these here!
     var maps:Array<MapFile>; //store every map in the user save file so that we dont have to do a bunch of extra stuff to regenerate them.
 }
@@ -76,6 +78,39 @@ class Save {
     }
     public static inline function writeSaveFile(?save:Save, name:String) File.saveContent('${Paths.savePath}/$name.sav', Json.stringify(save));
 
+    public static function generateSaveFile(save:Save, name:String) {
+        File.saveContent('${Paths.savePath}/$name.sav', Json.stringify(save, null, "    "));
+    }
+    private static function loadControls(data:Dynamic):Map<String, Array<FlxKey>> {
+        var control:Map<String, Array<FlxKey>>=[];
+        if(Reflect.hasField(data, "controls")) {
+            for(ctrl in 0...data.controls.length) {
+                var arr:Array<FlxKey>=[];
+                for(k in 0...data.controls[ctrl].keys.length) arr.push(data.controls[ctrl].keys[k]);
+                control.set(data.controls[ctrl].c, arr);
+            }
+            Main.controls=control;
+            return control;
+        }else Main.showError("");
+        return null;
+    }
+    public static function readSaveFile(file:String):SaveFile {
+        if(saveExists(file)){
+            var data:Dynamic = Json.parse(File.getContent('${Paths.savePath}/$file.sav'));
+            loadControls(data);
+            var sve:SaveFile = {
+                health: data.health,
+                stamina: data.stamina,
+                xp: data.xp,
+                position:{x: data.position.x, y: data.position.y},
+                controls: data.controls,
+                inventory: data.inventory,
+                maps: data.maps,
+            };
+            return sve;
+        }else Main.showError("SAVENOTCACHED", file);
+        return null;
+    }
     #if debug
         public static function DEBUGSAVE(name:String) {
             var toFile:SaveFile = {
@@ -83,6 +118,17 @@ class Save {
                 xp: 421,
                 stamina: 555,
                 position: {x: 412, y: 32},
+                controls: [
+                    {c: "moveUP", keys:["UP", "W"]},
+                    {c: "moveDOWN", keys:["DOWN", "S"]},
+                    {c: "moveRIGHT", keys:["RIGHT", "D"]},
+                    {c: "moveLEFT", keys:["LEFT", "A"]},
+                    {c: "zoomIN", keys:["PLUS"]},
+                    {c: "zoomOUT", keys:["MINUS"]},
+                    {c: "pause", keys:["ESCAPE", "BACKSPACE"]},
+                    {c: "inventory", keys:["I"]},
+                    {c: "interact", keys:["E", "ENTER"]}
+                ],
                 inventory: [
                     [{type: RANGED,weaponType: GUN,gunType: BALLISTIC,item: "pistol",durability: 100.0,damage: [],charges: 100.0,}]
                 ],

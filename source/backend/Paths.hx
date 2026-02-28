@@ -16,7 +16,8 @@ class Paths {
     }
     public static inline function lang(l:String):String return '${langPath}/$l.lang';
     public static inline function image(folder:String,i:String):String{
-        #if debug @:privateAccess FlxG.debugger.windows.get_debugger().bitmapLog.add(BitmapData.fromFile('assets/$folder/$i.png')); #end
+        //TODO: fix the bitmap logger crashing stuff.
+        //#if debug @:privateAccess FlxG.debugger.windows.get_debugger().bitmapLog.add(BitmapData.fromFile('assets/$folder/$i.png')); #end
         return 'assets/$folder/$i.png';
     }
     public static inline function weapon(w:String):String return '${weaponsPath}/$w.weapon';

@@ -1,5 +1,7 @@
 package;
 
+import flixel.input.keyboard.FlxKey;
+import backend.game.states.substates.HUDSubstate.Item;
 import backend.Language;
 import states.MainMenuState;
 import lime.app.Application;
@@ -15,6 +17,20 @@ import flixel.FlxCamera;
 //}
 
 class Main extends openfl.display.Sprite {
+    public static var controls:Map<String, Array<Int>>=[
+        "moveUP" => [UP, W],
+        "moveDOWN" => [DOWN, S],
+        "moveRIGHT" => [RIGHT, D],
+        "moveLEFT" => [LEFT, A],
+
+        "zoomIN" => [PLUS],
+        "zoomOUT" => [MINUS],
+        "pause" => [ESCAPE, BACKSPACE],
+        "inventory" => [I],
+        "interact" => [E, ENTER],
+    ];
+    public static var curHeldItem:Null<Item>=null;
+
     public static var curLanguage:Lang=EN_US;
     public static final ErrorType:Map<String, Array<String>>=[
         "TEST"=>["window title", "message box"],
