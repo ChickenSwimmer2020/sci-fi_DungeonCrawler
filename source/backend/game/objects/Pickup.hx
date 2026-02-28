@@ -12,8 +12,8 @@ class Pickup extends FlxSprite {
         super(x, y);
         data=dat;
         if(data==null){
-            destroy();
             Main.showError('NULLITEM');
+            destroy();
         }
         makeGraphic(10, 10, 0xFF00FF00); //placeholder
         camera=Main.camGame; //just gonna do this automatically.
