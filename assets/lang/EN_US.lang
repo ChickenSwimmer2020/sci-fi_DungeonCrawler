@@ -1,6 +1,7 @@
 {
     "TODO": "THIS",
 
+    "menu.config": "Settings",
     "menu.debug.debugger": "Debugger",
     
     "debugger.save": "Save Debugger",

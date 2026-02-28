@@ -1,6 +1,7 @@
 package states;
 
 
+import backend.game.states.substates.OptionsMenuSubstate;
 import backend.Language;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -14,7 +15,6 @@ import flixel.FlxState;
 #end
 
 class MainMenuState extends FlxState {
-    private static final BUTTONS_Y:Float=0;
     var logo:FlxSprite;
     var buttons:Array<FlxButton>=[];
     public function new() {
@@ -26,8 +26,12 @@ class MainMenuState extends FlxState {
             Language.getTranslatedKey(Main.curLanguage, "menu.new_game"),Language.getTranslatedKey(Main.curLanguage, "menu.load_game"),Language.getTranslatedKey(Main.curLanguage, "menu.config"),Language.getTranslatedKey(Main.curLanguage, "menu.art"),Language.getTranslatedKey(Main.curLanguage, "menu.awards"),Language.getTranslatedKey(Main.curLanguage, "menu.quit")
         ];
         for(i in 0...strings.length) {
-            var button:FlxButton = new FlxButton(0, BUTTONS_Y+(20*i), strings[i], [
-
+            var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], [
+                ()->{},
+                ()->{},
+                ()->{
+                    openSubState(new OptionsMenuSubstate());
+                },
             ][i]);
             buttons.push(button);
             add(button);
