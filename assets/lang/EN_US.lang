@@ -1,7 +1,12 @@
 {
     "TODO": "THIS",
 
+    "menu.new_game": "New Game",
+    "menu.load_game": "Load Game",
     "menu.config": "Settings",
+    "menu.art": "Gallery",
+    "menu.awards": "Achivements",
+    "menu.quit": "Quit",
     "menu.debug.debugger": "Debugger",
     
     "debugger.save": "Save Debugger",

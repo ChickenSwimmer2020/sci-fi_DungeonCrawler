@@ -77,12 +77,6 @@ class MapGenerator {
         }
 
         toMapFile.tiles = outputTiles;
-        //so we have basic logic here to generate a map file.
-        
-
-        //we can make these files SUPER small by compressing them.
-        
-        //we save maps in the save file now.
         if(Main.saveFile.data.maps==null)Main.saveFile.data.maps=([]:Array<MapFile>); //this should never be null, but in-case it is.
         (Main.saveFile.data.maps:Array<MapFile>).push(toMapFile); //stupid fuckin, i dont even know if this works or not.
     }
@@ -148,10 +142,12 @@ class MapGenerator {
 
     public static inline function mapExists(name:String):Bool return Main.foundMaps.contains(name);
     public static inline function findMaps(){
-        //TODO:
-        //for(i in 0...Lambda.count(Main.saveFile.data.maps)) {
-        //    Main.foundMaps.push(Main.saveFile.data.maps);
-        //}
-        //for(map in FileSystem.readDirectory(Paths.mapsPath))if(map.endsWith('.map'))Main.foundMaps.push(map);
+        if(Main.saveFile.data.maps!=null) {
+            for(i in 0...(Main.saveFile.data.maps:Array<MapFile>).length) {
+                Main.foundMaps.push((Main.saveFile.data.maps:Array<MapFile>)[i].name);
+            }
+        }else{
+            trace('no maps found in save file, this is okay.');
+        }
     }
 }

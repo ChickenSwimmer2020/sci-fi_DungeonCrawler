@@ -19,9 +19,7 @@ class Paths {
     public static inline function tiles(image:String)#if (android||html5) :BitmapData#else:String#end{
         return Paths.image('tiles', image);
     }
-    public static inline function lang(l:String):String{
-        return '${langPath}/${l.toUpperCase()}.lang';
-    }
+    public static inline function lang(l:String):String return '${langPath}/${l.toUpperCase()}.lang';
     public static inline function image(folder:String,i:String)#if (android||html5) :BitmapData#else:String#end{
         //TODO: fix the bitmap logger crashing stuff.
         //#if (debug) @:privateAccess FlxG.debugger.windows.get_debugger().bitmapLog.add(BitmapData.fromFile('assets/$folder/$i.png')); #end

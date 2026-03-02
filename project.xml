@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
-    <meta build-number="2" company="ChickenSwimmer2020" package="com.chickenswimmer2020.NAME" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]"/>
+    <meta build-number="3" company="ChickenSwimmer2020" package="com.chickenswimmer2020.NAME" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]"/>
     <app preloader="flixel.system.FlxPreloader" Path="export" file="[NAME]" main="Main"/>
     <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> 
 
 
     <section if="windows">
         <set name="version_prefix" value="PROTOTYE: " /> <!--boom, fixed.-->
-        <meta version="0.02.1"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
+        <meta version="0.02.2"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
     </section>
     
     <section unless="windows">
-        <meta version="PROTOTYPE: 0.02.1"/>
+        <meta version="PROTOTYPE: 0.02.2"/>
     </section>
 
     <error value="Fuck nah. Outta here with that shit" if="ios||apple" /> <!--the fuck are the build names for apple projects so i can force error them.-->
-    <error value="This is temporary, the game crashes from shaders while trying to load. PLEASE WAIT UNTIL A FUTURE UPDATE" if="windows" /> <!--TODO: make windows not crash from a shaders error-->
+    <error value="This is temporary, the game crashes from shaders while trying to load. PLEASE WAIT UNTIL A FUTURE UPDATE" if="windows" unless="hl"/> <!--TODO: make windows not crash from a shaders error-->
 
     <!--apple is NEVER happening unless someone is willing to debug on an apple device, which i am not. -ChickenSwimmer2020 3/2/2026 9:30AM -->
     <section if="android">

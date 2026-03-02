@@ -139,7 +139,7 @@ class Main extends openfl.display.Sprite {
         Application.current.window.alert(Message, Title);
         if(close){
             #if html5
-                //TODO: close website on error.
+                js.Browser.window.close();
             #else
                 Sys.exit(1);
             #end
@@ -155,7 +155,7 @@ class Main extends openfl.display.Sprite {
 
         //TODO: multiple save slot support.
         //Save.findSaves(); //load save files located into memory.
-        //MapGenerator.findMaps(); //load map files into memory. //TODO: android support (REWRITE TO SAVE MAPS IN THE SAVE FILE.)
+        MapGenerator.findMaps(); //load map files into memory.
 
 
 

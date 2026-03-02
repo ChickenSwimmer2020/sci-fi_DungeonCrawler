@@ -1,36 +1,83 @@
 package states;
 
+import lime.system.System;
+#if android
+class MenuButton extends FlxSprite {
+    var f:Void->Void=null;
+    public function new(x:Float, y:Float, image:String, onClick:Void->Void) {
+        super(x, y);
+        loadGraphic(Paths.image('android/ui', image));
+
+        f=onClick;
+    }
+
+    override public function update(elapsed:Float){
+        super.update(elapsed);
+
+        if(FlxG.touches.justStarted()[0]?.overlaps(this) && FlxG.touches.justStarted()[0]?.justPressed){
+            f(); //run function once clicked.
+        }
+    }
+}
+#end
+
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
-    var buttons:Array<FlxButton>=[];
+    var buttons:Array<#if(android)MenuButton #else FlxButton #end>=[];
     public function new() {
         super();
         logo=new FlxSprite(FlxG.width-500, 0).makeGraphic(500, 200, 0xFFFF0000);
         add(logo); //TODO: placeholder graphic
     
         final strings:Array<String>=[
-            Language.getTranslatedKey(Main.curLanguage, "menu.new_game"),Language.getTranslatedKey(Main.curLanguage, "menu.load_game"),Language.getTranslatedKey(Main.curLanguage, "menu.config"),Language.getTranslatedKey(Main.curLanguage, "menu.art"),Language.getTranslatedKey(Main.curLanguage, "menu.awards"),Language.getTranslatedKey(Main.curLanguage, "menu.quit")
+            Language.getTranslatedKey(Main.curLanguage, "menu.new_game"),
+            Language.getTranslatedKey(Main.curLanguage, "menu.load_game"),
+            Language.getTranslatedKey(Main.curLanguage, "menu.config"),
+            Language.getTranslatedKey(Main.curLanguage, "menu.art"),
+            Language.getTranslatedKey(Main.curLanguage, "menu.awards"),
+            Language.getTranslatedKey(Main.curLanguage, "menu.quit")
         ];
-        for(i in 0...strings.length) {
-            var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], [
-                ()->{trace('new game');},
-                ()->{trace('load game');},
-                ()->{
-                    openSubState(new OptionsMenuSubstate());
-                },
-                ()->{trace('gallery');},
-                ()->{trace('achivements');},
-                ()->{
-                    #if html5
-
-                    #else
-                        Sys.exit(1);
-                    #end
-                }
-            ][i]);
-            buttons.push(button);
-            add(button);
-        }
+        #if android
+            for(i in 0...strings.length) {
+                var button:MenuButton = new MenuButton([
+                    FlxG.width/2-128, FlxG.width/2+128, FlxG.width/2-128, FlxG.width/2+128, FlxG.width/2-128, FlxG.width/2+128
+                ][i], [
+                    0, 0, 108, 108, 216, 216
+                ][i], strings[i], [
+                    ()->{trace('new game');},
+                    ()->{trace('load game');},
+                    ()->{
+                        openSubState(new OptionsMenuSubstate());
+                    },
+                    ()->{trace('gallery');},
+                    ()->{trace('achivements');},
+                    ()->{System.exit(0);} //TODO: make android app actually close.
+                ][i]);
+                buttons.push(button);
+                add(button);
+            }
+        #else
+            for(i in 0...strings.length) {
+                var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], [
+                    ()->{trace('new game');},
+                    ()->{trace('load game');},
+                    ()->{
+                        openSubState(new OptionsMenuSubstate());
+                    },
+                    ()->{trace('gallery');},
+                    ()->{trace('achivements');},
+                    ()->{
+                        #if html5
+                            js.Browser.window.close();
+                        #else
+                            Sys.exit(1);
+                        #end
+                    }
+                ][i]);
+                buttons.push(button);
+                add(button);
+            }
+        #end
 
         //TODO: cool bg art
         //TODO: menu theme
