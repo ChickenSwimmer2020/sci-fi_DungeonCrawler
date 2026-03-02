@@ -1,6 +1,6 @@
 package debugging;
 
-#if (debug && !android)
+#if (debug)
 class MapDebugger extends FlxUIState{
     var widthStepper:FlxUINumericStepper;
     var heightStepper:FlxUINumericStepper;

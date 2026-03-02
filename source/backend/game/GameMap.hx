@@ -54,13 +54,13 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         if(type.special==true){
             switch(type.specialType) {
                 case SPAWN:
-                    #if (debug && !android)
+                    #if (debug)
                         tile.loadGraphic(Paths.DEBUG('entry'));
                         tile.color=0x7100FF00;
                     #end
                     playerSpawnPoint=FlxPoint.weak(tile.x, tile.y);
                     //createElevator() //TODO: elevator & stuff.
-                case WALKABLEAREA: #if (debug && !android) tile.color = 0xFF00FF00; #end
+                case WALKABLEAREA: #if (debug) tile.color = 0xFF00FF00; #end
                 default: //for special types that dont really do anything. like hallway, since thats only used during generation itself.
             }
 

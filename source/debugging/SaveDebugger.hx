@@ -1,5 +1,5 @@
 package debugging;
-#if (debug && !android)
+#if (debug)
 class SaveDebugger extends FlxUIState{
     var READING_button_read:FlxUIButton;
     var READING_textInputOther:FlxUIInputText;

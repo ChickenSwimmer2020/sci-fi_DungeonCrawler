@@ -27,7 +27,7 @@ class Pickup extends FlxSprite {
         }
         if(Player.instance.overlaps(this)) {
             interactionPopup(true);
-            if(FlxG.keys.anyJustPressed(Main.controls.get('interact'))) {
+            if(#if android true #else FlxG.keys.anyJustPressed(Main.controls.get('interact'))#end) {
                 if(!inventoryFull()){
                     if(onPickup!=null&&data!=null) onPickup(data);
                     sendToInventory(data);
@@ -54,7 +54,7 @@ class Pickup extends FlxSprite {
     var ranonce:Bool=false;
     private function interactionPopup(enable:Bool) {
         if(interactionSprite==null) {
-            interactionSprite = new FlxSprite(x, y)#if (debug && !android) .loadGraphic(Paths.DEBUG('pickupinteraction', 'png'));#else.makeGraphic(16, 16, 0xFF00FFFF);#end
+            interactionSprite = new FlxSprite(x, y)#if (debug) .loadGraphic(Paths.DEBUG('pickupinteraction', 'png'));#else.makeGraphic(16, 16, 0xFF00FFFF);#end
             FlxG.state.add(interactionSprite);
             interactionSprite.camera=Main.camGame;
         }else{

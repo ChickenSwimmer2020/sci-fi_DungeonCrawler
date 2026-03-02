@@ -3,7 +3,7 @@ package;
 class TestingState extends flixel.FlxState {
     public function new() {
         super();
-        #if (debug && !android) Main.loadedTestedState=true; #end
+        #if (debug) Main.loadedTestedState=true; #end
         Main.camGame = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
         Main.camGame.bgColor=0x00FFFFFF;
         FlxG.cameras.add(Main.camGame, false);
@@ -16,7 +16,7 @@ class TestingState extends flixel.FlxState {
         Main.camOther.bgColor=0x00FFFFFF;
         FlxG.cameras.add(Main.camOther, false);
 
-        #if (debug && !android)
+        #if (debug)
             Save.DEBUGSAVE('fucker'); //generate save BEFORE generating map. since maps are stored inthe save file they were being overridden. whoopsies!
             MapGenerator.generateMap(100, 100);
             add(MapGenerator.createMap('PLACEHOLDER'));

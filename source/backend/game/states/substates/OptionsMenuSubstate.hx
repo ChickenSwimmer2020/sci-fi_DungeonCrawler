@@ -7,7 +7,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         var tabs = [
 			{name: "tab_general", label: Language.getTranslatedKey(Main.curLanguage, "menu.options.tab.general")},
 			{name: "tab_graphics", label: Language.getTranslatedKey(Main.curLanguage, "menu.options.tab.graphics")},
-			{name: "tab_controls", label: Language.getTranslatedKey(Main.curLanguage, "menu.options.tab.controls")},
+			#if !android {name: "tab_controls", label: Language.getTranslatedKey(Main.curLanguage, "menu.options.tab.controls")}, #end
 			{name: "tab_difficulty", label: Language.getTranslatedKey(Main.curLanguage, "menu.options.tab.difficulty")},
 		];
 
@@ -21,13 +21,13 @@ class OptionsMenuSubstate extends FlxUISubState{
         //quickly init the groups and everything
         var general = new FlxUI(null, tab_menu, null); general.name = "tab_general";
         var graphics = new FlxUI(null, tab_menu, null); general.name = "tab_graphics";
-        var controls = new FlxUI(null, tab_menu, null); general.name = "tab_controls";
+        #if !android var controls = new FlxUI(null, tab_menu, null); general.name = "tab_controls"; #end
         var difficulty = new FlxUI(null, tab_menu, null); general.name = "tab_difficulty";
 
 
         tab_menu.addGroup(general);
         tab_menu.addGroup(graphics);
-        tab_menu.addGroup(controls);
+        #if !android tab_menu.addGroup(controls); #end
         tab_menu.addGroup(difficulty);
         add(tab_menu);
     }
@@ -35,6 +35,10 @@ class OptionsMenuSubstate extends FlxUISubState{
     override public function update(elapsed:Float){
         super.update(elapsed);
 
-        if(FlxG.keys.justPressed.ESCAPE) close(); //TODO: make act like a real internal window because fun
+        #if !android
+            if(FlxG.keys.justPressed.ESCAPE) close(); //TODO: make act like a real internal window because fun
+        #else
+            //TODO: this.
+        #end
     }
 }

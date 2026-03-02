@@ -9,18 +9,20 @@ package;
 //}
 
 class Main extends openfl.display.Sprite {
-    public static var controls:Map<String, Array<Int>>=[
-        "moveUP" => [UP, W],
-        "moveDOWN" => [DOWN, S],
-        "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
-        "moveLEFT" => [FlxKey.LEFT, A],
+    #if !android
+        public static var controls:Map<String, Array<Int>>=[
+            "moveUP" => [UP, W],
+            "moveDOWN" => [DOWN, S],
+            "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
+            "moveLEFT" => [FlxKey.LEFT, A],
 
-        "zoomIN" => [PLUS],
-        "zoomOUT" => [MINUS],
-        "pause" => [ESCAPE, BACKSPACE],
-        "inventory" => [I],
-        "interact" => [E, ENTER],
-    ];
+            "zoomIN" => [PLUS],
+            "zoomOUT" => [MINUS],
+            "pause" => [ESCAPE, BACKSPACE],
+            "inventory" => [I],
+            "interact" => [E, ENTER],
+        ];
+    #end
     public static var curHeldItem:Null<Item>=null;
 
     public static var curLanguage:Lang=EN_US;
@@ -37,11 +39,11 @@ class Main extends openfl.display.Sprite {
     public static var foundMaps:Array<String> = []; //we can store all the currently found maps from the game files and mods (if implemented.)
     public static var saveFiles:Array<String> = [];
 
-    #if (debug && !android) public static var loadedTestedState:Bool=false; #end
+    #if (debug) public static var loadedTestedState:Bool=false; #end
     public static var camGame:FlxCamera; //access from everywhere!
     public static var camHUD:FlxCamera; //access from everywhere!
     public static var camOther:FlxCamera; //access from everywhere!
-    #if (debug && !android)
+    #if (debug&&!android) //we still keep this disabled in android because the debugger doesnt exist (afaik).
         static var mapWindow:Window;
 
         static var saveFilesText:TextField;
@@ -161,6 +163,6 @@ class Main extends openfl.display.Sprite {
         ShaderCache.preload(); //preload shaders before loading everything to HOPEFULLY make the game run faster when shaders compile.
         //by not compiling during runtime.
         addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
-        #if (debug && !android) initDebugWindows(); #end
+        #if (debug&&!android) initDebugWindows(); #end
     }
 }

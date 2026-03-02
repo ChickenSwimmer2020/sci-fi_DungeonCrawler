@@ -1,5 +1,7 @@
 package backend.game;
 
+import backend.game.states.substates.ControllerSubState;
+
 class Player extends FlxSprite {
     public static var instance:Player;
     public static var health:Float = 100;
@@ -21,14 +23,14 @@ class Player extends FlxSprite {
         "DEBUG"=>FlxPoint.weak(0, 0)
     ];
     var targetWeaponPosition:FlxPoint;
-    var mousePosition:FlxPoint=new FlxPoint(0, 0);
+    var mousePosition:FlxPoint=new FlxPoint(0, 0); //funny thing, we can actually re-use this for android!
     public function new() {
         super(0, 0);
         targetWeaponPosition=new FlxPoint(x, y);
         makeGraphic(4, 4, 0xFFFF0000);
         instance=this;
     }
-    #if (debug && !android)
+    #if (debug)
         function addWatchObjects() {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
             FlxG.watch.addQuick("inventory open: ", inventory?.fullOpen);
@@ -45,11 +47,15 @@ class Player extends FlxSprite {
     //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        mousePosition = FlxG.mouse.getWorldPosition(Main.camGame);
+        mousePosition = #if android
+            FlxG.touches.justStarted()[0]?.getWorldPosition(Main.camGame); //TODO: fix and let not crash when trying to use this.
+        #else
+            FlxG.mouse.getWorldPosition(Main.camGame);
+        #end
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(velocity.x > 0 || velocity.x < 0)velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(velocity.y > 0 || velocity.y < 0)velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 4 * 1));
-        #if (debug && !android)
+        #if (debug&&!android) //these are useless on the android build (debugger and FlxKey doesnt exist on the android build).
             addWatchObjects();
             if(FlxG.keys.pressed.LBRACKET) health--;
             if(FlxG.keys.pressed.RBRACKET) health++;
@@ -77,9 +83,9 @@ class Player extends FlxSprite {
         }else{
             isWeapon=((inventory.selectedItem.type==RANGED||inventory.selectedItem.type==MEELEE)||inventory.selectedItem.type==MAGIC);
             weapon.active=weapon.visible=isWeapon;
-            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?FlxG.mouse.pressed:FlxG.mouse.justPressed) && (weapon.visible && weapon.active)) weapon.onLeftClick();
-            if(FlxG.mouse.justPressedRight && (weapon.visible && weapon.active)) weapon.onRightClick();
-            if((FlxG.mouse.justPressedMiddle && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
+            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?#if(android)FlxG.touches.justStarted()[0]?.pressed#else FlxG.mouse.pressed#end:#if(android)FlxG.touches.justStarted()[0]?.justPressed #else FlxG.mouse.justPressed#end) && (weapon.visible && weapon.active)) weapon.onLeftClick();
+            if(#if(android) false #else FlxG.mouse.justPressedRight#end && (weapon.visible && weapon.active)) weapon.onRightClick(); //TODO: android support for advanced weapon functions. other buttons maybe that freeze the game until you select a position to fire twoards?
+            if((#if(android) false #else FlxG.mouse.justPressedMiddle#end && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
 
             if(weapon.visible && weapon.active){
                 targetWeaponPosition.set(x+WEAPON_OFFSET.get(weapon.name)?.x,y+WEAPON_OFFSET.get(weapon.name)?.y);
@@ -102,26 +108,31 @@ class Player extends FlxSprite {
             }else continue;
 
         //HORRIBLE way to do it, but good enough.
-        if(inventory.weaponText.text!='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}')
+        if(inventory.weaponText.text!='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
             inventory.weaponText.text='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
+        }
 
         //TODO: make these better
-        if(FlxG.keys.anyPressed(Main.controls.get('moveUP'))) y-=1;
-        if(FlxG.keys.anyPressed(Main.controls.get('moveDOWN'))) y+=1;
-        if(FlxG.keys.anyPressed(Main.controls.get('moveRIGHT'))) x+=1;
-        if(FlxG.keys.anyPressed(Main.controls.get('moveLEFT'))) x-=1;
+        #if !android
+            if(FlxG.keys.anyPressed(Main.controls.get('moveUP'))) y-=1;
+            if(FlxG.keys.anyPressed(Main.controls.get('moveDOWN'))) y+=1;
+            if(FlxG.keys.anyPressed(Main.controls.get('moveRIGHT'))) x+=1;
+            if(FlxG.keys.anyPressed(Main.controls.get('moveLEFT'))) x-=1;
 
-        Main.camGame.zoom.clamp(MIN_ZOOM, MAX_ZOOM);
-        if(FlxG.keys.anyPressed(Main.controls.get('zoomOUT'))){
-            if(Main.camGame.zoom>MIN_ZOOM)Main.camGame.zoom-=0.25;
-        }
-        if(FlxG.keys.anyPressed(Main.controls.get('zoomIN'))){
-            if(Main.camGame.zoom<MAX_ZOOM)Main.camGame.zoom+=0.25;
-        }
+            Main.camGame.zoom.clamp(MIN_ZOOM, MAX_ZOOM);
+            if(FlxG.keys.anyPressed(Main.controls.get('zoomOUT'))){
+                if(Main.camGame.zoom>MIN_ZOOM)Main.camGame.zoom-=0.25;
+            }
+            if(FlxG.keys.anyPressed(Main.controls.get('zoomIN'))){
+                if(Main.camGame.zoom<MAX_ZOOM)Main.camGame.zoom+=0.25;
+            }
 
-        //MOVED PAUSING LOGIC TO INVENTORY
-        if(FlxG.keys.anyJustPressed(Main.controls.get('inventory'))) {
-            inventory.fullOpen=!inventory.fullOpen;
-        }
+            //MOVED PAUSING LOGIC TO INVENTORY
+            if(FlxG.keys.anyJustPressed(Main.controls.get('inventory'))) {
+                inventory.fullOpen=!inventory.fullOpen;
+            }
+        #else
+            //TODO: controls substate (part of inventory substate because it has to be) actually controlling player.
+        #end
     }
 }

@@ -13,11 +13,20 @@ class MainMenuState extends FlxState {
         ];
         for(i in 0...strings.length) {
             var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], [
-                ()->{},
-                ()->{},
+                ()->{trace('new game');},
+                ()->{trace('load game');},
                 ()->{
                     openSubState(new OptionsMenuSubstate());
                 },
+                ()->{trace('gallery');},
+                ()->{trace('achivements');},
+                ()->{
+                    #if html5
+
+                    #else
+                        Sys.exit(1);
+                    #end
+                }
             ][i]);
             buttons.push(button);
             add(button);
@@ -27,8 +36,8 @@ class MainMenuState extends FlxState {
         //TODO: menu theme
 
 
-        #if (debug && !android)
-            var debuggerButton:FlxButton = new FlxButton(FlxG.width-80, FlxG.height-20, Language.getTranslatedKey(Main.curLanguage, "menu.debug.debugger"), ()->{
+        #if (debug)
+            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 0, Language.getTranslatedKey(Main.curLanguage, "menu.debug.debugger"), ()->{
                 openSubState(new DebuggerChooser());
             });
             add(debuggerButton);
@@ -36,7 +45,7 @@ class MainMenuState extends FlxState {
     }
 }
 
-#if (debug && !android)
+#if (debug)
 class DebuggerChooser extends FlxSubState {
     final debuggerOptions:Map<String, Void->Void>=[
         Language.getTranslatedKey(Main.curLanguage, "debugger.map") => ()->{
@@ -58,7 +67,7 @@ class DebuggerChooser extends FlxSubState {
 
         var i:Int=0;
         for(lable => func in debuggerOptions) {
-            var button = add(new FlxButton(0, 0+(20*i), lable, func));
+            var button = add(new FlxButton(0, 0+(40*i), lable, func));
             add(button);
             Reflect.setField(button, "x", FlxG.width/2-40);
             i++;

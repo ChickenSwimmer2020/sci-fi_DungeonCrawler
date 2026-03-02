@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
-    <meta build-number="1" company="ChickenSwimmer2020" package="com.chickenswimmer2020.NAME" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="PROTOTYPE: 0.02"/>
+    <meta build-number="2" company="ChickenSwimmer2020" package="com.chickenswimmer2020.NAME" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]"/>
     <app preloader="flixel.system.FlxPreloader" Path="export" file="[NAME]" main="Main"/>
+    <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> 
 
-    <!--<define name="debug"/> the fact that i have to do this just for my code to show debug shit is stupid af.-->
 
-    <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> <!-- these should default? if im correct everything should set as platforms are built.-->
+    <section if="windows">
+        <set name="version_prefix" value="PROTOTYE: " /> <!--boom, fixed.-->
+        <meta version="0.02.1"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
+    </section>
+    
+    <section unless="windows">
+        <meta version="PROTOTYPE: 0.02.1"/>
+    </section>
+
+    <error value="Fuck nah. Outta here with that shit" if="ios||apple" /> <!--the fuck are the build names for apple projects so i can force error them.-->
 
     <!--apple is NEVER happening unless someone is willing to debug on an apple device, which i am not. -ChickenSwimmer2020 3/2/2026 9:30AM -->
     <section if="android">
@@ -14,10 +23,10 @@
         <config type="android" install-location="preferExternal" minimum-sdk-version="21" gradle-version="8.9" gradle-plugin="8.7.3" target-sdk-version="36"/>
     </section>
 
-    <section if="hl">
+    <!--linux upcoming? 👀-->
+    <section if="hl||windows||linux"> <!--WHOOPS, FORGOT TO TELL WINDOWS TO USE THESE AS WELL!!--> 
         <window allow-high-dpi="true" hardware="true" vsync="true" width="1280" height="720"/> <!--default window params-->
     </section>
-    <!--TODO: possible support for more platforms? i'll have to completely re-write the way the UI works since multiwindow doesnt exist on android-->
 
     <haxelib name="flixel"/>
     <haxelib name="flixel-ui"/>
@@ -27,12 +36,18 @@
 
     <source path="source" />
     <source path="source/debug" if="debug"/>
-    <assets path="assets" embed="true"/>
+    <section if="android||html5">
+        <assets path="assets" embed="true"/>
+    </section>
+    <section if="hl||windows">
+        <assets path="assets"/>
+    </section>
+    <assets if="android" path="assets/android" embed="true"/> <!-- for things like the joystick ui and stuff. -->
     <assets path="assets/debug" include="*.png" if="debug" /> <!-- for only debug assets. -->
 
     <!--platform specific enabling and disabling for performance-->
     <!-- <haxedef name="FLX_NO_KEYBOARD" if="android"/> --> <!--disable keyboard support on android -->
-    <!-- <haxedef name="FLX_NO_MOUSE" if="android"/> --> <!-- disable mouse controls for android (TODO: rewrite the entire weapon fire system to support touch.)-->
+    <haxedef name="FLX_NO_MOUSE" if="android"/> <!-- disable mouse controls for android (TODO: rewrite the entire weapon fire system to support touch.)-->
     <!-- <haxedef name="FLX_NO_SOUND_TRAY" if="android"/> --> <!-- sound volume is controlled via device itself on android. -->
     <!-- <haxedef name="FLX_NO_TOUCH" if="windows||html5||hl"/> --> <!-- disable touch controls on windows, hl, and html5-->
 

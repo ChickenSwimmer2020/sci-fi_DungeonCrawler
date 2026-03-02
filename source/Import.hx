@@ -81,7 +81,7 @@ import backend.game.objects.Pickup;
 import backend.game.objects.Tile;
 import backend.game.objects.Weapon;
 import backend.game.GameMap;
-#if (debug && !android)
+#if (debug)
     import debugging.SaveDebugger;
     import debugging.MapDebugger;
 #end

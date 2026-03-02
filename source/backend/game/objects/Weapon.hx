@@ -70,7 +70,7 @@ class Weapon extends FlxSprite{
     var increment:Int=0;
     var power:Float=0;
     public function shoot() {
-        if(FlxG.mouse.overlaps(Player.instance.inventory)) return; //cancel if holding an item. much simpler fix than anything else honestly.
+        if(#if(android)FlxG.touches.list[FlxG.touches.list.length].overlaps(Player.instance.inventory)#else FlxG.mouse.overlaps(Player.instance.inventory)#end) return; //cancel if holding an item. much simpler fix than anything else honestly.
         if(charges<=0)return; //cancel if we have no ammo.
         increment=0;
         if(coolDownTimer.finished){
@@ -127,7 +127,7 @@ class Weapon extends FlxSprite{
         super.update(elapsed);
 
         if(coolDownTimer.finished){
-            if(frMode==RAIL && (FlxG.mouse.justReleased)){
+            if(frMode==RAIL&&#if(android)(FlxG.touches.list[FlxG.touches.list.length].justReleased)#else(FlxG.mouse.justReleased)#end){
                 if(power<25) justShotFail=true; //failure if under 25%
                 else{
                     railFireShader=new RailFire();

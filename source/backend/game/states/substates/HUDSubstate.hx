@@ -106,7 +106,7 @@ class InventorySlot extends FlxSprite {
         FlxG.watch.addQuick('held item', Main.curHeldItem);
 
         //pickup logic
-        if(FlxG.mouse.overlaps(this) && FlxG.mouse.justPressed) {
+        if(#if(android)(FlxG.touches.justStarted()[0]?.overlaps(this)&&FlxG.touches.justStarted()[0]?.justPressed)#else(FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)#end) {
             if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
                 Main.curHeldItem=curItem;
                 unloadItem();
@@ -207,6 +207,9 @@ class HUDSubstate extends FlxSubState {
             inventory[i]="EMPTY";
         }
     }
+    #if android
+        public var controls:ControllerSubState;
+    #end
     override public function update(elapsed:Float) {
         super.update(elapsed);
         for(i in 0...inventory.length) {
@@ -236,11 +239,24 @@ class HUDSubstate extends FlxSubState {
                 if(i>MAX_SLOTS-1)slots[i].visible = false;
             }
         }
+
+        #if android
+            if(controls==null) {
+                controls=new ControllerSubState();
+                FlxG.state.persistentUpdate=true;
+                FlxG.state.openSubState(controls);
+                controls.output = (x:Float, y:Float)->{
+                    
+                }
+            }
+        #end
         
-        if(FlxG.keys.anyJustPressed(Main.controls.get('pause'))) { //swapped for anyJustPressed so it doesnt run multiple times in a frame
-            if(Player.onPlayerPause!=null)Player.onPlayerPause(); //so we can pause enemy and object ai/animations/tweens/everything
-            Player.playerPauseRequested = true;
-            openSubState(new PauseMenu()); //open the substate IN the substate. simple fix!
-        }
+        #if !android //the pause menu is controlled by the controls substate in android.
+            if(FlxG.keys.anyJustPressed(Main.controls.get('pause'))) { //swapped for anyJustPressed so it doesnt run multiple times in a frame
+                if(Player.onPlayerPause!=null)Player.onPlayerPause(); //so we can pause enemy and object ai/animations/tweens/everything
+                Player.playerPauseRequested = true;
+                openSubState(new PauseMenu()); //open the substate IN the substate. simple fix!
+            }
+        #end
     }
 }
