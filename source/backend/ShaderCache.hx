@@ -1,9 +1,5 @@
 package backend;
 
-import flixel.util.FlxTimer;
-import backend.shaders.RailFire;
-import backend.shaders.MaskShader;
-
 class ShaderCache {
     private static var mask:MaskShader;
     private static var rail:RailFire;

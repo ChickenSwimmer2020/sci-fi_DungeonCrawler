@@ -1,13 +1,5 @@
 package;
 
-import flixel.input.keyboard.FlxKey;
-import backend.game.states.substates.HUDSubstate.Item;
-import backend.Language;
-import states.MainMenuState;
-import lime.app.Application;
-import backend.ShaderCache;
-import flixel.FlxCamera;
-
 //enum abstract ErrorType(String) from String to String{
 //    var TEST="window title###message box";
 //    var IOERROR="error.nullio###The object{OBJ}couldnt be loaded.";
@@ -20,8 +12,8 @@ class Main extends openfl.display.Sprite {
     public static var controls:Map<String, Array<Int>>=[
         "moveUP" => [UP, W],
         "moveDOWN" => [DOWN, S],
-        "moveRIGHT" => [RIGHT, D],
-        "moveLEFT" => [LEFT, A],
+        "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
+        "moveLEFT" => [FlxKey.LEFT, A],
 
         "zoomIN" => [PLUS],
         "zoomOUT" => [MINUS],
@@ -45,11 +37,11 @@ class Main extends openfl.display.Sprite {
     public static var foundMaps:Array<String> = []; //we can store all the currently found maps from the game files and mods (if implemented.)
     public static var saveFiles:Array<String> = [];
 
-    #if debug public static var loadedTestedState:Bool=false; #end
+    #if (debug && !android) public static var loadedTestedState:Bool=false; #end
     public static var camGame:FlxCamera; //access from everywhere!
     public static var camHUD:FlxCamera; //access from everywhere!
     public static var camOther:FlxCamera; //access from everywhere!
-    #if debug
+    #if (debug && !android)
         static var mapWindow:Window;
 
         static var saveFilesText:TextField;
@@ -143,22 +135,32 @@ class Main extends openfl.display.Sprite {
 
         
         Application.current.window.alert(Message, Title);
-        if(close) Sys.exit(1);
+        if(close){
+            #if html5
+                //TODO: close website on error.
+            #else
+                Sys.exit(1);
+            #end
+        }
         if(gotomenu) FlxG.switchState(MainMenuState.new);
     }
-
+    
+    public static var saveFile:FlxSave = new FlxSave(); //TODO: support for multiple saves.
     public function new() {
         super();
-        trace('checking for missing filepaths and generating missing paths...');
-        if(!FileSystem.exists('${Paths.savePath}')) FileSystem.createDirectory(Paths.savePath);
+        #if (android||html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
+        saveFile.bind("SAVESLOT"); //TODO: multiple saves. again.
 
-        Save.findSaves(); //load save files located into memory.
-        MapGenerator.findMaps(); //load map files into memory.
+        //TODO: multiple save slot support.
+        //Save.findSaves(); //load save files located into memory.
+        //MapGenerator.findMaps(); //load map files into memory. //TODO: android support (REWRITE TO SAVE MAPS IN THE SAVE FILE.)
+
+
 
         
         ShaderCache.preload(); //preload shaders before loading everything to HOPEFULLY make the game run faster when shaders compile.
         //by not compiling during runtime.
         addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
-        #if debug initDebugWindows(); #end
+        #if (debug && !android) initDebugWindows(); #end
     }
 }

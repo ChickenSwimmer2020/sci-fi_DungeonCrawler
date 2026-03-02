@@ -1,15 +1,6 @@
 package debugging;
 
-#if debug
-import flixel.addons.ui.FlxUINumericStepper;
-import flixel.text.FlxText;
-import states.MainMenuState;
-import backend.Language;
-import flixel.addons.ui.FlxUIButton;
-import flixel.addons.ui.FlxUI;
-import flixel.addons.ui.FlxUITabMenu;
-import flixel.addons.ui.FlxUIState;
-
+#if (debug && !android)
 class MapDebugger extends FlxUIState{
     var widthStepper:FlxUINumericStepper;
     var heightStepper:FlxUINumericStepper;

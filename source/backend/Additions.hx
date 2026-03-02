@@ -1,8 +1,5 @@
 package backend;
 
-import backend.game.states.substates.HUDSubstate.Item;
-import flixel.util.typeLimit.OneOfTwo;
-
 final class Additions{
     //for math
     public static inline function clamp(n:Float, min:Float, max:Float) return Math.max(min, Math.min(n, max));

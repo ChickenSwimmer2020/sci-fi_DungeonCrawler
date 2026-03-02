@@ -1,7 +1,5 @@
 package backend.shaders;
 
-import flixel.system.FlxAssets;
-
 class RailFire extends FlxAssets.FlxShader {
     @:glFragmentSource('
         #pragma header

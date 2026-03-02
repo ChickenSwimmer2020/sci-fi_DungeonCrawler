@@ -1,12 +1,5 @@
 package backend.game.states.substates;
 
-import flixel.util.typeLimit.OneOfTwo;
-import flixel.text.FlxText;
-import openfl.geom.Matrix;
-import backend.shaders.MaskShader;
-import flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer;
-import flixel.FlxSubState;
-
 enum abstract ItemType(String) from String to String {
     var ITEM="ITEM";
     var CONSUMABLE="CONSUMABLE";
@@ -91,13 +84,13 @@ class InventorySlot extends FlxSprite {
         camera=Main.camHUD;
     }
     private function loadItemGraphic(item:String) {
-        if(FileSystem.exists(Paths.image('ui/items', item))) {
+        if(#if (android || html5) Paths.image('ui/items', item)!=null #else FileSystem.exists(Paths.image('ui/items', item))#end) {
             var outputBitmapData:BitmapData = new BitmapData(Math.floor(width), Math.floor(height), true, 0xFFFFFF);
             var scaleMatrix:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
             scaleMatrix.scale(2, 2);
             outputBitmapData.draw(pixels, scaleMatrix);
             scaleMatrix.scale(1.5, 1.5);
-            outputBitmapData.draw(BitmapData.fromFile(Paths.image('ui/items', item)), scaleMatrix);
+            outputBitmapData.draw(#if (android||html5) Paths.image('ui/items', item) #else BitmapData.fromFile(Paths.image('ui/items', item)) #end, scaleMatrix);
             loadGraphic(outputBitmapData); //hehehehaw! now we *hopefully* can update the hitbox
             setGraphicSize(SIZE, SIZE);
             updateHitbox();
@@ -164,7 +157,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
         //add(outerXP);
         add(outline);
         scale.set(2, 2);
-        innerHealth.shader = innerHealthShader = new MaskShader(BitmapData.fromFile(Paths.image('ui/health', "flask_inner-MASK")));
+        innerHealth.shader = innerHealthShader = new MaskShader(#if (android || html5) Paths.image('ui/health', "flask_inner-MASK")#else BitmapData.fromFile(Paths.image('ui/health', "flask_inner-MASK"))#end);
         //outerXP.shader = new MaskShader(BitmapData.fromFile("assets/ui/health/flask_outer-MASK.png"));
     }
 

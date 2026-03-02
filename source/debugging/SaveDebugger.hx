@@ -1,18 +1,5 @@
 package debugging;
-#if debug
-import flixel.text.FlxText;
-import states.MainMenuState;
-import backend.Language;
-import flixel.addons.ui.FlxUIText;
-import flixel.addons.ui.StrNameLabel;
-import flixel.addons.ui.FlxUIDropDownMenu;
-import flixel.addons.ui.FlxUIInputText;
-import flixel.addons.ui.FlxUIButton;
-import flixel.addons.ui.FlxUI;
-import flixel.addons.ui.FlxUIRadioGroup;
-import flixel.addons.ui.FlxUITabMenu;
-import flixel.addons.ui.FlxUIState;
-
+#if (debug && !android)
 class SaveDebugger extends FlxUIState{
     var READING_button_read:FlxUIButton;
     var READING_textInputOther:FlxUIInputText;
@@ -21,7 +8,8 @@ class SaveDebugger extends FlxUIState{
     var returnText:FlxUIText;
     public function new() {
         super();
-        Save.findSaves(); //just because its smart to do this everytime we load the state.
+        //TODO: reimplement and support multiple saves
+        //Save.findSaves(); //just because its smart to do this everytime we load the state.
         var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.exit"), 24, true);
         add(text);
 
@@ -48,9 +36,9 @@ class SaveDebugger extends FlxUIState{
         READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.parse"), ()->{
             if(tabs_radio_1.selectedId=="OTHER"&&READING_textInputOther.text.contains('.')) { //now we can read varibles inside of structures
                 //TODO: array support.
-                returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSaveADV(READING_saveDropdown.selectedId, READING_textInputOther.text.split('.')[0], READING_textInputOther.text.split('.')[1])}';
+                //returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSaveADV(READING_saveDropdown.selectedId, READING_textInputOther.text.split('.')[0], READING_textInputOther.text.split('.')[1])}';
             }else{
-                returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, tabs_radio_1.selectedId, READING_textInputOther.text)}';
+                returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_textInputOther.text)}';
             }
         });
 

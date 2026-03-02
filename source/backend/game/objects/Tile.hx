@@ -1,7 +1,5 @@
 package backend.game.objects;
 
-import flixel.graphics.frames.FlxTileFrames;
-
 class Tile extends FlxSprite {
     public static var curImage:String="";
     final mapTiles:Map<String, Map<String, Int>> = [

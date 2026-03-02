@@ -1,12 +1,5 @@
 package backend.game.objects;
 
-import flixel.animation.FlxAnimationController;
-import flixel.math.FlxMath;
-import backend.shaders.RailFire;
-import openfl.filters.ShaderFilter;
-import flixel.util.FlxTimer;
-import backend.game.states.substates.HUDSubstate;
-
 typedef WeaponData = {
     var weaponType:ItemType;
     var name:String;
@@ -190,18 +183,18 @@ class WeaponParser {
     }
     public static function recycleWeapon(weapon:Weapon, path:String) {
         @:privateAccess
-        if(path!=""&&(weapon!=null&&FileSystem.exists(Paths.weapon(path)))) weapon.setUpWeapon(parse(path));
-        else if(weapon==null||!FileSystem.exists(Paths.weapon(path))) Main.showError("IOERROR", Paths.weapon(path));
+        if(path!=""&&(weapon!=null&&#if (android||html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path)) #end)) weapon.setUpWeapon(parse(path));
+        else if(weapon==null||#if(android||html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path));
     }
     public static function parse(path:String):WeaponData {
-        if(FileSystem.exists(Paths.weapon(path)))return parseXML(Paths.weapon(path));
+        if(#if(android||html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path))#end)return parseXML(Paths.weapon(path));
         else Main.showError("IOERROR", Paths.weapon(path));
         return null;
     }
     private static function parseXML(path:String):WeaponData {
         trace('Parsing weapon file: $path');
-        if(FileSystem.exists(path)){
-            var xmlToParse:Xml = Xml.parse(File.getContent(path));
+        if(#if(android||html5) Assets.getText(path)!=null #else FileSystem.exists(path)#end){
+            var xmlToParse:Xml = Xml.parse(#if(android||html5) Assets.getText(path) #else File.getContent(path)#end);
             var damge:Map<String, Float>=[];
             var anims:Array<{n:String, f:Array<Int>, fr:Int, l:Bool, fl:{x:Bool,y:Bool}}>=[];
             final root:Xml = xmlToParse.firstChild();

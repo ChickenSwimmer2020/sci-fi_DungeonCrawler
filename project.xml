@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
-    <meta build-number="0" company="ChickenSwimmer2020" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="PROTOTYPE: 0.01.5.1"/>
+    <meta build-number="1" company="ChickenSwimmer2020" package="com.chickenswimmer2020.NAME" description="description. does this show up in windows file explorer?" title="[INSERT NAME HERE]" version="PROTOTYPE: 0.02"/>
     <app preloader="flixel.system.FlxPreloader" Path="export" file="[NAME]" main="Main"/>
 
     <!--<define name="debug"/> the fact that i have to do this just for my code to show debug shit is stupid af.-->
 
     <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> <!-- these should default? if im correct everything should set as platforms are built.-->
+
+    <!--apple is NEVER happening unless someone is willing to debug on an apple device, which i am not. -ChickenSwimmer2020 3/2/2026 9:30AM -->
     <section if="android">
+        <set name="ANDROID_PLATFORM" value="android-33" />
         <android install-location="perferExternal" target-sdk-version="36"/>
         <config type="android" install-location="preferExternal" minimum-sdk-version="21" gradle-version="8.9" gradle-plugin="8.7.3" target-sdk-version="36"/>
     </section>
@@ -20,16 +23,23 @@
     <haxelib name="flixel-ui"/>
     <haxelib name="flixel-addons"/>
     <haxelib name="openfl"/>
+    <haxelib name="hxcpp"/>
 
     <source path="source" />
     <source path="source/debug" if="debug"/>
-    <assets path="assets"/>
+    <assets path="assets" embed="true"/>
     <assets path="assets/debug" include="*.png" if="debug" /> <!-- for only debug assets. -->
+
+    <!--platform specific enabling and disabling for performance-->
+    <!-- <haxedef name="FLX_NO_KEYBOARD" if="android"/> --> <!--disable keyboard support on android -->
+    <!-- <haxedef name="FLX_NO_MOUSE" if="android"/> --> <!-- disable mouse controls for android (TODO: rewrite the entire weapon fire system to support touch.)-->
+    <!-- <haxedef name="FLX_NO_SOUND_TRAY" if="android"/> --> <!-- sound volume is controlled via device itself on android. -->
+    <!-- <haxedef name="FLX_NO_TOUCH" if="windows||html5||hl"/> --> <!-- disable touch controls on windows, hl, and html5-->
 
     <haxedef name="FLX_NO_DEBUG" unless="debug"/>
     <haxedef name="FLX_NO_HEALTH"/> <!--because im doing it myself.-->
     <haxedef name="FLX_NO_FOCUS_LOST_SCREEN"/>
     <haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
-    <language name="en-US" />
+    <language name="en" /> <!--turns out en-US doesnt work. and it just has to be "en"-->
 </project>

@@ -1,13 +1,5 @@
 package backend.game.states.substates;
 
-import states.MainMenuState;
-import flixel.ui.FlxButton;
-import flixel.FlxCamera;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.FlxSubState;
-using flixel.util.FlxSpriteUtil;
-
 class PauseMenu extends FlxSubState {
     var pauseCamera:FlxCamera;
     var menuBG:FlxSprite;
@@ -15,11 +7,11 @@ class PauseMenu extends FlxSubState {
     public function new() {
         super();
         FlxG.state.persistentUpdate = false;
-        pauseCamera = new FlxCamera(0, 0, 1280, 720, 1);
+        pauseCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
         pauseCamera.bgColor = 0x00000000;
         FlxG.cameras.add(pauseCamera, false);
 
-        menuBG = new FlxSprite(1185, 720).makeGraphic(100, 200, 0x00FF0000);
+        menuBG = new FlxSprite(FlxG.width-100, FlxG.height).makeGraphic(100, 200, 0x00FF0000);
         add(menuBG);
         menuBG.drawPolygon([
             FlxPoint.get(0, 0),
@@ -29,12 +21,12 @@ class PauseMenu extends FlxSubState {
             FlxPoint.get(0, 0)
         ], 0xFFFF0000);
         menuBG.flipX = true;
-        FlxTween.tween(menuBG, {y: 520}, 0.25, {ease:FlxEase.expoInOut});
+        FlxTween.tween(menuBG, {y: FlxG.height-200}, 0.25, {ease:FlxEase.expoInOut});
 
 
         //TODO: buttons
-        for(i in 0...(#if debug Main.loadedTestedState?6:5 #else 5 #end)) {
-            var button:FlxButton = new FlxButton(1195, 720, [
+        for(i in 0...(#if(debug&&!android)Main.loadedTestedState?6:5#else 5#end)) {
+            var button:FlxButton = new FlxButton(FlxG.width-85, FlxG.height, [
                 Language.getTranslatedKey(Main.curLanguage, "pause.resume"),
                 "",
                 "",
@@ -43,11 +35,11 @@ class PauseMenu extends FlxSubState {
                 Language.getTranslatedKey(Main.curLanguage, "pause.debug.exittestingstate")
             ][i], [
                 ()->{
-                    FlxTween.tween(menuBG, {y: 720}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
+                    FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
                         close();
                     }});
                     for(i in 0...buttons.length) {
-                        FlxTween.tween(buttons[i], {y: 720}, 0.75, {ease:FlxEase.expoOut});
+                        FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
                     }
                 },
                 ()->{},
@@ -60,7 +52,7 @@ class PauseMenu extends FlxSubState {
             ][i]);
             button.camera = pauseCamera;
             add(button);
-            FlxTween.tween(button, {y: 585+(20*i)}, 0.25, {ease:FlxEase.expoInOut});
+            FlxTween.tween(button, {y: FlxG.height-135+(20*i)}, 0.25, {ease:FlxEase.expoInOut});
             buttons.push(button);
         }
         
@@ -79,11 +71,11 @@ class PauseMenu extends FlxSubState {
     override public function update(elapsed:Float) {
         super.update(elapsed);
             if(FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE])){
-                        FlxTween.tween(menuBG, {y: 720}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
+                        FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
                 close();
             }});
             for(i in 0...buttons.length) {
-                FlxTween.tween(buttons[i], {y: 720}, 0.75, {ease:FlxEase.expoOut});
+                FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
             }
         }
     }

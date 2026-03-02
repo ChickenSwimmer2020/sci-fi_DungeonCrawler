@@ -1,10 +1,5 @@
 package backend.game.objects;
 
-import flixel.util.typeLimit.OneOfTwo;
-import backend.game.objects.Weapon.WeaponParser;
-import backend.game.states.substates.HUDSubstate.Item;
-import flixel.math.FlxMath;
-
 class Pickup extends FlxSprite {
     public var onPickup:Item->Void; //void to void, can be overridden for whatever logic we want, but also returns the item definition we have.
     public var interactionSprite:FlxSprite;
@@ -59,7 +54,7 @@ class Pickup extends FlxSprite {
     var ranonce:Bool=false;
     private function interactionPopup(enable:Bool) {
         if(interactionSprite==null) {
-            interactionSprite = new FlxSprite(x, y)#if debug .loadGraphic(Paths.DEBUG('pickupinteraction', 'png'));#else.makeGraphic(16, 16, 0xFF00FFFF);#end
+            interactionSprite = new FlxSprite(x, y)#if (debug && !android) .loadGraphic(Paths.DEBUG('pickupinteraction', 'png'));#else.makeGraphic(16, 16, 0xFF00FFFF);#end
             FlxG.state.add(interactionSprite);
             interactionSprite.camera=Main.camGame;
         }else{

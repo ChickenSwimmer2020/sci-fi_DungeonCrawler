@@ -1,19 +1,5 @@
 package states;
 
-
-import backend.game.states.substates.OptionsMenuSubstate;
-import backend.Language;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.FlxSubState;
-import flixel.ui.FlxButton;
-import flixel.FlxState;
-
-#if debug
-    import debugging.SaveDebugger;
-    import debugging.MapDebugger;
-#end
-
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
     var buttons:Array<FlxButton>=[];
@@ -41,7 +27,7 @@ class MainMenuState extends FlxState {
         //TODO: menu theme
 
 
-        #if debug
+        #if (debug && !android)
             var debuggerButton:FlxButton = new FlxButton(FlxG.width-80, FlxG.height-20, Language.getTranslatedKey(Main.curLanguage, "menu.debug.debugger"), ()->{
                 openSubState(new DebuggerChooser());
             });
@@ -50,7 +36,7 @@ class MainMenuState extends FlxState {
     }
 }
 
-#if debug
+#if (debug && !android)
 class DebuggerChooser extends FlxSubState {
     final debuggerOptions:Map<String, Void->Void>=[
         Language.getTranslatedKey(Main.curLanguage, "debugger.map") => ()->{

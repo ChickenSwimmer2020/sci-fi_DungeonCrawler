@@ -1,11 +1,5 @@
 package backend.game;
 
-import flixel.math.FlxMath;
-import backend.game.objects.Weapon;
-import backend.game.states.substates.HUDSubstate;
-import flixel.FlxCamera.FlxCameraFollowStyle;
-import flixel.input.keyboard.FlxKey;
-
 class Player extends FlxSprite {
     public static var instance:Player;
     public static var health:Float = 100;
@@ -34,7 +28,7 @@ class Player extends FlxSprite {
         makeGraphic(4, 4, 0xFFFF0000);
         instance=this;
     }
-    #if debug
+    #if (debug && !android)
         function addWatchObjects() {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
             FlxG.watch.addQuick("inventory open: ", inventory?.fullOpen);
@@ -55,7 +49,7 @@ class Player extends FlxSprite {
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(velocity.x > 0 || velocity.x < 0)velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(velocity.y > 0 || velocity.y < 0)velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 4 * 1));
-        #if debug
+        #if (debug && !android)
             addWatchObjects();
             if(FlxG.keys.pressed.LBRACKET) health--;
             if(FlxG.keys.pressed.RBRACKET) health++;

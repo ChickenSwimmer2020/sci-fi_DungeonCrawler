@@ -1,8 +1,5 @@
 package backend.generation;
 
-import flixel.util.FlxTimer;
-import backend.game.GameMap;
-
 enum abstract SpecialTileType(Int) from Int to Int {
     var NONE=-1; //JUST incase.
     var SPAWN=0;
@@ -27,6 +24,7 @@ typedef Room = {
 } 
 
 typedef MapFile = {
+    var name:String;
     var width:Int;
     var height:Int;
     var tiles:Array<Array<TilePointer>>;
@@ -52,6 +50,7 @@ class MapGenerator {
     public static function generateMap(width:Int, height:Int) {  
         var outputTiles:Array<Array<TilePointer>> = [];
         var toMapFile:MapFile = {
+            name: "PLACEHOLDER",
             width: width,
             height: height,
             tiles: []
@@ -82,8 +81,10 @@ class MapGenerator {
         
 
         //we can make these files SUPER small by compressing them.
-        //TODO: support for other platforms
-        File.saveContent(Paths.map("PLACEHOLDER"), Json.stringify(toMapFile, null, "    "));
+        
+        //we save maps in the save file now.
+        if(Main.saveFile.data.maps==null)Main.saveFile.data.maps=([]:Array<MapFile>); //this should never be null, but in-case it is.
+        (Main.saveFile.data.maps:Array<MapFile>).push(toMapFile); //stupid fuckin, i dont even know if this works or not.
     }
     private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){
         var hallwayLength:Int = FlxG.random.int(HALLWAY_MIN_LENGTH, HALLWAY_MAX_LENGTH);
@@ -112,23 +113,31 @@ class MapGenerator {
     };
 
     public static function createMap(file:String):GameMap {
-        if(FileSystem.exists('${Paths.mapsPath}/${file.remove('.map')}.map')) {
-            var data:Dynamic = Json.parse(File.getContent('${Paths.mapsPath}/${file.remove('.map')}.map'));
-            var internalMap:MapFile = {
-                width: data.width??0,
-                height: data.height??0,
-                tiles: data.tiles??([]:Array<Array<TilePointer>>) //i didnt know i could do this!
-            };
+        trace(Main.saveFile.data);
+        var hasMap:Bool=false;
+        for(map in 0...Main.saveFile.data.maps.length)if(Main.saveFile.data.maps[map].name==file)hasMap=true; //check if we have the target map in the save file.
+        if(hasMap) {
+            var internalMap:Null<MapFile>=null;
+            for(possibleMap in 0...Main.saveFile.data.maps.length) {
+                if(Main.saveFile.data.maps[possibleMap].name == file){
+                    internalMap={
+                        name: Main.saveFile.data.maps[possibleMap].name??"ERROR",
+                        width: Main.saveFile.data.maps[possibleMap].width??0,
+                        height: Main.saveFile.data.maps[possibleMap].height??0,
+                        tiles: Main.saveFile.data.maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
+                    }
+                }
+            }
             var returnMap:GameMap = new GameMap(internalMap);
             returnMap.generate();
-            #if debug
+            #if (debug && !android)
                 new FlxTimer().start(1, (_)->{
                     Main.DEBUG_updateMapsInfo(internalMap.width, internalMap.height, internalMap.tiles);
                     _.destroy();
                 });
             #end
             //if im correct, i should be able to override the world bounds to be better!
-            FlxG.worldBounds.set(0, 0, 0+(16*data.width), 0+(16*data.height));
+            FlxG.worldBounds.set(0, 0, 0+(16*internalMap.width), 0+(16*internalMap.height));
             return returnMap;
         }else{
             Main.showError("MISSINGMAP", file);
@@ -138,5 +147,11 @@ class MapGenerator {
     }
 
     public static inline function mapExists(name:String):Bool return Main.foundMaps.contains(name);
-    public static inline function findMaps()for(map in FileSystem.readDirectory(Paths.mapsPath))if(map.endsWith('.map'))Main.foundMaps.push(map);
+    public static inline function findMaps(){
+        //TODO:
+        //for(i in 0...Lambda.count(Main.saveFile.data.maps)) {
+        //    Main.foundMaps.push(Main.saveFile.data.maps);
+        //}
+        //for(map in FileSystem.readDirectory(Paths.mapsPath))if(map.endsWith('.map'))Main.foundMaps.push(map);
+    }
 }

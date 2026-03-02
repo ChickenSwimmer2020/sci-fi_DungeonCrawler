@@ -1,10 +1,5 @@
 package backend.game;
 
-import backend.game.objects.Pickup;
-import flixel.util.FlxTimer;
-import backend.game.objects.Tile;
-import flixel.group.FlxGroup.FlxTypedGroup;
-
 class GameMap extends FlxTypedGroup<Dynamic> {
     public static final TILE_SIZE:Int = 16; //we can avvoid MAGIC numbers
     public static final COLLISION_RADIUS:Int=2;
@@ -59,13 +54,13 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         if(type.special==true){
             switch(type.specialType) {
                 case SPAWN:
-                    #if debug
+                    #if (debug && !android)
                         tile.loadGraphic(Paths.DEBUG('entry'));
                         tile.color=0x7100FF00;
                     #end
                     playerSpawnPoint=FlxPoint.weak(tile.x, tile.y);
                     //createElevator() //TODO: elevator & stuff.
-                case WALKABLEAREA: #if debug tile.color = 0xFF00FF00; #end
+                case WALKABLEAREA: #if (debug && !android) tile.color = 0xFF00FF00; #end
                 default: //for special types that dont really do anything. like hallway, since thats only used during generation itself.
             }
 

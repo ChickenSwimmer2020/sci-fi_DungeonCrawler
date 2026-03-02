@@ -1,11 +1,5 @@
 package backend.game.states.substates;
 
-import flixel.addons.ui.FlxUIAssets;
-import flixel.addons.ui.FlxUI9SliceSprite;
-import flixel.addons.ui.FlxUISubState;
-import flixel.addons.ui.FlxUI;
-import flixel.addons.ui.FlxUITabMenu;
-
 class OptionsMenuSubstate extends FlxUISubState{
     public function new() {
         super();
