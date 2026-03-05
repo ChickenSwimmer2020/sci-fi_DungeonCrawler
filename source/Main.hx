@@ -147,21 +147,21 @@ class Main extends openfl.display.Sprite {
         if(gotomenu) FlxG.switchState(MainMenuState.new);
     }
     
-    public static var saveFile:FlxSave = new FlxSave(); //TODO: support for multiple saves.
+    public static var saveFile:FlxSave = new FlxSave();
+    public static var FILE:String="";
     public function new() {
         super();
         #if (android||html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
-        saveFile.bind("SAVESLOT"); //TODO: multiple saves. again.
+        saveFile.bind("SAVES");
+        if(saveFile.data.saves == null) { //should fix it?
+            saveFile.data.saves=new Map<String, SaveFile>();
+        }
 
-        //TODO: multiple save slot support.
-        //Save.findSaves(); //load save files located into memory.
-        MapGenerator.findMaps(); //load map files into memory.
-
-
-
-        
+        Save.findSaves(); //find the save files within SAVES
+        MapGenerator.findMaps(); //find the maps within SAVES
         ShaderCache.preload(); //preload shaders before loading everything to HOPEFULLY make the game run faster when shaders compile.
         //by not compiling during runtime.
+
         addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
         #if (debug&&!android) initDebugWindows(); #end
     }

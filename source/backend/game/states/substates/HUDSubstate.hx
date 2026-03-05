@@ -1,5 +1,7 @@
 package backend.game.states.substates;
 
+import flixel.ui.FlxVirtualPad;
+
 enum abstract ItemType(String) from String to String {
     var ITEM="ITEM";
     var CONSUMABLE="CONSUMABLE";
@@ -168,6 +170,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
 }
 
 class HUDSubstate extends FlxSubState {
+    #if android public var Controller:FlxVirtualPad; #end
     public var healthFlask:HealthFlask;
     public var weaponText:FlxText;
     public var fullOpen:Bool=false; //so that we can have the hotbar
@@ -207,9 +210,6 @@ class HUDSubstate extends FlxSubState {
             inventory[i]="EMPTY";
         }
     }
-    #if android
-        public var controls:ControllerSubState;
-    #end
     override public function update(elapsed:Float) {
         super.update(elapsed);
         for(i in 0...inventory.length) {
@@ -234,20 +234,20 @@ class HUDSubstate extends FlxSubState {
             slots[i].color=0xFFFFFFFF;
             if(slots[Player.curHotbarSlot]!=null) slots[Player.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
             if(fullOpen){
-                if(slots[i].visible==false)slots[i].visible=true;
+                if(slots[i].visible==false){
+                    slots[i].visible=slots[i].active=slots[i].alive=true;
+                }
             }else{
-                if(i>MAX_SLOTS-1)slots[i].visible = false;
+                if(i>MAX_SLOTS-1)slots[i].visible=slots[i].active=slots[i].alive=false;
             }
         }
 
         #if android
-            if(controls==null) {
-                controls=new ControllerSubState();
-                FlxG.state.persistentUpdate=true;
-                FlxG.state.openSubState(controls);
-                controls.output = (x:Float, y:Float)->{
-                    
-                }
+            if(Controller==null) {
+                Controller = new FlxVirtualPad(ANALOG, A_B_X_Y);
+                add(Controller);
+                Controller.camera = Main.camOther;
+                //Controller.setPosition(0, FlxG.height-Controller.height);
             }
         #end
         

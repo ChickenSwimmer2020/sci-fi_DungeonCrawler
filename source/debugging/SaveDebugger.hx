@@ -8,8 +8,7 @@ class SaveDebugger extends FlxUIState{
     var returnText:FlxUIText;
     public function new() {
         super();
-        //TODO: reimplement and support multiple saves
-        //Save.findSaves(); //just because its smart to do this everytime we load the state.
+        Save.findSaves(); //just because its smart to do this everytime we load the state.
         var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.exit"), 24, true);
         add(text);
 
@@ -34,12 +33,7 @@ class SaveDebugger extends FlxUIState{
             Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Custom")
 		]);
         READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.parse"), ()->{
-            if(tabs_radio_1.selectedId=="OTHER"&&READING_textInputOther.text.contains('.')) { //now we can read varibles inside of structures
-                //TODO: array support.
-                //returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSaveADV(READING_saveDropdown.selectedId, READING_textInputOther.text.split('.')[0], READING_textInputOther.text.split('.')[1])}';
-            }else{
-                returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_textInputOther.text)}';
-            }
+            returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, READING_textInputOther.text)}';
         });
 
         returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned"), 8, true);

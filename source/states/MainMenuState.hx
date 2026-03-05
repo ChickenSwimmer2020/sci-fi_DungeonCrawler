@@ -1,5 +1,6 @@
 package states;
 
+import backend.game.states.substates.LoadGameSubstate;
 import lime.system.System;
 #if android
 class MenuButton extends FlxSprite {
@@ -28,7 +29,35 @@ class MainMenuState extends FlxState {
         super();
         logo=new FlxSprite(FlxG.width-500, 0).makeGraphic(500, 200, 0xFFFF0000);
         add(logo); //TODO: placeholder graphic
-    
+        final onButtonClicked:Array<Void->Void>=[
+            ()->{
+                trace('new game');
+                #if debug
+                    Save.DEBUGSAVE('test');
+                    Save.DEBUGSAVE('test1');
+                    Save.DEBUGSAVE('test2');
+                    Save.DEBUGSAVE('test3');
+                    Save.DEBUGSAVE('test4');
+                #end
+            },
+            ()->{
+                openSubState(new LoadGameSubstate());
+            },
+            ()->{
+                openSubState(new OptionsMenuSubstate());
+            },
+            ()->{trace('gallery');},
+            ()->{trace('achivements');},
+            ()->{     
+                #if android
+                    System.exit(1); //TODO: make android app actually close.
+                #elseif html5
+                    js.Browser.window.close();
+                #else
+                    Sys.exit(1);
+                #end
+            }
+        ];
         final strings:Array<String>=[
             Language.getTranslatedKey(Main.curLanguage, "menu.new_game"),
             Language.getTranslatedKey(Main.curLanguage, "menu.load_game"),
@@ -43,37 +72,13 @@ class MainMenuState extends FlxState {
                     FlxG.width/2-128, FlxG.width/2+128, FlxG.width/2-128, FlxG.width/2+128, FlxG.width/2-128, FlxG.width/2+128
                 ][i], [
                     0, 0, 108, 108, 216, 216
-                ][i], strings[i], [
-                    ()->{trace('new game');},
-                    ()->{trace('load game');},
-                    ()->{
-                        openSubState(new OptionsMenuSubstate());
-                    },
-                    ()->{trace('gallery');},
-                    ()->{trace('achivements');},
-                    ()->{System.exit(0);} //TODO: make android app actually close.
-                ][i]);
+                ][i], strings[i], onButtonClicked[i]);
                 buttons.push(button);
                 add(button);
             }
         #else
             for(i in 0...strings.length) {
-                var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], [
-                    ()->{trace('new game');},
-                    ()->{trace('load game');},
-                    ()->{
-                        openSubState(new OptionsMenuSubstate());
-                    },
-                    ()->{trace('gallery');},
-                    ()->{trace('achivements');},
-                    ()->{
-                        #if html5
-                            js.Browser.window.close();
-                        #else
-                            Sys.exit(1);
-                        #end
-                    }
-                ][i]);
+                var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], onButtonClicked[i]);
                 buttons.push(button);
                 add(button);
             }
@@ -84,7 +89,7 @@ class MainMenuState extends FlxState {
 
 
         #if (debug)
-            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 0, Language.getTranslatedKey(Main.curLanguage, "menu.debug.debugger"), ()->{
+            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 200, Language.getTranslatedKey(Main.curLanguage, "menu.debug.debugger"), ()->{
                 openSubState(new DebuggerChooser());
             });
             add(debuggerButton);
@@ -99,7 +104,7 @@ class DebuggerChooser extends FlxSubState {
             FlxG.switchState(MapDebugger.new);
         },
         Language.getTranslatedKey(Main.curLanguage, "debugger.testing")=>()->{
-            FlxG.switchState(TestingState.new);
+            FlxG.switchState(()->new TestingState(false));
         },
         Language.getTranslatedKey(Main.curLanguage, "debugger.save")=>()->{
             FlxG.switchState(SaveDebugger.new);

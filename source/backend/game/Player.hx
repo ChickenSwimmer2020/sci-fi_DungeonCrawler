@@ -1,6 +1,6 @@
 package backend.game;
 
-import backend.game.states.substates.ControllerSubState;
+import flixel.input.touch.FlxTouch;
 
 class Player extends FlxSprite {
     public static var instance:Player;
@@ -48,7 +48,7 @@ class Player extends FlxSprite {
     override public function update(elapsed:Float) {
         super.update(elapsed);
         mousePosition = #if android
-            FlxG.touches.justStarted()[0]?.getWorldPosition(Main.camGame); //TODO: fix and let not crash when trying to use this.
+            FlxG.touches.getFirst()?.getWorldPosition(Main.camGame);
         #else
             FlxG.mouse.getWorldPosition(Main.camGame);
         #end
@@ -83,7 +83,7 @@ class Player extends FlxSprite {
         }else{
             isWeapon=((inventory.selectedItem.type==RANGED||inventory.selectedItem.type==MEELEE)||inventory.selectedItem.type==MAGIC);
             weapon.active=weapon.visible=isWeapon;
-            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?#if(android)FlxG.touches.justStarted()[0]?.pressed#else FlxG.mouse.pressed#end:#if(android)FlxG.touches.justStarted()[0]?.justPressed #else FlxG.mouse.justPressed#end) && (weapon.visible && weapon.active)) weapon.onLeftClick();
+            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?#if(android)FlxG.touches.getFirst()?.pressed#else FlxG.mouse.pressed#end:#if(android)FlxG.touches.justStarted()[0]?.justPressed #else FlxG.mouse.justPressed#end) && (weapon.visible && weapon.active)) weapon.onLeftClick();
             if(#if(android) false #else FlxG.mouse.justPressedRight#end && (weapon.visible && weapon.active)) weapon.onRightClick(); //TODO: android support for advanced weapon functions. other buttons maybe that freeze the game until you select a position to fire twoards?
             if((#if(android) false #else FlxG.mouse.justPressedMiddle#end && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
 

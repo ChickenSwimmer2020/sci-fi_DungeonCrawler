@@ -77,8 +77,8 @@ class MapGenerator {
         }
 
         toMapFile.tiles = outputTiles;
-        if(Main.saveFile.data.maps==null)Main.saveFile.data.maps=([]:Array<MapFile>); //this should never be null, but in-case it is.
-        (Main.saveFile.data.maps:Array<MapFile>).push(toMapFile); //stupid fuckin, i dont even know if this works or not.
+        if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null)(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=([]:Array<MapFile>);
+        (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
     }
     private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){
         var hallwayLength:Int = FlxG.random.int(HALLWAY_MIN_LENGTH, HALLWAY_MAX_LENGTH);
@@ -107,18 +107,17 @@ class MapGenerator {
     };
 
     public static function createMap(file:String):GameMap {
-        trace(Main.saveFile.data);
         var hasMap:Bool=false;
-        for(map in 0...Main.saveFile.data.maps.length)if(Main.saveFile.data.maps[map].name==file)hasMap=true; //check if we have the target map in the save file.
+        for(map in 0...(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.length)if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[map].name==file)hasMap=true; //check if we have the target map in the save file.
         if(hasMap) {
             var internalMap:Null<MapFile>=null;
-            for(possibleMap in 0...Main.saveFile.data.maps.length) {
-                if(Main.saveFile.data.maps[possibleMap].name == file){
+            for(possibleMap in 0...(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.length) {
+                if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].name == file){
                     internalMap={
-                        name: Main.saveFile.data.maps[possibleMap].name??"ERROR",
-                        width: Main.saveFile.data.maps[possibleMap].width??0,
-                        height: Main.saveFile.data.maps[possibleMap].height??0,
-                        tiles: Main.saveFile.data.maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
+                        name: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].name??"ERROR",
+                        width: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].width??0,
+                        height: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].height??0,
+                        tiles: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
                     }
                 }
             }
