@@ -30,7 +30,7 @@ class Player extends FlxSprite {
         makeGraphic(4, 4, 0xFFFF0000);
         instance=this;
     }
-    #if (debug)
+    //#if (debug)
         function addWatchObjects() {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
             FlxG.watch.addQuick("inventory open: ", inventory?.fullOpen);
@@ -42,7 +42,7 @@ class Player extends FlxSprite {
             FlxG.watch.addQuick("stamina", stamina??0);
             FlxG.watch.addQuick("xp", xp??0);
         }
-    #end
+    //#end
     var isWeapon:Bool=false;
     //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
@@ -108,8 +108,8 @@ class Player extends FlxSprite {
             }else continue;
 
         //HORRIBLE way to do it, but good enough.
-        if(inventory.weaponText.text!='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
-            inventory.weaponText.text='${Language.getTranslatedKey(Main.curLanguage, 'weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
+        if(inventory.weaponText.txt!='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
+            inventory.weaponText.txt='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
         }
 
         //TODO: make these better
@@ -128,7 +128,7 @@ class Player extends FlxSprite {
             }
 
             //MOVED PAUSING LOGIC TO INVENTORY
-            if(FlxG.keys.anyJustPressed(Main.controls.get('inventory'))) {
+            if(Functions.checkJustPressedSafe(Main.controls.get('inventory'))) { //stupid that i need safe check functions. :/
                 inventory.fullOpen=!inventory.fullOpen;
             }
         #else

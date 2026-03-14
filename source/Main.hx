@@ -16,10 +16,10 @@ class Main extends openfl.display.Sprite {
             "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
             "moveLEFT" => [FlxKey.LEFT, A],
 
-            "zoomIN" => [PLUS],
-            "zoomOUT" => [MINUS],
+            "zoomIN" => [PLUS, NONE],
+            "zoomOUT" => [MINUS, NONE],
             "pause" => [ESCAPE, BACKSPACE],
-            "inventory" => [I],
+            "inventory" => [I, NONE],
             "interact" => [E, ENTER],
         ];
     #end
@@ -43,7 +43,7 @@ class Main extends openfl.display.Sprite {
     public static var camGame:FlxCamera; //access from everywhere!
     public static var camHUD:FlxCamera; //access from everywhere!
     public static var camOther:FlxCamera; //access from everywhere!
-    #if (debug&&!android) //we still keep this disabled in android because the debugger doesnt exist (afaik).
+    #if (debug&&!android&&!html5) //we still keep this disabled in android because the debugger doesnt exist (afaik).
         static var mapWindow:Window;
 
         static var saveFilesText:TextField;
@@ -121,9 +121,10 @@ class Main extends openfl.display.Sprite {
         showError("MISSINGLANG", lang, EN_US);
     }
     public static function showError(input:String,?missingObject:Dynamic=null, ?forceLanguage:Lang=null) {
+        if(forceLanguage!=null)curLanguage=forceLanguage; //since we dont have language input on Language.getTranslatedKey anymore.
         var type:Array<String> = ErrorType.get(input);
-        var Message:String=Language.getTranslatedErrorMessage(forceLanguage??Main.curLanguage, missingObject, type[1]);
-        var Title:String=Language.getTranslatedKey(forceLanguage??Main.curLanguage, type[0]);
+        var Message:String=Language.getTranslatedErrorMessage(missingObject, type[1]);
+        var Title:String=Language.getTranslatedKey(type[0]);
         var close:Bool=false;
         var gotomenu:Bool=false;
         if(Message.indexOf('[SHUTDOWN]')!=-1){
@@ -148,7 +149,8 @@ class Main extends openfl.display.Sprite {
     }
     
     public static var saveFile:FlxSave = new FlxSave();
-    public static var FILE:String="";
+    public static var lastLoadedSaveName:Null<String>;
+    public static var FILE:Null<String>;
     public function new() {
         super();
         #if (android||html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
@@ -156,6 +158,13 @@ class Main extends openfl.display.Sprite {
         if(saveFile.data.saves == null) { //should fix it?
             saveFile.data.saves=new Map<String, SaveFile>();
         }
+        curLanguage=saveFile.data.language??EN_US; //default to EN_US if no language is specified in the save file.
+        if(saveFile.data.lastLoadedSave==null) saveFile.data.lastLoadedSave=Flags.DEFAULT_SAVE;
+        if(saveFile.data.lastLoadedSave!=null){
+            lastLoadedSaveName=saveFile.data.lastLoadedSave;
+            FILE=lastLoadedSaveName;
+            saveFile.flush();
+        }else FILE=Flags.DEFAULT_SAVE;
 
         Save.findSaves(); //find the save files within SAVES
         MapGenerator.findMaps(); //find the maps within SAVES
@@ -163,6 +172,14 @@ class Main extends openfl.display.Sprite {
         //by not compiling during runtime.
 
         addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
-        #if (debug&&!android) initDebugWindows(); #end
+        initDefaultSaveParemeters();
+        #if (debug&&!android&&!html5) initDebugWindows(); #end
+    }
+    private static function initDefaultSaveParemeters() {
+        if((saveFile.data.saves:Map<String,SaveFile>).get(Flags.DEFAULT_SAVE)==null){
+            (saveFile.data.saves:Map<String,SaveFile>).set(Flags.DEFAULT_SAVE, Flags.DEFAULT_SAVEFILE);
+        }
+        if(saveFile.data.shaders==null)saveFile.data.shaders=true;
+        if(saveFile.data.language==null)saveFile.data.language="EN_US";
     }
 }

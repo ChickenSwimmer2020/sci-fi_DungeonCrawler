@@ -59,12 +59,12 @@ class MainMenuState extends FlxState {
             }
         ];
         final strings:Array<String>=[
-            Language.getTranslatedKey(Main.curLanguage, "menu.new_game"),
-            Language.getTranslatedKey(Main.curLanguage, "menu.load_game"),
-            Language.getTranslatedKey(Main.curLanguage, "menu.config"),
-            Language.getTranslatedKey(Main.curLanguage, "menu.art"),
-            Language.getTranslatedKey(Main.curLanguage, "menu.awards"),
-            Language.getTranslatedKey(Main.curLanguage, "menu.quit")
+            Language.getTranslatedKey("menu.new_game"),
+            Language.getTranslatedKey("menu.load_game"),
+            Language.getTranslatedKey("menu.config"),
+            Language.getTranslatedKey("menu.art"),
+            Language.getTranslatedKey("menu.awards"),
+            Language.getTranslatedKey("menu.quit")
         ];
         #if android
             for(i in 0...strings.length) {
@@ -80,6 +80,7 @@ class MainMenuState extends FlxState {
             for(i in 0...strings.length) {
                 var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], onButtonClicked[i]);
                 buttons.push(button);
+                button.label.font='assets/ui/font.ttf';
                 add(button);
             }
         #end
@@ -89,7 +90,7 @@ class MainMenuState extends FlxState {
 
 
         #if (debug)
-            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 200, Language.getTranslatedKey(Main.curLanguage, "menu.debug.debugger"), ()->{
+            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 200, Language.getTranslatedKey("menu.debug.debugger"), ()->{
                 openSubState(new DebuggerChooser());
             });
             add(debuggerButton);
@@ -100,14 +101,17 @@ class MainMenuState extends FlxState {
 #if (debug)
 class DebuggerChooser extends FlxSubState {
     final debuggerOptions:Map<String, Void->Void>=[
-        Language.getTranslatedKey(Main.curLanguage, "debugger.map") => ()->{
+        Language.getTranslatedKey("debugger.map") => ()->{
             FlxG.switchState(MapDebugger.new);
         },
-        Language.getTranslatedKey(Main.curLanguage, "debugger.testing")=>()->{
+        Language.getTranslatedKey("debugger.testing")=>()->{
             FlxG.switchState(()->new TestingState(false));
         },
-        Language.getTranslatedKey(Main.curLanguage, "debugger.save")=>()->{
+        Language.getTranslatedKey("debugger.save")=>()->{
             FlxG.switchState(SaveDebugger.new);
+        },
+        Language.getTranslatedKey("debugger.alphabet")=>()->{
+            FlxG.switchState(AlphabetDebugger.new);
         }
     ];
     public function new() {

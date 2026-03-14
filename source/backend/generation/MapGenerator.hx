@@ -123,10 +123,10 @@ class MapGenerator {
             }
             var returnMap:GameMap = new GameMap(internalMap);
             returnMap.generate();
-            #if (debug&&!android) //because the debugger doesnt exist on android.
-                new FlxTimer().start(1, (_)->{
+            
+            #if (debug&&!android&&!html5) //because the debugger doesnt exist on android.
+                Functions.wait(1, (_)->{
                     Main.DEBUG_updateMapsInfo(internalMap.width, internalMap.height, internalMap.tiles);
-                    _.destroy();
                 });
             #end
             //if im correct, i should be able to override the world bounds to be better!

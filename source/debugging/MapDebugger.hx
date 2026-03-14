@@ -7,12 +7,12 @@ class MapDebugger extends FlxUIState{
     var GenerateButton:FlxUIButton;
     public function new() {
         super();
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.map.exit"), 24, true);
+        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.map.exit"), 24, true);
         add(text);
 
         // Define the tabs:
 		var tabs = [
-			{name: "tab_1", label: Language.getTranslatedKey(Main.curLanguage, "debugger.map.generatemenu")},
+			{name: "tab_1", label: Language.getTranslatedKey("debugger.map.generatemenu")},
 		];
 
 		// Make the tab menu itself:
@@ -30,7 +30,7 @@ class MapDebugger extends FlxUIState{
         tab_group_1.add(widthStepper);
         tab_group_1.add(heightStepper);
 
-        GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey(Main.curLanguage, "debugger.map.generate"), ()->{
+        GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey("debugger.map.generate"), ()->{
             trace('generate map');
         });
 
@@ -38,17 +38,17 @@ class MapDebugger extends FlxUIState{
 
 		/***TAB GROUP 1***/
 	    //tabs_radio_1 = new FlxUIRadioGroup(10, 10, ["HEALTH", "STAMINA", "XP", "INVENTORY", "OTHER"], [
-		//	Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Health"),
-		//	Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Stamina"),
-		//	Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Experience"),
-		//	Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Inventory"),
-        //    Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Custom")
+		//	Language.getTranslatedKey("debugger.save.radio.Health"),
+		//	Language.getTranslatedKey("debugger.save.radio.Stamina"),
+		//	Language.getTranslatedKey("debugger.save.radio.Experience"),
+		//	Language.getTranslatedKey("debugger.save.radio.Inventory"),
+        //    Language.getTranslatedKey("debugger.save.radio.Custom")
 		//]);
-        //READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.parse"), ()->{
-        //    returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, tabs_radio_1.selectedId, READING_textInputOther.text)}';
+        //READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey("debugger.save.parse"), ()->{
+        //    returnText.text='${Language.getTranslatedKey("debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, tabs_radio_1.selectedId, READING_textInputOther.text)}';
         //});
 //
-        //returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned"), 8, true);
+        //returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey("debugger.save.returned"), 8, true);
 //
         //var dropdownList:Array<StrNameLabel>=[];
         //for(save in Main.saveFiles) {
@@ -57,7 +57,7 @@ class MapDebugger extends FlxUIState{
 //
         //
 //
-        //READING_saveDropdown = new FlxUIDropDownMenu(0, 0, dropdownList??[new StrNameLabel("", Language.getTranslatedKey(Main.curLanguage, "debugger.save.nosaves"))]);
+        //READING_saveDropdown = new FlxUIDropDownMenu(0, 0, dropdownList??[new StrNameLabel("", Language.getTranslatedKey("debugger.save.nosaves"))]);
         //
 
 //

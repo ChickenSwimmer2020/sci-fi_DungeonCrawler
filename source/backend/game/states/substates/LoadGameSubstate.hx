@@ -24,7 +24,7 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         BG=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, 380, 100));
         CUTOUT=new FlxUI9SliceSprite(5, 5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, 90, 90));
         text=new FlxUIText(100, 5, BG.width-105, '{NAME} - {DIFFICULTY}\n{H}:{M}:{S} || {DEPTH}\n{LEVEL}', 14, true);
-        loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey(Main.curLanguage, "menu.save.loadsave"), ()->{
+        loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave"), ()->{
             Main.FILE=text.text.split('-')[0].trim(); //should work?
             #if debug FlxG.switchState(()->new TestingState(true)); #end
         }, false);
@@ -121,15 +121,19 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        FlxG.watch.addQuick('mouse', FlxG.mouse.wheel);
-        FlxG.watch.addQuick('index', scrollIndex);
-        if(scrollIndex>=0)
-            scrollIndex-=(FlxG.mouse.wheel*10); //TODO: clamp properly so you cant scroll up at the start of it.
-        else
-            scrollIndex=0;
-        
+        #if !android
+            FlxG.watch.addQuick('mouse', FlxG.mouse.wheel);
+            FlxG.watch.addQuick('index', scrollIndex);
+            if(scrollIndex>=0)
+                scrollIndex-=(FlxG.mouse.wheel*10); //TODO: clamp properly so you cant scroll up at the start of it.
+            else
+                scrollIndex=0;
+            
 
-        scrollCam.scroll.y = scrollIndex;
-        if(FlxG.keys.justPressed.ESCAPE) close();
+            scrollCam.scroll.y = scrollIndex;
+            if(FlxG.keys.justPressed.ESCAPE) close();
+        #else
+
+        #end
     }
 }

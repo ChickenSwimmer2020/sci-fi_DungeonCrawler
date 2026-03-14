@@ -76,6 +76,7 @@ class InventorySlot extends FlxSprite {
     public var hasItem:Bool=false;
     public var curItem:Null<Item>;
     public var locked:Bool=false;
+    public var interactable:Bool=true;
 
     public function new(x:Float,y:Float) {
         super(x, y);
@@ -108,15 +109,17 @@ class InventorySlot extends FlxSprite {
         FlxG.watch.addQuick('held item', Main.curHeldItem);
 
         //pickup logic
-        if(#if(android)(FlxG.touches.justStarted()[0]?.overlaps(this)&&FlxG.touches.justStarted()[0]?.justPressed)#else(FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)#end) {
-            if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
-                Main.curHeldItem=curItem;
-                unloadItem();
-                onItemMoveStart();
-            }else if(Main.curHeldItem!=null){
-                setItem(Main.curHeldItem);
-                onItemMoveEnd();
-                Main.curHeldItem=null;
+        if(interactable){
+            if(#if(android)(FlxG.touches.justStarted()[0]?.overlaps(this)&&FlxG.touches.justStarted()[0]?.justPressed)#else(FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)#end) {
+                if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
+                    Main.curHeldItem=curItem;
+                    unloadItem();
+                    onItemMoveStart();
+                }else if(Main.curHeldItem!=null){
+                    setItem(Main.curHeldItem);
+                    onItemMoveEnd();
+                    Main.curHeldItem=null;
+                }
             }
         }
     }
@@ -172,7 +175,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
 class HUDSubstate extends FlxSubState {
     #if android public var Controller:FlxVirtualPad; #end
     public var healthFlask:HealthFlask;
-    public var weaponText:FlxText;
+    public var weaponText:Alphabet;
     public var fullOpen:Bool=false; //so that we can have the hotbar
     private static final MAX_SLOTS:Int = 10;
     public var inventory:Null<Array<OneOfTwo<String, Item>>>;
@@ -198,7 +201,7 @@ class HUDSubstate extends FlxSubState {
             index++;
         }
 
-        weaponText=new FlxText(0+(InventorySlot.SIZE*index), 0, 150, "[WEAPONNAME]\n{C}/{M}|{P}", 12, true);
+        weaponText=new Alphabet(0+(InventorySlot.SIZE*index), 0, 150, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
         add(weaponText);
         weaponText.camera=Main.camHUD;
         
@@ -219,7 +222,7 @@ class HUDSubstate extends FlxSubState {
                 }
             }
         }
-        @:privateAccess weaponText.visible=Player.instance.isWeapon;
+        //@:privateAccess weaponText.visible=Player.instance.isWeapon;
         selectedItem=slots[Player.curHotbarSlot]?.curItem??{
             type: NULL,
             weaponType: NULL,
@@ -235,10 +238,11 @@ class HUDSubstate extends FlxSubState {
             if(slots[Player.curHotbarSlot]!=null) slots[Player.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
             if(fullOpen){
                 if(slots[i].visible==false){
-                    slots[i].visible=slots[i].active=slots[i].alive=true;
+                    slots[i].visible=slots[i].active=slots[i].alive=slots[i].interactable=true;
                 }
             }else{
                 if(i>MAX_SLOTS-1)slots[i].visible=slots[i].active=slots[i].alive=false;
+                else slots[i].interactable=false;
             }
         }
 

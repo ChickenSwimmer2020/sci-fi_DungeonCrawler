@@ -9,7 +9,7 @@ class ShaderCache {
         mask = new MaskShader(null); 
         rail = new RailFire();
 
-        new FlxTimer().start(0.5, (_)->{
+        Functions.wait(0.5, (_)->{
             mask=null;
             rail=null;
         });

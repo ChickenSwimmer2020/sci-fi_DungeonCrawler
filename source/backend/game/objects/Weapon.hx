@@ -70,14 +70,18 @@ class Weapon extends FlxSprite{
     var increment:Int=0;
     var power:Float=0;
     public function shoot() {
-        if(#if(android)FlxG.touches.list[FlxG.touches.list.length].overlaps(Player.instance.inventory)#else FlxG.mouse.overlaps(Player.instance.inventory)#end) return; //cancel if holding an item. much simpler fix than anything else honestly.
+        #if android
+            if(FlxG.touches.getFirst()?.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) return;
+        #else
+            if(FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) return;//cancel if holding an item. much simpler fix than anything else honestly.
+        #end
         if(charges<=0)return; //cancel if we have no ammo.
         increment=0;
         if(coolDownTimer.finished){
             switch(frMode) {
                 case SEMI: fire(); charges--;
-                case BURST: for(i in 0...3)new FlxTimer().start(shoot_time*(0.15*i), (_)->{charges--;fire();_.destroy();});
-                case FULLAUTO:increment++;new FlxTimer().start(shoot_time*(0.15*increment), (_)->{charges--;fire(_);});
+                case BURST: for(i in 0...3)Functions.wait(shoot_time*(0.15*i), (_)->{charges--;fire();});
+                case FULLAUTO:increment++;Functions.wait(shoot_time*(0.15*increment), (_)->{charges--;fire(_);});
                 case RAIL: power+=POWER_INCREMENT; power=Math.max(0, Math.min(power, 100));
                 case SHOTGUN: for(i in 0...9){fire(1, true, i);charges--;}
                 case NULL:

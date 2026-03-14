@@ -9,12 +9,12 @@ class SaveDebugger extends FlxUIState{
     public function new() {
         super();
         Save.findSaves(); //just because its smart to do this everytime we load the state.
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.exit"), 24, true);
+        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.save.exit"), 24, true);
         add(text);
 
         // Define the tabs:
 		var tabs = [
-			{name: "tab_1", label: Language.getTranslatedKey(Main.curLanguage, "debugger.save.readmenu")},
+			{name: "tab_1", label: Language.getTranslatedKey("debugger.save.readmenu")},
 		];
 
 		// Make the tab menu itself:
@@ -26,24 +26,24 @@ class SaveDebugger extends FlxUIState{
 
 		/***TAB GROUP 1***/
 	    tabs_radio_1 = new FlxUIRadioGroup(10, 10, ["HEALTH", "STAMINA", "XP", "INVENTORY", "OTHER"], [
-			Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Health"),
-			Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Stamina"),
-			Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Experience"),
-			Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Inventory"),
-            Language.getTranslatedKey(Main.curLanguage, "debugger.save.radio.Custom")
+			Language.getTranslatedKey("debugger.save.radio.Health"),
+			Language.getTranslatedKey("debugger.save.radio.Stamina"),
+			Language.getTranslatedKey("debugger.save.radio.Experience"),
+			Language.getTranslatedKey("debugger.save.radio.Inventory"),
+            Language.getTranslatedKey("debugger.save.radio.Custom")
 		]);
-        READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.parse"), ()->{
-            returnText.text='${Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, READING_textInputOther.text)}';
+        READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey("debugger.save.parse"), ()->{
+            returnText.text='${Language.getTranslatedKey("debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, READING_textInputOther.text)}';
         });
 
-        returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey(Main.curLanguage, "debugger.save.returned"), 8, true);
+        returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey("debugger.save.returned"), 8, true);
 
         var dropdownList:Array<StrNameLabel>=[];
         for(save in Main.saveFiles) {
             dropdownList.push(new StrNameLabel(save.remove('.sav'), save));
         }
         if(dropdownList[0]==null) //fallback.
-            dropdownList[0]=new StrNameLabel("", Language.getTranslatedKey(Main.curLanguage, "debugger.save.nosaves"));
+            dropdownList[0]=new StrNameLabel("", Language.getTranslatedKey("debugger.save.nosaves"));
 
 
         READING_saveDropdown = new FlxUIDropDownMenu(0, 0, dropdownList);

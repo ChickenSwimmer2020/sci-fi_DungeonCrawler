@@ -2,26 +2,43 @@ package backend;
 
 enum abstract Lang(String) from String to String {
     var EN_US="EN_US";
-    var KLINGON="tomfuckery";
+    var JP="JP";
 }
 
 class Language {
-    public static function getTranslatedKey(language:Lang, key:String):String {
-        if(#if (android || html5) Assets.getText(Paths.lang(language))!=null #else FileSystem.exists(Paths.lang(language))#end) {
-            var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(language)) #else File.getContent(Paths.lang(language))#end);
-            if(Reflect.hasField(lang, key)) return Reflect.field(lang, key);
-            else return key; //just return the base string ID if there is no entry. prevents issues.
-        }else Main.showLanguageError(language);
+    public static final applicationTitles:Map<String,String>=[
+        "EN_US"=>"Sublevel Atlas-Zero",
+        "JP"=>"「サブレベル・アトラス・ゼロ」",
+    ];
+    public static final WIPLanguages:Array<String>=[
+        "JP"
+    ];
+    private static final languageNames:Map<String, String>=[
+        "EN_US"=>"English (US)",
+        "JP"=>"Japanese"
+    ];
+    public static function getLanguageLable(key:String):String{ //return the key, if its null just return the input.
+        if(languageNames.get(key)!=null) return languageNames.get(key);
+        else return key;
+
         return null;
     }
-    public static function getTranslatedErrorMessage(language:Lang, ?missingObject:Dynamic, key:String):String {
-        if(#if (android || html5) Assets.getText(Paths.lang(language))!=null #else FileSystem.exists(Paths.lang(language))#end) {
-            var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(language)) #else File.getContent(Paths.lang(language))#end);
+    public static function getTranslatedKey(key:String):String {
+        if(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
+            var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
+            if(Reflect.hasField(lang, key)) return Reflect.field(lang, key);
+            else return key; //just return the base string ID if there is no entry. prevents issues.
+        }else Main.showLanguageError(Main.curLanguage);
+        return null;
+    }
+    public static function getTranslatedErrorMessage(?missingObject:Dynamic, key:String):String {
+        if(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
+            var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
             if(Reflect.hasField(lang, key)){
                 var error:String=Reflect.field(lang, key);
                 return error.replace('{OBJ}', missingObject);
             }else return key; //just return the base string ID if there is no entry. prevents issues.
-        }else Main.showLanguageError(language);
+        }else Main.showLanguageError(Main.curLanguage);
         return null;
     }
 }

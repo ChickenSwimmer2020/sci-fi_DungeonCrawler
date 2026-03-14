@@ -92,6 +92,9 @@ class Save {
     public static function readSaveFile(file:String):SaveFile {
         #if !android loadControls(file); #end
         Main.FILE=file;
+        Main.saveFile.data.lastLoadedSave = file;
+        Main.lastLoadedSaveName = file;
+        Main.saveFile.flush(); //upload the last loaded save file name to the save and actually save it, forgot to do that lol.
         return (Main.saveFile.data.saves:Map<String, SaveFile>).get(file);
     }
     #if (debug)

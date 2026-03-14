@@ -1,9 +1,9 @@
 {
     "TODO": "THIS",
 
-    "warning.unfinishedlanguage": "!UNFINISHED LANGUAGE!",
+    "warning.unfinishedlanguage": "「!未完成の言語!」",
     "warning.unfinishedlanguage.continue": "Okay",
-    "warning.unfinishedlanguage.message": "The language file selected's translation is INCOMPLETE\nIt will be updated in the future.\n\nPLEASE RESTART THE GAME FOR THIS TO TAKE EFFECT PROPERLY.",
+    "warning.unfinishedlanguage.message": "「選択された言語ファイルの翻訳は未完成です。\n将来的に更新される予定です。\n\n正常に反映されるためにはゲームを再起動してください。」",
 
     "menu.options.tab.controls": "Controls",
     "menu.options.tab.difficulty": "Difficulty",

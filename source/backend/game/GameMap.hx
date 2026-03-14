@@ -94,9 +94,8 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                                 effect.setPosition(bullet.x-effect.width/2, bullet.y-effect.height/2);
                                 FlxG.state.add(effect);
                                 effect.camera=plr?.camera;
-                                new FlxTimer().start(0.5, (_)->{ //TODO until animation length
+                                Functions.wait(0.5, (_)->{ //TODO until animation length
                                     effect.destroy();
-                                    _.destroy();
                                 });
                             });
                         }

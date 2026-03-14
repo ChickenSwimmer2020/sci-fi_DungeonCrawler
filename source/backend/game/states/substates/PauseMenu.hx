@@ -27,12 +27,12 @@ class PauseMenu extends FlxSubState {
         //TODO: buttons
         for(i in 0...(#if(debug&&!android)Main.loadedTestedState?6:5#else 5#end)) {
             var button:FlxButton = new FlxButton(FlxG.width-85, FlxG.height, [
-                Language.getTranslatedKey(Main.curLanguage, "pause.resume"),
+                Language.getTranslatedKey("pause.resume"),
                 "",
                 "",
                 "",
                 "",
-                Language.getTranslatedKey(Main.curLanguage, "pause.debug.exittestingstate")
+                Language.getTranslatedKey("pause.debug.exittestingstate")
             ][i], [
                 ()->{
                     FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
