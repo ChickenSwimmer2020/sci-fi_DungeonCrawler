@@ -7,8 +7,8 @@ class WarningPopup extends FlxSubState {
     private var background:FlxUI9SliceSprite;
     private var background2:FlxUI9SliceSprite;
     private var butts:Array<FlxUIButton>=[];
-    private var header:Alphabet;
-    private var body:Alphabet;
+    private var header:FlxText;
+    private var body:FlxText;
     public function new(title:String, b:String, buttons:Array<{l:String,f:Void->Void,c:Bool}>) {
         super();
         if(buttons.length>4){
@@ -18,12 +18,11 @@ class WarningPopup extends FlxSubState {
 
         background=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, FlxG.width/4, FlxG.height/4));
         background2=new FlxUI9SliceSprite(5, 15, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, FlxG.width/4-10, FlxG.height/4-30));
-        header = new Alphabet(2, 2, background.width, title, 12); //8
-        //header.setBorderStyle(OUTLINE, 0xFF000000, 1, 1); //TODO: outline support
+        header = new FlxText(2, 2, background.width, title, 12); //8
+        header.setBorderStyle(OUTLINE, 0xFF000000, 1, 1);
         header.alignment=CENTER;
 
-        body=new Alphabet(background2.x, background2.y, background2.width, b, 12);
-
+        body=new FlxText(5, background2.y, background2.width, b, 12);
         add(background);
         add(background2);
         add(header);

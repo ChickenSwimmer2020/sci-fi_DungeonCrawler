@@ -108,8 +108,8 @@ class Player extends FlxSprite {
             }else continue;
 
         //HORRIBLE way to do it, but good enough.
-        if(inventory.weaponText.txt!='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
-            inventory.weaponText.txt='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
+        if(inventory.weaponText.text!='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
+            inventory.weaponText.text='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
         }
 
         //TODO: make these better

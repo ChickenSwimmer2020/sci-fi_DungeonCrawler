@@ -153,6 +153,7 @@ class Main extends openfl.display.Sprite {
     public static var FILE:Null<String>;
     public function new() {
         super();
+        
         #if (android||html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
         saveFile.bind("SAVES");
         if(saveFile.data.saves == null) { //should fix it?
@@ -165,6 +166,11 @@ class Main extends openfl.display.Sprite {
             FILE=lastLoadedSaveName;
             saveFile.flush();
         }else FILE=Flags.DEFAULT_SAVE;
+        Application.current.window.title = Language.applicationTitles.get(Main.curLanguage);
+        FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
+            case EN_US: "Nokia Cellphone FC Small";
+            case JP: "assets/ui/fonts/k8x12L.ttf";
+        }
 
         Save.findSaves(); //find the save files within SAVES
         MapGenerator.findMaps(); //find the maps within SAVES

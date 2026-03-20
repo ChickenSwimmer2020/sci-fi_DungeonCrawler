@@ -10,7 +10,7 @@ class AlphabetDebugger extends FlxUIState{
         var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.alphabet.exit"), 24, true);
         add(text);
 
-        var alphabet:Alphabet=new Alphabet(0, 50, 0, "ABCDEFGHIJKLMNOPQRSTUVWXYZ \n abcdefghijklmnopqrstuvwxyz \n 0123456789 \n ~!@#$%^&*()_+{}|:\"<>? \n `-=[]\\;',./", 12);
+        var alphabet:FlxText=new FlxText(0, 50, 0, Language.getTranslatedKey("debugger.alphabet.allsymbols"), 12);
         add(alphabet);
     }
     override public function update(elapsed:Float) {

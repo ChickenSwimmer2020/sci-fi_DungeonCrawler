@@ -80,7 +80,6 @@ class MainMenuState extends FlxState {
             for(i in 0...strings.length) {
                 var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], onButtonClicked[i]);
                 buttons.push(button);
-                button.label.font='assets/ui/font.ttf';
                 add(button);
             }
         #end

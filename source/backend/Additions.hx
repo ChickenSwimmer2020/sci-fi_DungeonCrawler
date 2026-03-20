@@ -1,6 +1,8 @@
 package backend;
 
 final class Functions {
+    public static inline function invertColor(color:Int):Int return (~color & 0x00FFFFFF) | (color & 0xFF000000);
+
     public static function wait(time:Float, onComplete:FlxTimer->Void) {
         return new FlxTimer().start(time, (_)->{
             onComplete(_);
@@ -144,6 +146,7 @@ final class Functions {
 
 final class Additions{
     //for math
+    public static inline function floor(n:Float):Int return Math.floor(n);
     public static inline function clamp(n:Float, min:Float, max:Float) return Math.max(min, Math.min(n, max));
     public static inline function add(n:Float, added:Float):Float return n+=added;
     public static inline function subtract(n:Float, removed:Float):Float return n-=removed;

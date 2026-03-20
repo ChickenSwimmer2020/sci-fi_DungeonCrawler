@@ -16,10 +16,11 @@ class OptionsMenuSubstate extends FlxUISubState{
     var graphics:FlxUI;
     var controls:FlxUI;
     var difficulty:FlxUI;
+    var tabs:Array<{name:String, label:String}>=[];
     public function new() {
         super();
 
-        var tabs = [
+        tabs=[
 			{name: "tab_general", label: Language.getTranslatedKey("menu.options.tab.general")},
 			{name: "tab_graphics", label: FlxG.random.bool(14)?Language.getTranslatedKey("menu.options.tab.graphicsEG"):Language.getTranslatedKey("menu.options.tab.graphics")},
 			#if !android {name: "tab_controls", label: Language.getTranslatedKey("menu.options.tab.controls")}, #end
@@ -170,11 +171,10 @@ class OptionsMenuSubstate extends FlxUISubState{
             }
         #else
             for(language in 0...availableLanguages.length) {
-                if(Assets.exists('assets/lang/${availableLanguages[language]}.lang', AssetType.TEXT) && Assets.exists('assets/ui/fonts/${Main.curLanguage}.png', AssetType.IMAGE)) //validate that the assets for the language exist before even THINKING of adding them to the selectable dropdown.
+                if(Assets.exists('assets/lang/${availableLanguages[language]}.lang', AssetType.TEXT)) //validate that the assets for the language exist before even THINKING of adding them to the selectable dropdown.
                     languages.push(new StrNameLabel(availableLanguages[language], availableLanguagesLables[language]));
                 else Main.showError("MISSINGFONTORLANGUAGEASSET", availableLanguages[language]);
             }
-            //TODO: language swap logic for android/html5
         #end
         languageDropdown=new FlxUIDropDownMenu(5, 5, languages, (_)->{
             Main.curLanguage=_; //Lang in Language is a string, so this should work.
@@ -182,12 +182,40 @@ class OptionsMenuSubstate extends FlxUISubState{
             Application.current.window.title = Language.applicationTitles.get(Main.curLanguage); //change application title to match with the new language setting.
             Main.saveFile.flush(); //upload new default language to save file.
             trace('attempting to index language $_ and change game target LANG file');
+            FlxAssets.FONT_DEFAULT=switch(Main.curLanguage){ //automatically switch the default font depending on language setting.
+                case EN_US: "Nokia Cellphone FC Small";
+                case JP: "assets/ui/fonts/k8x12L.ttf";
+            }
+            @:privateAccess{
+                for(i in 0...tab_menu._tabs.length){
+                    var tab:FlxUIButton=cast(tab_menu.getTab(null, i));
+                    tab.label.text = [
+                        Language.getTranslatedKey("menu.options.tab.general"),FlxG.random.bool(14)?Language.getTranslatedKey("menu.options.tab.graphicsEG"):Language.getTranslatedKey("menu.options.tab.graphics"),
+                        #if !android Language.getTranslatedKey("menu.options.tab.controls"), #end Language.getTranslatedKey("menu.options.tab.difficulty")
+                    ][i];
+
+                    tab.label.font = FlxAssets.FONT_DEFAULT;
+                    tab.label.size=switch(Main.curLanguage){ //automatically switch the default font depending on language setting.
+                        case EN_US: 8;
+                        case JP: 12;
+                    }
+                }
+            }
             if(Language.WIPLanguages.contains(_)) openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage"), Language.getTranslatedKey("warning.unfinishedlanguage.message"), [
                 {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue"), f:()->{}, c:true}
             ]));
 
         });
+        
         for(languageOption in languageDropdown.list) {
+            switch(languageOption.name) {
+                case 'Japanese', "JP", "にほんご": languageOption.label.font = "assets/ui/fonts/k8x12L.ttf";
+                case 'English (US)', "EN_US", "English": languageOption.label.font = "Nokia Cellphone FC Small";
+            }
+            switch(languageDropdown.header.text.text) {
+                case "English (US)", 'EN_US', "English": languageDropdown.header.text.font = "Nokia Cellphone FC Small";
+                case 'Japanese', "JP", "にほんご": languageOption.label.font = "assets/ui/fonts/k8x12L.ttf";
+            }
             if(Main.curLanguage==languageOption.name) languageDropdown.selectedLabel=Main.curLanguage;
         }
         general.add(languageDropdown);

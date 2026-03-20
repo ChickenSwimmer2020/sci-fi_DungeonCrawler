@@ -19,6 +19,7 @@
     "menu.quit": "Quit",
     "menu.debug.debugger": "Debugger",
     
+    "debugger.alphabet.allsymbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ \n abcdefghijklmnopqrstuvwxyz \n 0123456789 \n ~!@#$%^&*()_+{}|:\"<>? \n `-=[]\\;',./",
     "debugger.save": "Save Debugger",
     "debugger.save.exit": "Press BACKSPACE to exit",
     "debugger.save.readmenu": "Read",

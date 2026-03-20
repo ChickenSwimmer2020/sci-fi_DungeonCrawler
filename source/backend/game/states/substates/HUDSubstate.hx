@@ -175,7 +175,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
 class HUDSubstate extends FlxSubState {
     #if android public var Controller:FlxVirtualPad; #end
     public var healthFlask:HealthFlask;
-    public var weaponText:Alphabet;
+    public var weaponText:FlxText;
     public var fullOpen:Bool=false; //so that we can have the hotbar
     private static final MAX_SLOTS:Int = 10;
     public var inventory:Null<Array<OneOfTwo<String, Item>>>;
@@ -201,7 +201,7 @@ class HUDSubstate extends FlxSubState {
             index++;
         }
 
-        weaponText=new Alphabet(0+(InventorySlot.SIZE*index), 0, 150, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
+        weaponText=new FlxText(0+(InventorySlot.SIZE*index), 0, 0, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
         add(weaponText);
         weaponText.camera=Main.camHUD;
         

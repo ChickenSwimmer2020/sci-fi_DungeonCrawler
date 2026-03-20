@@ -1,5 +1,13 @@
 # ChangeLog
 
+## Prototype Update 0.03.1 (swap of alphabet system)
+
+* Removed Alphabet
+* Added `Floor` to `Additions`
+* Added `invertColor` to `Functions`
+* Tab names update properly with language changes (need to fix the order though.)
+* `Language.languageNames` now stores each language in its language.
+
 ## Prototype Update 0.03 (controls menu and alphabet)
 
 > WE HAVE A NAME!

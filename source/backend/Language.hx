@@ -15,7 +15,7 @@ class Language {
     ];
     private static final languageNames:Map<String, String>=[
         "EN_US"=>"English (US)",
-        "JP"=>"Japanese"
+        "JP"=>"にほんご"
     ];
     public static function getLanguageLable(key:String):String{ //return the key, if its null just return the input.
         if(languageNames.get(key)!=null) return languageNames.get(key);
