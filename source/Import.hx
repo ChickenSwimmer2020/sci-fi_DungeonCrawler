@@ -75,7 +75,6 @@ import backend.game.objects.Weapon.WeaponParser;
 import backend.game.states.substates.HUDSubstate;
 import states.MainMenuState;
 import backend.shaders.RailFire;
-import backend.shaders.MaskShader;
 import backend.ShaderCache;
 import backend.game.objects.Pickup;
 import backend.game.objects.Tile;

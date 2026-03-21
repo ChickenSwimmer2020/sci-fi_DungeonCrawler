@@ -144,7 +144,6 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
     var innerHealth:FlxSprite;
     var outerXP:FlxSprite;
     
-    var innerHealthShader:MaskShader;
     public function new(x:Float, y:Float) {
         super(x, y);
         outline = new FlxSprite(0, 0).loadGraphic(Paths.image('ui/health', 'flask_outline'));
@@ -162,13 +161,12 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
         //add(outerXP);
         add(outline);
         scale.set(2, 2);
-        innerHealth.shader = innerHealthShader = new MaskShader(#if (android || html5) Paths.image('ui/health', "flask_inner-MASK")#else BitmapData.fromFile(Paths.image('ui/health', "flask_inner-MASK"))#end);
+        //innerHealth.shader = innerHealthShader = new MaskShader(#if (android || html5) Paths.image('ui/health', "flask_inner-MASK")#else BitmapData.fromFile(Paths.image('ui/health', "flask_inner-MASK"))#end);
         //outerXP.shader = new MaskShader(BitmapData.fromFile("assets/ui/health/flask_outer-MASK.png"));
     }
 
     override function update(elapsed:Float) {
         super.update(elapsed);
-        innerHealthShader.maskValue.value=[1-Math.max(0,Math.min(1,Player.health/100))];
     }
 }
 

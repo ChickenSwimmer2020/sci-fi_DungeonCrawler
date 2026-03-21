@@ -17,7 +17,7 @@
     <!--apple can eat the corn out of my shit.-->
     <error value="Fuck nah. Outta here with that shit (PLATFORM_MAC_NOT_SUPPORTED)" if="mac" />
     <error value="Fuck nah. Outta here with that shit (PLATFORM_IOS_NOT_SUPPORTED)" if="ios" />
-    <error value="This is temporary, the game crashes from shaders while trying to load. PLEASE WAIT UNTIL A FUTURE UPDATE" if="windows" unless="hl"/> <!--TODO: make windows not crash from a shaders error-->
+    <!--<error value="This is temporary, the game crashes from shaders while trying to load. PLEASE WAIT UNTIL A FUTURE UPDATE" if="windows" unless="hl"/>--> <!--TODO: make windows not crash from a shaders error-->
 
     <!--apple is NEVER happening unless someone is willing to debug on an apple device, which i am not. -ChickenSwimmer2020 3/2/2026 9:30AM -->
     <section if="android">
