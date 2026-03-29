@@ -1,6 +1,17 @@
 package;
 
 class Flags {
+    public static final FALLBACK_WEAPON:WeaponData = {
+        animations: [],
+        damage: [],
+        fireMode: SEMI,
+        format: NULL,
+        sprite: {n:"",a:false,f:{w:0,h:0}},
+        weaponType: NULL,
+        name: "",
+        magicType: NULL,
+        gunType: NULL,
+    };
     public static inline final DEFAULT_SAVE:String="default";
     public static final DEFAULT_SAVEFILE:SaveFile = { //would be inline but apparently this isnt constant?
         meta:{

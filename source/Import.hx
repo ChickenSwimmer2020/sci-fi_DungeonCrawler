@@ -7,6 +7,15 @@ import flixel.math.FlxPoint;
     import flixel.system.debug.DebuggerUtil;
     import flixel.system.debug.Window;
 #end
+#if(android)
+    import flixel.input.touch.FlxTouch;
+    import flixel.ui.FlxVirtualPad;
+#end
+import flixel.text.FlxInputText;
+import flixel.addons.ui.FlxUICheckBox;
+import flixel.ui.FlxBar;
+import flixel.addons.ui.FlxUIBar;
+import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxHorizontalAlign;
 import flixel.FlxG;
 import flixel.util.typeLimit.OneOfTwo;
@@ -45,10 +54,10 @@ import flixel.addons.ui.FlxUIRadioGroup;
 
 //haxe (never changes)
 import haxe.Json;
+import haxe.io.Error;
 
 //sys (does change depending on platform.)
 #if !html5
-    import sys.io.File;
     import sys.FileSystem;
     import sys.io.File;
 #end
@@ -58,7 +67,9 @@ import openfl.text.TextField;
 import openfl.geom.Matrix;
 import openfl.display.BitmapData;
 import openfl.filters.ShaderFilter;
+import openfl.geom.Rectangle;
 #if(html5||android)import openfl.Assets;#end
+
 
 //lime
 #if(html5||android)import lime.utils.Log;#end
@@ -69,9 +80,7 @@ import backend.save.Save;
 import backend.Paths;
 import backend.generation.MapGenerator;
 import backend.game.states.substates.OptionsMenuSubstate;
-import backend.game.states.substates.HUDSubstate.Item;
 import backend.Language;
-import backend.game.objects.Weapon.WeaponParser;
 import backend.game.states.substates.HUDSubstate;
 import states.MainMenuState;
 import backend.shaders.RailFire;
@@ -81,7 +90,8 @@ import backend.game.objects.Tile;
 import backend.game.objects.Weapon;
 import backend.game.GameMap;
 import Flags;
-import backend.Additions.Functions;
+import backend.ui.WarningPopup;
+import backend.game.states.substates.LoadGameSubstate;
 #if (debug)
     import debugging.SaveDebugger;
     import debugging.MapDebugger;

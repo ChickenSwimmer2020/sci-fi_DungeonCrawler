@@ -80,7 +80,7 @@ class Weapon extends FlxSprite{
         if(coolDownTimer.finished){
             switch(frMode) {
                 case SEMI: fire(); charges--;
-                case BURST: for(i in 0...3)Functions.wait(shoot_time*(0.15*i), (_)->{charges--;fire();});
+                case BURST: for(i in 0...3)Functions.wait(shoot_time*(0.15*i), (_)->{charges--;fire(_);});
                 case FULLAUTO:increment++;Functions.wait(shoot_time*(0.15*increment), (_)->{charges--;fire(_);});
                 case RAIL: power+=POWER_INCREMENT; power=Math.max(0, Math.min(power, 100));
                 case SHOTGUN: for(i in 0...9){fire(1, true, i);charges--;}
@@ -107,23 +107,34 @@ class Weapon extends FlxSprite{
         //if we're firing the shotgun we want to times KICKBACK_STRENGTH by the number of pellets, because otherwise it jumps back WAY to far.
         setPosition(x-(cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)), y-(sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH))); //do this **after** we set the velocity to hopefuly prevent bullets from spawning behind the player
         Player.instance.velocity.set( //should add some kickback to the player. hopefully.
-            Player.instance.velocity.x - cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH),
-            Player.instance.velocity.y - sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)
+            Player.instance.weaponKickback.x-cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH),
+            Player.instance.weaponKickback.y-sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)
         );
     }
     private function setUpWeapon(data:WeaponData) { 
         animation.destroy();
         animation = new FlxAnimationController(this);
         damageTypes = [];
-
-        name=data.name;
-        frMode=data.fireMode;
-        shoot_time=switch(data.fireMode){case SEMI: 0.25; case FULLAUTO: 0.1; case SHOTGUN: 1.5; case BURST: 0.4; case RAIL: 5.2; case NULL:0.0;};
-        if(data.fireMode==RAIL) charge_time=0.5;
-        loadGraphic(data.sprite.n, data.sprite.a, data.sprite.f.w, data.sprite.f.h);
-        for(anim in data.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
-        for(damnType => damnDamage in data.damage) damageTypes.set(damnType, damnDamage);
-        updateHitbox();
+        if(data==null){ //so we still *make* the weapon, it just doesnt actually load a real weapon until we get one.
+            var internal:WeaponData = Flags.FALLBACK_WEAPON;
+            name=internal.name;
+            frMode=internal.fireMode;
+            shoot_time=switch(internal.fireMode){case SEMI: 0.25; case FULLAUTO: 0.1; case SHOTGUN: 1.5; case BURST: 0.4; case RAIL: 5.2; case NULL:0.0;};
+            if(internal.fireMode==RAIL) charge_time=0.5;
+            loadGraphic(internal.sprite.n, internal.sprite.a, internal.sprite.f.w, internal.sprite.f.h);
+            for(anim in internal.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
+            for(damnType => damnDamage in internal.damage) damageTypes.set(damnType, damnDamage);
+            updateHitbox();
+        }else{
+            name=data.name;
+            frMode=data.fireMode;
+            shoot_time=switch(data.fireMode){case SEMI: 0.25; case FULLAUTO: 0.1; case SHOTGUN: 1.5; case BURST: 0.4; case RAIL: 5.2; case NULL:0.0;};
+            if(data.fireMode==RAIL) charge_time=0.5;
+            loadGraphic(data.sprite.n, data.sprite.a, data.sprite.f.w, data.sprite.f.h);
+            for(anim in data.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
+            for(damnType => damnDamage in data.damage) damageTypes.set(damnType, damnDamage);
+            updateHitbox();
+        }
     }
     var shaderTime:Float=0;
     var railFireShader:RailFire;
@@ -191,6 +202,7 @@ class WeaponParser {
         else if(weapon==null||#if(android||html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path));
     }
     public static function parse(path:String):WeaponData {
+        if(path==null) return null; //simple as that.
         if(#if(android||html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path))#end)return parseXML(Paths.weapon(path));
         else Main.showError("IOERROR", Paths.weapon(path));
         return null;

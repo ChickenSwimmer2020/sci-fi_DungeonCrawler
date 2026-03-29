@@ -1,8 +1,9 @@
 package backend;
 
 enum abstract Lang(String) from String to String {
-    var EN_US="EN_US";
-    var JP="JP";
+    var EN_US="EN_US"; //enlish
+    var JP="JP"; //japanese
+    var ES="ES"; //spanish
 }
 
 class Language {
@@ -23,7 +24,7 @@ class Language {
 
         return null;
     }
-    public static function getTranslatedKey(key:String):String {
+    public static function getTranslatedKey(key:String):String { //TODO: way to switch all instances of anything containing FlxText's font and text on the fly without restarting the game.
         if(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
             var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
             if(Reflect.hasField(lang, key)) return Reflect.field(lang, key);

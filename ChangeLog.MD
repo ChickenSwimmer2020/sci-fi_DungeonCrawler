@@ -1,5 +1,38 @@
 # ChangeLog
 
+## Prototype Update 0.03.2 (inventory tomfoolery)
+
+* Updated `.markdownlint.json` so it wont complain about `README.md` anymore
+* `.vscode` is now ignored
+* Added plrWindow icon (DEBUG)
+* `Glock and ball torture.png` was cleaned up (EASTEREGG)
+* `burstgun`, `railgun`, `rifle`, and `shotgun`.weapon were fixed
+* `EN_US.lang` was updated slightly
+* Created `LogoConcept.aseprite`
+* `README` was modified
+* `Additions` was trimmed
+* Added `clamp` and `clampf` to `Additions`
+* Discord rich presence support was added (WINDOWS/HL)
+* New pickups were added to `GameMap` for testing.
+* `GameMap` now has a static instance varible
+* `Pickup` had its interaction sprite FINALLY fixed.
+* `Weapon` was updated to use proper velocity and now loads null data correctly
+* `Player` movement system was overhauled
+* `HUDSubstate.InventorySlot` now has rightclick options
+* `LoadGameSubstate` needs scrolling fixed
+* `OptionsMenuSubstate` was updated
+* Removed a TODO message from `PauseMenu`
+* Added a TODO to `Language`
+* Created `Music` (dont use, not ready yet.)
+* Added `musicPath` to `Paths`
+* `WarningPopup` now renders on-top of everything properly
+* Added a button to `MapDebugger` (nonfunctional)
+* Added a default `FALLBACK_WEAPON` flag to `Flags`
+* Moved imports to `Import`
+* Did some stuff in `Main`
+* Added a single line to `MainMenuState`
+* Created probably non-functional python script to find unused imports.
+
 ## Prototype Update 0.03.1 (swap of alphabet system)
 
 * Removed Alphabet

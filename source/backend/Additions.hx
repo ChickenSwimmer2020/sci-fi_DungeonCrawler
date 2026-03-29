@@ -1,5 +1,4 @@
 package backend;
-
 final class Functions {
     /**
      * inverts the input color.
@@ -7,7 +6,6 @@ final class Functions {
      * @return inverted color
      */
     public static inline function invertColor(color:Int):Int return (~color & 0x00FFFFFF) | (color & 0xFF000000);
-
     /**
      * wait a specific ammount of time, then run code.
      * @param time how long to wait
@@ -19,7 +17,6 @@ final class Functions {
             _.destroy();
         });
     }
-    
     /**
      * justPressed but ignore NONE 
      * @param keys keys
@@ -59,7 +56,6 @@ final class Functions {
         }
         return FlxG.keys.anyJustReleased(h);
     }
-
     /**
      * unoptimized, do not use.
      * @param key target int number.
@@ -172,7 +168,6 @@ final class Functions {
         }
     }
 }
-
 final class Additions{
     //for math
     /**
@@ -188,7 +183,15 @@ final class Additions{
      * @param max maximum
      * @return Float
      */
-    public static inline function clamp(n:Float, min:Float, max:Float) return Math.max(min, Math.min(n, max));
+    public static inline function clamp(n:Float, min:Float, max:Float):Int return Math.floor(Math.max(min, Math.min(n, max)));
+    /**
+     * clamp but floating point
+     * @param n input
+     * @param min minimum
+     * @param max maxiumum
+     * @return Int return Math.floor(Math.max(min, Math.min(n, max)))
+     */
+    public static inline function clampf(n:Float, min:Float, max:Float):Float return Math.max(min, Math.min(n, max));
     /**
      * return added number
      * @param n input number

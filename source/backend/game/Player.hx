@@ -1,7 +1,5 @@
 package backend.game;
 
-import flixel.input.touch.FlxTouch;
-
 class Player extends FlxSprite {
     public static var instance:Player;
     public static var health:Float = 100;
@@ -16,6 +14,8 @@ class Player extends FlxSprite {
 
     public static var playerPauseRequested:Bool = false; //for easier pausing since i cant just do like FlxG.pause.
     public static var onPlayerPause:Void->Void = null; //JUST in-case i ever need it.
+    public static var MOVE_SPEED:Float=50; // or whatever your speed is
+    public static var MAX_MOVE_SPEED:Float=50; //for some reason always has 50 added while moving??
 
     private static final MAX_ZOOM:Float=10;
     private static final MIN_ZOOM:Float=1;
@@ -24,13 +24,29 @@ class Player extends FlxSprite {
     ];
     var targetWeaponPosition:FlxPoint;
     var mousePosition:FlxPoint=new FlxPoint(0, 0); //funny thing, we can actually re-use this for android!
+
+    private var ctrlUp:Array<FlxKey>;    
+    private var ctrlDown:Array<FlxKey>;  
+    private var ctrlLeft:Array<FlxKey>;  
+    private var ctrlRight:Array<FlxKey>; 
+    private var ctrlZoomIn:Array<FlxKey>;  
+    private var ctrlZoomOut:Array<FlxKey>; 
+    private var ctrlInv:Array<FlxKey>;   
     public function new() {
         super(0, 0);
         targetWeaponPosition=new FlxPoint(x, y);
         makeGraphic(4, 4, 0xFFFF0000);
         instance=this;
+
+        ctrlUp = Main.controls.get('moveUP');
+        ctrlDown = Main.controls.get('moveDOWN');
+        ctrlLeft = Main.controls.get('moveLEFT');
+        ctrlRight = Main.controls.get('moveRIGHT');
+        ctrlZoomIn = Main.controls.get('zoomIN');
+        ctrlZoomOut = Main.controls.get('zoomOUT');
+        ctrlInv = Main.controls.get('inventory');
     }
-    //#if (debug)
+    #if (debug)
         function addWatchObjects() {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
             FlxG.watch.addQuick("inventory open: ", inventory?.fullOpen);
@@ -42,7 +58,8 @@ class Player extends FlxSprite {
             FlxG.watch.addQuick("stamina", stamina??0);
             FlxG.watch.addQuick("xp", xp??0);
         }
-    //#end
+    #end
+    public var weaponKickback:FlxPoint=FlxPoint.weak(0, 0);
     var isWeapon:Bool=false;
     //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
@@ -53,8 +70,10 @@ class Player extends FlxSprite {
             FlxG.mouse.getWorldPosition(Main.camGame);
         #end
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
-        if(velocity.x > 0 || velocity.x < 0)velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 4 * 1));
-        if(velocity.y > 0 || velocity.y < 0)velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 4 * 1));
+        if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));
+        if(weaponKickback.y > 0 || weaponKickback.y < 0) weaponKickback.y=FlxMath.lerp(0, weaponKickback.y, Math.exp(-elapsed * 3.126 * 4 * 1));
+        if(axis(ctrlRight, ctrlLeft)==0 && (velocity.x > 0 || velocity.x < 0)) velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 2 * 1));
+        if(axis(ctrlDown, ctrlUp)== 0 && (velocity.y > 0 || velocity.y < 0)) velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 2 * 1));
         #if (debug&&!android) //these are useless on the android build (debugger and FlxKey doesnt exist on the android build).
             addWatchObjects();
             if(FlxG.keys.pressed.LBRACKET) health--;
@@ -72,7 +91,7 @@ class Player extends FlxSprite {
             FlxG.state.openSubState(inventory); //open the inventory. (which is also technically the hotbar)
         }
         if(weapon==null) {
-            weapon=new Weapon(0, 0, WeaponParser.parse('DEBUG'));
+            weapon=new Weapon(0, 0, null); //we dont want to parse a weapon yet, idk if this will crash.
             weapon.camera=camera; //move the weapn to the player camera;
             FlxG.state.add(weapon);
             weapon.setActions(
@@ -97,7 +116,9 @@ class Player extends FlxSprite {
         Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
 
 
-        curHotbarSlot.clamp(0, 9); //actually 1-10;
+        
+        #if !android curHotbarSlot+=FlxG.mouse.wheel; curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);  #end //windows/hashlink only
+        curHotbarSlot=curHotbarSlot.clamp(0, 9); //actually 1-10;
         for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)
             if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
                 curHotbarSlot=i;
@@ -112,27 +133,15 @@ class Player extends FlxSprite {
             inventory.weaponText.text='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
         }
 
-        //TODO: make these better
         #if !android
-            if(FlxG.keys.anyPressed(Main.controls.get('moveUP'))) y-=1;
-            if(FlxG.keys.anyPressed(Main.controls.get('moveDOWN'))) y+=1;
-            if(FlxG.keys.anyPressed(Main.controls.get('moveRIGHT'))) x+=1;
-            if(FlxG.keys.anyPressed(Main.controls.get('moveLEFT'))) x-=1;
+            velocity.x = ((velocity.x = velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED))); //add kickback on-top of the normal velocity based movement
+            velocity.y = ((velocity.y = velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED))); //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
+            Main.camGame.zoom = (Main.camGame.zoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
 
-            Main.camGame.zoom.clamp(MIN_ZOOM, MAX_ZOOM);
-            if(FlxG.keys.anyPressed(Main.controls.get('zoomOUT'))){
-                if(Main.camGame.zoom>MIN_ZOOM)Main.camGame.zoom-=0.25;
-            }
-            if(FlxG.keys.anyPressed(Main.controls.get('zoomIN'))){
-                if(Main.camGame.zoom<MAX_ZOOM)Main.camGame.zoom+=0.25;
-            }
-
-            //MOVED PAUSING LOGIC TO INVENTORY
-            if(Functions.checkJustPressedSafe(Main.controls.get('inventory'))) { //stupid that i need safe check functions. :/
-                inventory.fullOpen=!inventory.fullOpen;
-            }
+            if (Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
         #else
             //TODO: controls substate (part of inventory substate because it has to be) actually controlling player.
         #end
     }
+    inline function axis(pos:Array<FlxKey>, neg:Array<FlxKey>):Float return (FlxG.keys.anyPressed(pos) ? 1 : 0) - (FlxG.keys.anyPressed(neg) ? 1 : 0);
 }

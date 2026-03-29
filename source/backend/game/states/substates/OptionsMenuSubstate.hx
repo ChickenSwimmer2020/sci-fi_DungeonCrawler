@@ -1,14 +1,5 @@
 package backend.game.states.substates;
 
-import openfl.utils.AssetType;
-import haxe.io.Error;
-import flixel.text.FlxInputText;
-import flixel.addons.ui.FlxUICheckBox;
-import openfl.geom.Rectangle;
-import flixel.addons.ui.FlxUISprite;
-import backend.ui.WarningPopup;
-import flixel.addons.ui.FlxUIGroup.FlxTypedUIGroup;
-
 class OptionsMenuSubstate extends FlxUISubState{
     private var total_Controls:Int=0;
     var tab_menu:FlxUITabMenu;
@@ -83,7 +74,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         }
         private function createControlsUI() {
             SBG=new FlxUI9SliceSprite(controls.x+5, controls.y+5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0,0, 490, 370));
-            Save.readSaveFile(Main.FILE); //just in-case. TODO: add posssible dropdown incase a save file isnt loaded, or a deault save file thingy.
+            Save.readSaveFile(Main.FILE); //just in-case. //TODO: add posssible dropdown incase a save file isnt loaded, or a deault save file thingy.
             CONTROLSScrollCamera = new FlxCamera((FlxG.width/2-250)+5, (FlxG.height/2-200)+25, 490, 370, 1);
             CONTROLSScrollCamera.bgColor=0x0000FF00;
             FlxG.cameras.add(CONTROLSScrollCamera, false);
@@ -132,15 +123,16 @@ class OptionsMenuSubstate extends FlxUISubState{
             saveButton.updateHitbox();
             saveButton.autoCenterLabel();
             controls.add(saveButton);
+
+            openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage"), Language.getTranslatedKey("warning.unfinishedlanguage.message"), [
+                {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue"), f:()->{}, c:true}
+            ]));
         }
     #end
 
     /**GRAPHICS SETTINGS OBJECTS AND FUNCTION**/
     private var shadersCheck:FlxUICheckBox;
     private function createGraphicsUI() {
-        openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage"), Language.getTranslatedKey("warning.unfinishedlanguage.message"), [
-                {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue"), f:()->{}, c:true}
-            ]));
         shadersCheck=new FlxUICheckBox(5, 5, null, null, "Shaders", 100, null, ()->{
             Main.saveFile.data.shaders=shadersCheck.checked;
             Main.saveFile.flush(); //automatically save the update
@@ -153,14 +145,16 @@ class OptionsMenuSubstate extends FlxUISubState{
     }
 
     /**GENERAL SETTINGS OBJECTS AND FUNCTION**/
+    private var labels:Array<FlxUIText>=[];
     private var languageDropdown:FlxUIDropDownMenu;
+    private var audioTrackDropdown:FlxUIDropDownMenu;
     private function createGeneralUI() {
         #if (android||html5)
             final availableLanguages:Array<String>=[
                 "EN_US", "JP"
             ];
             final availableLanguagesLables:Array<String>=[
-                "English (US)", "Japanese" //TODO: lanugages show what they are in the target language.
+                "English (US)", "Japanese"
             ];
         #end
         var languages:Array<StrNameLabel>=[];
@@ -176,7 +170,10 @@ class OptionsMenuSubstate extends FlxUISubState{
                 else Main.showError("MISSINGFONTORLANGUAGEASSET", availableLanguages[language]);
             }
         #end
-        languageDropdown=new FlxUIDropDownMenu(5, 5, languages, (_)->{
+        var languageLabel:FlxUIText=new FlxUIText(5, 5, 0, Language.getTranslatedKey("menu.options.general.language"), 12, true);
+        labels.push(languageLabel);
+        general.add(languageLabel);
+        languageDropdown=new FlxUIDropDownMenu(5, 30, languages, (_)->{
             Main.curLanguage=_; //Lang in Language is a string, so this should work.
             Main.saveFile.data.language=Main.curLanguage;
             Application.current.window.title = Language.applicationTitles.get(Main.curLanguage); //change application title to match with the new language setting.
@@ -185,6 +182,7 @@ class OptionsMenuSubstate extends FlxUISubState{
             FlxAssets.FONT_DEFAULT=switch(Main.curLanguage){ //automatically switch the default font depending on language setting.
                 case EN_US: "Nokia Cellphone FC Small";
                 case JP: "assets/ui/fonts/k8x12L.ttf";
+                default: "Nokia Cellphone FC Small";
             }
             @:privateAccess{
                 for(i in 0...tab_menu._tabs.length){
@@ -198,6 +196,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     tab.label.size=switch(Main.curLanguage){ //automatically switch the default font depending on language setting.
                         case EN_US: 8;
                         case JP: 12;
+                        case ES: 8;
                     }
                 }
             }
@@ -206,6 +205,23 @@ class OptionsMenuSubstate extends FlxUISubState{
             ]));
 
         });
+        var audioLabel:FlxUIText=new FlxUIText(125, 5, 0, Language.getTranslatedKey("menu.options.general.audiotrack"), 12, true);
+        labels.push(audioLabel);
+        general.add(audioLabel);
+        audioTrackDropdown=new FlxUIDropDownMenu(125, 30, [
+            new StrNameLabel("D", "Default"),
+            new StrNameLabel("P", "Prototype"),
+            new StrNameLabel("A", "Alpha"),
+            new StrNameLabel("B", "Beta"),
+            new StrNameLabel("F", "Final"),
+            //new StrNameLabel("R", "Remaster")
+        ], (_)->{
+            trace('changing music postfix to $_ and flushing to save file');
+            Main.saveFile.data.musicPF = _;
+            Main.saveFile.flush();
+            Main.musicPostfix = _;
+        });
+        general.add(audioTrackDropdown);
         
         for(languageOption in languageDropdown.list) {
             switch(languageOption.name) {

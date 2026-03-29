@@ -1,10 +1,5 @@
 package backend.ui;
 
-import flixel.group.FlxSpriteGroup;
-import flixel.group.FlxGroup;
-import openfl.geom.Rectangle;
-import haxe.io.Error;
-
 class WarningPopup extends FlxSubState {
     private var background:FlxUI9SliceSprite;
     private var background2:FlxUI9SliceSprite;
@@ -12,8 +7,12 @@ class WarningPopup extends FlxSubState {
     private var header:FlxText;
     private var body:FlxText;
     private var group:FlxSpriteGroup;
+    private var popupCamera:FlxCamera;
     public function new(title:String, b:String, buttons:Array<{l:String,f:Void->Void,c:Bool}>) {
         super();
+        popupCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
+        popupCamera.bgColor=0x7C000000; //darkens stuff behind it :3 //TODO: maybe make blur through a filter if shaders are enabled.
+        FlxG.cameras.add(popupCamera, false);
         if(buttons.length>4){
             throw Error.Custom("Value outside of bounds. (4 buttons max!)");
             return;
@@ -51,5 +50,12 @@ class WarningPopup extends FlxSubState {
         }
 
         group.screenCenter();
+        group.camera = popupCamera;
+    }
+
+    override public function destroy() {
+        FlxG.cameras.remove(popupCamera);
+        popupCamera=null;
+        super.destroy();
     }
 }

@@ -33,6 +33,7 @@ class MapDebugger extends FlxUIState{
         GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey("debugger.map.generate"), ()->{
             trace('generate map');
         });
+        tab_group_1.add(GenerateButton);
 
 		// Now make some content for it:
 

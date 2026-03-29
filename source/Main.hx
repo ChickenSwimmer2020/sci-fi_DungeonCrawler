@@ -1,12 +1,6 @@
 package;
 
-//enum abstract ErrorType(String) from String to String{
-//    var TEST="window title###message box";
-//    var IOERROR="error.nullio###The object{OBJ}couldnt be loaded.";
-//    var RENDERFAILURE="error.renderfailure###error.renderfailure.message";
-//    var SAVENOTCACHED="error.cachefault###The save file{OBJ}could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game.";
-//    var MISSINGLANG="error.languagemissing###The language file for{OBJ}could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]";
-//}
+import backend.Discord;
 
 class Main extends openfl.display.Sprite {
     #if !android
@@ -24,6 +18,7 @@ class Main extends openfl.display.Sprite {
         ];
     #end
     public static var curHeldItem:Null<Item>=null;
+    public static var heldItemGraphic:Null<FlxSprite>=null;
 
     public static var curLanguage:Lang=EN_US;
     public static final ErrorType:Map<String, Array<String>>=[
@@ -38,14 +33,22 @@ class Main extends openfl.display.Sprite {
     //hehe we can store static varibles here to be accessed EVERYWHERE.
     public static var foundMaps:Array<String> = []; //we can store all the currently found maps from the game files and mods (if implemented.)
     public static var saveFiles:Array<String> = [];
+    public static var musicPostfix:String=""; //for the proto, alpha, beta, and final song version mixes.
 
     #if (debug) public static var loadedTestedState:Bool=false; #end
     public static var camGame:FlxCamera; //access from everywhere!
     public static var camHUD:FlxCamera; //access from everywhere!
     public static var camOther:FlxCamera; //access from everywhere!
     #if (debug&&!android&&!html5) //we still keep this disabled in android because the debugger doesnt exist (afaik).
-        static var mapWindow:Window;
+        
+        static var playerSaveWindow:Window;
+        static var curSaveLoaded:TextField;
+        static var healthTxt:TextField;
+        static var staminaTxt:TextField;
+        static var xpTxt:TextField;
+        static var inventoryTxt:TextField;
 
+        static var mapWindow:Window;
         static var saveFilesText:TextField;
         static var mapsFilesText:TextField;
 
@@ -54,42 +57,65 @@ class Main extends openfl.display.Sprite {
         static var mapArrayText:TextField;
         private static function initDebugWindows() {
             //map window
-            
-            mapWindow = new Window("Map", BitmapData.fromFile("assets/debug/mapWindow.png"), 500, 100, true, null, false, true);
-            FlxG.debugger.windows.add(mapWindow);
-            FlxG.debugger.addButton(FlxHorizontalAlign.LEFT, BitmapData.fromFile("assets/debug/mapWindow.png"), ()->{
-                mapWindow.visible = !mapWindow.visible;
-            }, true);
-
-            mapwidthText = DebuggerUtil.createTextField(0, 12 + (12*0), 0xFFFFFFFF, 12);
-            mapwidthText.text = "[MAP IS NULL!]";
-            mapheightText = DebuggerUtil.createTextField(0, 12 + (12*1), 0xFFFFFFFF, 12);
-            mapheightText.text = "[MAP IS NULL!]";
-            mapArrayText = DebuggerUtil.createTextField(0, 12 + (12*2), 0xFFFFFFFF, 12);
-            mapArrayText.text = "[MAP IS NULL!]";
-            mapWindow.addChild(mapwidthText);
-            mapWindow.addChild(mapheightText);
-            mapWindow.addChild(mapArrayText);
+                mapWindow = new Window("Map", BitmapData.fromFile("assets/debug/mapWindow.png"), 500, 100, true, null, false, true);
+                FlxG.debugger.windows.add(mapWindow);
+                FlxG.debugger.addButton(FlxHorizontalAlign.LEFT, BitmapData.fromFile("assets/debug/mapWindow.png"), ()->{
+                    mapWindow.visible = !mapWindow.visible;
+                }, true);
+                mapwidthText = DebuggerUtil.createTextField(0, 12 + (12*0), 0xFFFFFFFF, 12);
+                mapwidthText.text = "[MAP IS NULL!]";
+                mapheightText = DebuggerUtil.createTextField(0, 12 + (12*1), 0xFFFFFFFF, 12);
+                mapheightText.text = "[MAP IS NULL!]";
+                mapArrayText = DebuggerUtil.createTextField(0, 12 + (12*2), 0xFFFFFFFF, 12);
+                mapArrayText.text = "[MAP IS NULL!]";
+                mapWindow.addChild(mapwidthText);
+                mapWindow.addChild(mapheightText);
+                mapWindow.addChild(mapArrayText);
         
             //stored assets window.
-            var storedAssetsWindow:Window;
-            storedAssetsWindow = new Window("Stored Assets", BitmapData.fromFile("assets/debug/storedAssets.png"), 500, 100, true, null, false, true);
-            FlxG.debugger.windows.add(storedAssetsWindow);
-            FlxG.debugger.addButton(FlxHorizontalAlign.LEFT, BitmapData.fromFile("assets/debug/storedAssets.png"), ()->{
-                storedAssetsWindow.visible = !storedAssetsWindow.visible;
-            }, true);
+                var storedAssetsWindow:Window;
+                storedAssetsWindow = new Window("Stored Assets", BitmapData.fromFile("assets/debug/storedAssets.png"), 500, 100, true, null, false, true);
+                FlxG.debugger.windows.add(storedAssetsWindow);
+                FlxG.debugger.addButton(FlxHorizontalAlign.LEFT, BitmapData.fromFile("assets/debug/storedAssets.png"), ()->{
+                    storedAssetsWindow.visible = !storedAssetsWindow.visible;
+                }, true);
+                saveFilesText = DebuggerUtil.createTextField(0, 12, 0xFFFFFFFF, 12);
+                saveFilesText.text = "[NONE]";
+                mapsFilesText = DebuggerUtil.createTextField(0, saveFilesText.y+saveFilesText.textHeight, 0xFFFFFFFF, 12);
+                mapsFilesText.text = "[NONE]";
+                storedAssetsWindow.addChild(saveFilesText);
+                storedAssetsWindow.addChild(mapsFilesText);
 
-            saveFilesText = DebuggerUtil.createTextField(0, 12, 0xFFFFFFFF, 12);
-            saveFilesText.text = "[NONE]";
-            mapsFilesText = DebuggerUtil.createTextField(0, saveFilesText.y+saveFilesText.textHeight, 0xFFFFFFFF, 12);
-            mapsFilesText.text = "[NONE]";
-            
+                mapsFilesText.text = 'Maps: ${foundMaps.toString()}';
+                saveFilesText.text = 'Saves: ${saveFiles.toString()}';
 
-            storedAssetsWindow.addChild(saveFilesText);
-            storedAssetsWindow.addChild(mapsFilesText);
+            //player save window
+                playerSaveWindow = new Window("Player Save", BitmapData.fromFile("assets/debug/plrWindow.png"), 500, 100, true, null, false, true);
+                FlxG.debugger.windows.add(playerSaveWindow);
+                FlxG.debugger.addButton(FlxHorizontalAlign.LEFT, BitmapData.fromFile("assets/debug/plrWindow.png"), ()->{
+                    playerSaveWindow.visible = !playerSaveWindow.visible;
+                }, true);
+                curSaveLoaded = DebuggerUtil.createTextField(0, 12 + (12*0), 0xFFFFFFFF, 12);
+                curSaveLoaded.text = "NO SAVE LOADED!!";
 
-            mapsFilesText.text = 'Maps: ${foundMaps.toString()}';
-            saveFilesText.text = 'Saves: ${saveFiles.toString()}';
+
+                healthTxt = DebuggerUtil.createTextField(0, 12 + (12*2), 0xFFFFFFFF, 12);
+                staminaTxt = DebuggerUtil.createTextField(0, 12 + (12*3), 0xFFFFFFFF, 12);
+                xpTxt = DebuggerUtil.createTextField(0, 12 + (12*4), 0xFFFFFFFF, 12);
+                inventoryTxt = DebuggerUtil.createTextField(0, 12 + (12*5), 0xFFFFFFFF, 12);
+                //mapheightText = DebuggerUtil.createTextField(0, 12 + (12*1), 0xFFFFFFFF, 12);
+                //mapheightText.text = "[MAP IS NULL!]";
+                //mapArrayText = DebuggerUtil.createTextField(0, 12 + (12*2), 0xFFFFFFFF, 12);
+                //mapArrayText.text = "[MAP IS NULL!]";
+                playerSaveWindow.addChild(curSaveLoaded);
+                playerSaveWindow.addChild(healthTxt);
+                healthTxt.text = "Health: NULL";
+                playerSaveWindow.addChild(staminaTxt);
+                staminaTxt.text = "Stamina: NULL";
+                playerSaveWindow.addChild(xpTxt);
+                xpTxt.text = "XP: NULL";
+                playerSaveWindow.addChild(inventoryTxt);
+                inventoryTxt.text = "Inventory: [NULL]";
         }
 
         static var i:Int = 0;
@@ -114,6 +140,15 @@ class Main extends openfl.display.Sprite {
                 mapWindow.height = (mapwidthText.textHeight + mapheightText.textHeight + mapArrayText.textHeight);
                 mapWindow.width = mapArrayText.textWidth;
             }else mapArrayText.text = "feature disabled for performance reasons.";
+        }
+
+        public static function DEBUG_updateSaveInfo(save:String) {
+            var file:SaveFile = Save.readSaveFile(save);
+            curSaveLoaded.text = save;
+            healthTxt.text = 'Health: ${file.health}';
+            staminaTxt.text = 'Stamina: ${file.stamina}';
+            xpTxt.text = 'XP: ${file.xp}';
+            inventoryTxt.text = 'Inventory: ${file.inventory}';
         }
     #end
 
@@ -151,6 +186,7 @@ class Main extends openfl.display.Sprite {
     public static var saveFile:FlxSave = new FlxSave();
     public static var lastLoadedSaveName:Null<String>;
     public static var FILE:Null<String>;
+    #if sys public static var discord:Discord; #end
     public function new() {
         super();
         
@@ -166,10 +202,12 @@ class Main extends openfl.display.Sprite {
             FILE=lastLoadedSaveName;
             saveFile.flush();
         }else FILE=Flags.DEFAULT_SAVE;
+        musicPostfix = Main.saveFile.data.musicPF??""; //default to none if the musicPF is null.
         Application.current.window.title = Language.applicationTitles.get(Main.curLanguage);
         FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
             case EN_US: "Nokia Cellphone FC Small";
             case JP: "assets/ui/fonts/k8x12L.ttf";
+            case ES: "Nokia Cellphone FC Small";
         }
 
         Save.findSaves(); //find the save files within SAVES
@@ -178,6 +216,10 @@ class Main extends openfl.display.Sprite {
         //by not compiling during runtime.
 
         addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
+        #if sys
+            discord = new Discord("1487613766077120724");
+            discord.setActivity("IPC RICH PRESENCE TEST 01");
+        #end
         initDefaultSaveParemeters();
         #if (debug&&!android&&!html5) initDebugWindows(); #end
     }

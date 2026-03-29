@@ -7,17 +7,16 @@
 
     <section if="windows">
         <set name="version_prefix" value="PROTOTYE: " /> <!--boom, fixed.-->
-        <meta version="0.03.1"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
+        <meta version="0.03.2"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
     </section>
     
     <section unless="windows">
-        <meta version="PROTOTYPE: 0.03.1"/>
+        <meta version="PROTOTYPE: 0.03.2"/>
     </section>
 
     <!--apple can eat the corn out of my shit.-->
     <error value="Fuck nah. Outta here with that shit (PLATFORM_MAC_NOT_SUPPORTED)" if="mac" />
     <error value="Fuck nah. Outta here with that shit (PLATFORM_IOS_NOT_SUPPORTED)" if="ios" />
-    <!--<error value="This is temporary, the game crashes from shaders while trying to load. PLEASE WAIT UNTIL A FUTURE UPDATE" if="windows" unless="hl"/>--> <!--TODO: make windows not crash from a shaders error-->
 
     <!--apple is NEVER happening unless someone is willing to debug on an apple device, which i am not. -ChickenSwimmer2020 3/2/2026 9:30AM -->
     <section if="android">
@@ -47,6 +46,9 @@
     </section>
     <assets if="android" path="assets/android" embed="true"/> <!-- for things like the joystick ui and stuff. -->
     <assets path="assets/debug" include="*.png" if="debug" /> <!-- for only debug assets. -->
+    
+    <assets path="assets/"    rename="assets"	exclude="*.ogg" if="web"/>
+    <assets path="assets/"    rename="assets"	exclude="*.mp3" unless="web"/>
 
     <!--platform specific enabling and disabling for performance-->
     <!-- <haxedef name="FLX_NO_KEYBOARD" if="android"/> --> <!--disable keyboard support on android -->

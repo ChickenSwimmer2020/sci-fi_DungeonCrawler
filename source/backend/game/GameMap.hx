@@ -1,6 +1,7 @@
 package backend.game;
 
 class GameMap extends FlxTypedGroup<Dynamic> {
+    public static var instance:GameMap;
     public static final TILE_SIZE:Int = 16; //we can avvoid MAGIC numbers
     public static final COLLISION_RADIUS:Int=2;
 
@@ -11,6 +12,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     
     public function new(file:MapFile) {
         super();
+        instance=this;
         tiles = file.tiles;
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
@@ -28,6 +30,15 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 item: "pistol",
                 damage: []
             }));
+            
+            add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y-50, {type: RANGED,item: "pistol",damage: []}));
+            add(new Pickup(playerSpawnPoint.x+50, playerSpawnPoint.y-50, {type: RANGED,item: "railgun",damage: []}));
+            add(new Pickup(playerSpawnPoint.x+100, playerSpawnPoint.y-50, {type: RANGED,item: "shotgun",damage: []}));
+            add(new Pickup(playerSpawnPoint.x+150, playerSpawnPoint.y-50, {type: RANGED,item: "rifle",damage: []}));
+            add(new Pickup(playerSpawnPoint.x+200, playerSpawnPoint.y-50, {type: RANGED,item: "burstgun",damage: []}));
+
+            //test pickup for consumables and right clickable items.
+            add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y, {type: CONSUMABLE, item: "DEBUGCONSUMABLE", consumable: true, consumableType: CRUMB}));
             plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
             plr.camera = Main.camGame;
         }

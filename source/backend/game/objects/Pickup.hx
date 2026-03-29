@@ -15,15 +15,14 @@ class Pickup extends FlxSprite {
         camera=Main.camGame; //just gonna do this automatically.
         //TODO: graphic loading system
     }
-    var sin:Int=0;
+    var sin:Float=0;
     override public function update(elapsed:Float) {
         super.update(elapsed);
         if(interactionSprite!=null) {
-            sin++;
-            interactionSprite.x = FlxMath.lerp(Player.instance.x, interactionSprite.x, Math.exp(-elapsed * 3.125 * 4 * 1));
-            interactionSprite.y = FlxMath.lerp(Player.instance.y, interactionSprite.y, Math.exp(-elapsed * 3.125 * 4 * 1));
-            
-            interactionSprite.y+=Math.sin(sin);
+            sin+=0.005;
+            interactionSprite.x = FlxMath.lerp(Player.instance.getGraphicMidpoint().x-interactionSprite.width/2, interactionSprite.x, Math.exp(-elapsed * 3.125 * 4 * 1));
+            interactionSprite.y = FlxMath.lerp(Player.instance.getGraphicMidpoint().y-interactionSprite.height, interactionSprite.y, Math.exp(-elapsed * 3.125 * 4 * 1));
+            interactionSprite.y+=Math.sin(sin)/4;
         }
         if(Player.instance.overlaps(this)) {
             interactionPopup(true);
@@ -51,6 +50,15 @@ class Pickup extends FlxSprite {
         }
     }
 
+    public static function ExternalsendToInventory(item:Item) {
+        var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
+        var it:Item = item;
+        if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
+        if(inv[inv.getFirstEmpty()]!=null && ((inv[inv.getFirstEmpty()] is String) && inv[inv.getFirstEmpty()]=="EMPTY")){
+            inv[inv.getFirstEmpty()] = it;
+        }
+    }
+
     var ranonce:Bool=false;
     private function interactionPopup(enable:Bool) {
         if(interactionSprite==null) {
@@ -58,15 +66,13 @@ class Pickup extends FlxSprite {
             FlxG.state.add(interactionSprite);
             interactionSprite.camera=Main.camGame;
         }else{
+            interactionSprite.visible=enable;
             if(!enable){
                 ranonce=false;
-                interactionSprite.destroy(); //get rid of it if we dont want it. saves memory i think.
             }else{
-                if(interactionSprite.visible != enable)
-                    interactionSprite.visible=enable;
                 if(!ranonce){
-                    interactionSprite.x = Player.instance.x;
-                    interactionSprite.y = Player.instance.y;
+                    interactionSprite.x = Player.instance.getGraphicMidpoint().x-interactionSprite.width/2;
+                    interactionSprite.y = Player.instance.getGraphicMidpoint().y-interactionSprite.height;
                     sin=0;
                     ranonce=true;
                 }

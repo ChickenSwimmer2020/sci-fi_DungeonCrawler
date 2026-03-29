@@ -10,6 +10,8 @@
     "menu.options.tab.general": "General",
     "menu.options.tab.graphics": "Graphics",
     "menu.options.tab.graphicsEG": "Grapchis",
+    "menu.options.general.language": "Language",
+    "menu.options.general.audiotrack": "Audio version",
 
     "menu.new_game": "New Game",
     "menu.load_game": "Load Game",

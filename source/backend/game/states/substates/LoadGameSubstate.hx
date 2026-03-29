@@ -1,13 +1,5 @@
 package backend.game.states.substates;
 
-import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
-import flixel.math.FlxRect;
-import flixel.ui.FlxBar;
-import flixel.addons.ui.FlxUIBar;
-import flixel.addons.ui.FlxUISprite;
-import flixel.addons.ui.FlxUIGroup;
-import openfl.geom.Rectangle;
-
 class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
     public var onSaveDestroyed:Void->Void;
     private var BG:FlxUI9SliceSprite;
@@ -124,8 +116,9 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
         #if !android
             FlxG.watch.addQuick('mouse', FlxG.mouse.wheel);
             FlxG.watch.addQuick('index', scrollIndex);
+            scrollIndex= scrollIndex.clampf(0, Math.POSITIVE_INFINITY); //TODO: actually fix.
             if(scrollIndex>=0)
-                scrollIndex-=(FlxG.mouse.wheel*10); //TODO: clamp properly so you cant scroll up at the start of it.
+                scrollIndex-=(FlxG.mouse.wheel*10);
             else
                 scrollIndex=0;
             

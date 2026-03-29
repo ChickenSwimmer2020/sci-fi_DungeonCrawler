@@ -1,7 +1,4 @@
 package states;
-
-import backend.game.states.substates.LoadGameSubstate;
-import lime.system.System;
 #if android
 class MenuButton extends FlxSprite {
     var f:Void->Void=null;
@@ -27,6 +24,7 @@ class MainMenuState extends FlxState {
     var buttons:Array<#if(android)MenuButton #else FlxButton #end>=[];
     public function new() {
         super();
+
         logo=new FlxSprite(FlxG.width-500, 0).makeGraphic(500, 200, 0xFFFF0000);
         add(logo); //TODO: placeholder graphic
         final onButtonClicked:Array<Void->Void>=[

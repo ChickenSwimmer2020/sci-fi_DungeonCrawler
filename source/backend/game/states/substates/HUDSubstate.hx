@@ -1,7 +1,5 @@
 package backend.game.states.substates;
 
-import flixel.ui.FlxVirtualPad;
-
 enum abstract ItemType(String) from String to String {
     var ITEM="ITEM";
     var CONSUMABLE="CONSUMABLE";
@@ -63,13 +61,14 @@ typedef Item = {
     @:optional var MagicType:MagicType;
     var item:String;
     @:optional var durability:Float;
-    var damage:Map<String, Float>; //so we can apply MANY damage types to anything. //TODO: list damage types
+    @:optional var damage:Map<String, Float>; //so we can apply MANY damage types to anything.
     @:optional var consumable:Bool;
     @:optional var consumableType:ConsumableType;
     @:optional var charges:Float; //also affects guns
 }
 
 class InventorySlot extends FlxSprite {
+    public var onItemUsed:(String, Item)->Void; //action, item
     public var onItemMoveStart:Void->Void;
     public var onItemMoveEnd:Void->Void;
     public static final SIZE:Int = 64;
@@ -78,13 +77,50 @@ class InventorySlot extends FlxSprite {
     public var locked:Bool=false;
     public var interactable:Bool=true;
 
-    public function new(x:Float,y:Float) {
+    public function new(x:Float,y:Float, ?item:Item) {
         super(x, y);
         loadGraphic(Paths.image('ui/inventory', 'slot'));
         setGraphicSize(SIZE, SIZE);
         updateHitbox();
         scrollFactor.set();
         camera=Main.camHUD;
+        RightClickOptions=[];
+        RightClickFunctions=[];
+        if(item!=null){
+            if(item.consumable==true){
+                if(((item.consumableType==SHOT||(item.consumableType==GLASS||item.consumableType==BOTTLE)||item.consumableType==POTION))){
+                    RightClickOptions.push("Drink");
+                    RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                        ()->{
+                            trace('player has drank something.');
+                            onItemUsed("drink", curItem);
+                            unloadItem();
+                        }
+                    );
+                }
+                if((item.consumableType==CRUMB||(item.consumableType==SNACK||item.consumableType==MEAL))){
+                    RightClickOptions.push("Eat");
+                    RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                        ()->{
+                            trace('player has eaten something.');
+                            onItemUsed("consume", curItem);
+                            unloadItem();
+                        }
+                    );
+                }
+            }
+        }
+        
+
+        //always at the bottom.
+        RightClickOptions.push("Drop");
+        RightClickFunctions.push(
+            ()->{
+                GameMap.instance.add(new Pickup(GameMap.instance.plr.x, GameMap.instance.plr.y, curItem)); //place a pickup at the player location containing the item we just had.
+                onItemUsed("drop", curItem);
+                unloadItem();
+            }
+        );
     }
     private function loadItemGraphic(item:String) {
         if(#if (android || html5) Paths.image('ui/items', item)!=null #else FileSystem.exists(Paths.image('ui/items', item))#end) {
@@ -107,10 +143,15 @@ class InventorySlot extends FlxSprite {
     override public function update(elapsed:Float) {
         super.update(elapsed);
         FlxG.watch.addQuick('held item', Main.curHeldItem);
-
         //pickup logic
         if(interactable){
-            if(#if(android)(FlxG.touches.justStarted()[0]?.overlaps(this)&&FlxG.touches.justStarted()[0]?.justPressed)#else(FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)#end) {
+            if((
+                #if(android)
+                    (FlxG.touches.justStarted()[0]?.overlaps(this)&&FlxG.touches.justStarted()[0]?.justPressed) //TODO: make this a hold thing
+                #else
+                    (FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)
+                #end) && !optionsOpen //if the options menu is open we dont wanna try and grab the item.
+            ) {
                 if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
                     Main.curHeldItem=curItem;
                     unloadItem();
@@ -121,6 +162,22 @@ class InventorySlot extends FlxSprite {
                     Main.curHeldItem=null;
                 }
             }
+            if((
+                #if(android)
+                    //TODO: logic for this on android
+                #else
+                    (FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressedRight)
+                #end) && hasItem==true
+            ) {
+                openRightClickMenu();
+                trace('attempting right click menu');
+            }
+        }
+
+
+
+        if(optionsOpen && (optionsGroup!=null)){
+            if(!FlxG.mouse.overlaps(optionsGroup, camera)) openRightClickMenu();
         }
     }
     public function unloadItem() {
@@ -135,6 +192,68 @@ class InventorySlot extends FlxSprite {
         hasItem=true;
         curItem=item;
         loadItemGraphic(item?.item);
+        RightClickOptions=[];
+        RightClickFunctions=[];
+
+        if(item?.consumable==true){ //null safety hopefully.
+            if(((item?.consumableType==SHOT||(item?.consumableType==GLASS||item?.consumableType==BOTTLE)||item?.consumableType==POTION))){
+                RightClickOptions.push("Drink");
+                RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                    ()->{
+                        trace('player has drank something.');
+                        onItemUsed("drink", curItem);
+                        unloadItem();
+                    }
+                );
+            }
+            if((item?.consumableType==CRUMB||(item?.consumableType==SNACK||item?.consumableType==MEAL))){
+                RightClickOptions.push("Eat");
+                RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                    ()->{
+                        trace('player has eaten something.');
+                        onItemUsed("consume", curItem);
+                        unloadItem();
+                    }
+                );
+            }
+        }
+        
+
+        //always at the bottom.
+        RightClickOptions.push("Drop");
+        RightClickFunctions.push(
+            ()->{
+                GameMap.instance.add(new Pickup(GameMap.instance.plr.x, GameMap.instance.plr.y, curItem)); //place a pickup at the player location containing the item we just had.
+                onItemUsed("drop", curItem);
+                unloadItem();
+            }
+        );
+    }
+
+    var optionsGroup:FlxSpriteGroup=new FlxSpriteGroup();
+    var optionsOpen:Bool=false;
+    var RightClickOptions:Array<String>=[];
+    var RightClickFunctions:Array<Void->Void>=[];
+    var rightClickButtons:Array<FlxButton>=[];
+    private function openRightClickMenu() {
+        optionsOpen=!optionsOpen;
+        if(!optionsOpen) {
+            for(button in rightClickButtons) button.destroy();
+            rightClickButtons=[];
+            if(optionsGroup!=null) optionsGroup.destroy();
+        }else{
+            optionsGroup=new FlxSpriteGroup(FlxG.mouse.viewX, FlxG.mouse.viewY);
+            optionsGroup.camera=camera;
+            HUDSubstate.instance.add(optionsGroup);
+            for(i in 0...RightClickOptions.length) {
+                var button:FlxButton = new FlxButton(0, 0+(20*i), RightClickOptions[i], ()->{
+                    RightClickFunctions[i]();
+                    openRightClickMenu();
+                });
+                optionsGroup.add(button);
+                rightClickButtons.push(button);
+            }
+        }
     }
 }
 
@@ -171,6 +290,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
 }
 
 class HUDSubstate extends FlxSubState {
+    public static var instance:HUDSubstate;
     #if android public var Controller:FlxVirtualPad; #end
     public var healthFlask:HealthFlask;
     public var weaponText:FlxText;
@@ -182,6 +302,7 @@ class HUDSubstate extends FlxSubState {
     public var selectedItem:Item;
     public function new(?items:Array<Item>) {
         super();
+        instance=this;
         inventory=items??[];
     
         var index:Int=0;
@@ -196,6 +317,15 @@ class HUDSubstate extends FlxSubState {
             slot.onItemMoveEnd = ()->{
                 inventory[slots.indexOf(slot)] = Main.curHeldItem;
             };
+            slot.onItemUsed = (action, item)->{
+                switch(action){
+                    case "consume": inventory[slots.indexOf(slot)] = "EMPTY";
+                    case "drink": inventory[slots.indexOf(slot)] = "EMPTY";
+
+                    case "drop": inventory[slots.indexOf(slot)] = "EMPTY"; //so the slot doesnt get IMMEDIATELY overwritten by inventory reloading items constantly.
+                    default: trace('unknown action tyep $action on $item');
+                }
+            }
             index++;
         }
 
@@ -220,7 +350,31 @@ class HUDSubstate extends FlxSubState {
                 }
             }
         }
-        //@:privateAccess weaponText.visible=Player.instance.isWeapon;
+        if(Main.curHeldItem!=null) {
+            //create the small graphic that follows the cursor when holding an item
+            if(Main.heldItemGraphic==null) {
+                Main.heldItemGraphic = new FlxSprite(FlxG.mouse.viewX, FlxG.mouse.viewY);
+                trace(Main.curHeldItem);
+                if(#if (android || html5) Paths.image('ui/items', Main.curHeldItem.item)!=null #else FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))#end) {
+                    Main.heldItemGraphic.loadGraphic(Paths.image('ui/items', Main.curHeldItem.item));
+                    Main.heldItemGraphic.setGraphicSize(32, 32);
+                    Main.heldItemGraphic.updateHitbox();
+                }else Main.heldItemGraphic.makeGraphic(16, 16, 0xFFFF00FF);
+                Main.heldItemGraphic.camera=Main.camHUD;
+                add(Main.heldItemGraphic);
+            }else{
+                Main.heldItemGraphic.setPosition(FlxG.mouse.viewX+16, FlxG.mouse.viewY);
+                if(!fullOpen) {
+                    //TODO: make the item move back to the last slot it was in instead of the first available slot.
+                    Pickup.ExternalsendToInventory(Main.curHeldItem); //send to the first available slot in the inventory.
+                    Main.curHeldItem=null; //doing this should automatically destroy the graphic, if im correct.
+                }
+            }
+        }else if(Main.heldItemGraphic!=null) {
+            Main.heldItemGraphic.destroy();
+            Main.heldItemGraphic=null;
+        }
+        @:privateAccess weaponText.visible=Player.instance.isWeapon;
         selectedItem=slots[Player.curHotbarSlot]?.curItem??{
             type: NULL,
             weaponType: NULL,
@@ -235,7 +389,7 @@ class HUDSubstate extends FlxSubState {
             slots[i].color=0xFFFFFFFF;
             if(slots[Player.curHotbarSlot]!=null) slots[Player.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
             if(fullOpen){
-                if(slots[i].visible==false){
+                if(slots[i].visible==false || slots[i].interactable==false){
                     slots[i].visible=slots[i].active=slots[i].alive=slots[i].interactable=true;
                 }
             }else{
