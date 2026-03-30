@@ -70,11 +70,7 @@ class Weapon extends FlxSprite{
     var increment:Int=0;
     var power:Float=0;
     public function shoot() {
-        #if android
-            if(FlxG.touches.getFirst()?.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) return;
-        #else
-            if(FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) return;//cancel if holding an item. much simpler fix than anything else honestly.
-        #end
+        if(FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) return; //cancel if holding an item. much simpler fix than anything else honestly.
         if(charges<=0)return; //cancel if we have no ammo.
         increment=0;
         if(coolDownTimer.finished){
@@ -142,7 +138,7 @@ class Weapon extends FlxSprite{
         super.update(elapsed);
 
         if(coolDownTimer.finished){
-            if(frMode==RAIL&&#if(android)(FlxG.touches.list[FlxG.touches.list.length].justReleased)#else(FlxG.mouse.justReleased)#end){
+            if(frMode==RAIL&&FlxG.mouse.justReleased){
                 if(power<25) justShotFail=true; //failure if under 25%
                 else{
                     railFireShader=new RailFire();
@@ -198,19 +194,19 @@ class WeaponParser {
     }
     public static function recycleWeapon(weapon:Weapon, path:String) {
         @:privateAccess
-        if(path!=""&&(weapon!=null&&#if (android||html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path)) #end)) weapon.setUpWeapon(parse(path));
-        else if(weapon==null||#if(android||html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path));
+        if(path!=""&&(weapon!=null&&#if (html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path)) #end)) weapon.setUpWeapon(parse(path));
+        else if(weapon==null||#if(html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path));
     }
     public static function parse(path:String):WeaponData {
         if(path==null) return null; //simple as that.
-        if(#if(android||html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path))#end)return parseXML(Paths.weapon(path));
+        if(#if(html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path))#end)return parseXML(Paths.weapon(path));
         else Main.showError("IOERROR", Paths.weapon(path));
         return null;
     }
     private static function parseXML(path:String):WeaponData {
         trace('Parsing weapon file: $path');
-        if(#if(android||html5) Assets.getText(path)!=null #else FileSystem.exists(path)#end){
-            var xmlToParse:Xml = Xml.parse(#if(android||html5) Assets.getText(path) #else File.getContent(path)#end);
+        if(#if(html5) Assets.getText(path)!=null #else FileSystem.exists(path)#end){
+            var xmlToParse:Xml = Xml.parse(#if(html5) Assets.getText(path) #else File.getContent(path)#end);
             var damge:Map<String, Float>=[];
             var anims:Array<{n:String, f:Array<Int>, fr:Int, l:Bool, fl:{x:Bool,y:Bool}}>=[];
             final root:Xml = xmlToParse.firstChild();

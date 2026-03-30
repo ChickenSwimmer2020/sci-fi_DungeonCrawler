@@ -3,20 +3,18 @@ package;
 import backend.Discord;
 
 class Main extends openfl.display.Sprite {
-    #if !android
-        public static var controls:Map<String, Array<Int>>=[
-            "moveUP" => [UP, W],
-            "moveDOWN" => [DOWN, S],
-            "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
-            "moveLEFT" => [FlxKey.LEFT, A],
+    public static var controls:Map<String, Array<Int>>=[
+        "moveUP" => [UP, W],
+        "moveDOWN" => [DOWN, S],
+        "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
+        "moveLEFT" => [FlxKey.LEFT, A],
 
-            "zoomIN" => [PLUS, NONE],
-            "zoomOUT" => [MINUS, NONE],
-            "pause" => [ESCAPE, BACKSPACE],
-            "inventory" => [I, NONE],
-            "interact" => [E, ENTER],
-        ];
-    #end
+        "zoomIN" => [PLUS, NONE],
+        "zoomOUT" => [MINUS, NONE],
+        "pause" => [ESCAPE, BACKSPACE],
+        "inventory" => [I, NONE],
+        "interact" => [E, ENTER],
+    ];
     public static var curHeldItem:Null<Item>=null;
     public static var heldItemGraphic:Null<FlxSprite>=null;
 
@@ -39,7 +37,7 @@ class Main extends openfl.display.Sprite {
     public static var camGame:FlxCamera; //access from everywhere!
     public static var camHUD:FlxCamera; //access from everywhere!
     public static var camOther:FlxCamera; //access from everywhere!
-    #if (debug&&!android&&!html5) //we still keep this disabled in android because the debugger doesnt exist (afaik).
+    #if (debug&&!html5) //for some reason the debugger complains about windows in html5 specifically.
         
         static var playerSaveWindow:Window;
         static var curSaveLoaded:TextField;
@@ -190,7 +188,7 @@ class Main extends openfl.display.Sprite {
     public function new() {
         super();
         
-        #if (android||html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
+        #if (html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
         saveFile.bind("SAVES");
         if(saveFile.data.saves == null) { //should fix it?
             saveFile.data.saves=new Map<String, SaveFile>();
@@ -221,7 +219,7 @@ class Main extends openfl.display.Sprite {
             discord.setActivity("IPC RICH PRESENCE TEST 01");
         #end
         initDefaultSaveParemeters();
-        #if (debug&&!android&&!html5) initDebugWindows(); #end
+        #if (debug&&!html5) initDebugWindows(); #end
     }
     private static function initDefaultSaveParemeters() {
         if((saveFile.data.saves:Map<String,SaveFile>).get(Flags.DEFAULT_SAVE)==null){

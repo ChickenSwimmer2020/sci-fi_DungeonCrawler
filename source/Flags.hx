@@ -25,7 +25,7 @@ class Flags {
         stamina: 0,
         xp: 0,
         position: {x:0, y:0},
-        #if !android controls: [], #end
+        controls: [],
         inventory: [],
         maps: [],
     };

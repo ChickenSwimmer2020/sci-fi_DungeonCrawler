@@ -26,7 +26,7 @@ class Pickup extends FlxSprite {
         }
         if(Player.instance.overlaps(this)) {
             interactionPopup(true);
-            if(#if android true #else FlxG.keys.anyJustPressed(Main.controls.get('interact'))#end) {
+            if(FlxG.keys.anyJustPressed(Main.controls.get('interact'))) {
                 if(!inventoryFull()){
                     if(onPickup!=null&&data!=null) onPickup(data);
                     sendToInventory(data);

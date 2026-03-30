@@ -1,5 +1,9 @@
 # ChangeLog
 
+## prototype update 0.03.3 (android removal)
+
+* Android is no longer a supported target.
+
 ## Prototype Update 0.03.2 (inventory tomfoolery)
 
 * Updated `.markdownlint.json` so it wont complain about `README.md` anymore

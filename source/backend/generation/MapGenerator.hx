@@ -124,7 +124,7 @@ class MapGenerator {
             var returnMap:GameMap = new GameMap(internalMap);
             returnMap.generate();
             
-            #if (debug&&!android&&!html5) //because the debugger doesnt exist on android.
+            #if (debug&&!html5) //maps window doesnt exist on html5.
                 Functions.wait(1, (_)->{
                     Main.DEBUG_updateMapsInfo(internalMap.width, internalMap.height, internalMap.tiles);
                 });

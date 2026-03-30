@@ -18,12 +18,9 @@
     <error value="Fuck nah. Outta here with that shit (PLATFORM_MAC_NOT_SUPPORTED)" if="mac" />
     <error value="Fuck nah. Outta here with that shit (PLATFORM_IOS_NOT_SUPPORTED)" if="ios" />
 
-    <!--apple is NEVER happening unless someone is willing to debug on an apple device, which i am not. -ChickenSwimmer2020 3/2/2026 9:30AM -->
-    <section if="android">
-        <set name="ANDROID_PLATFORM" value="android-33" />
-        <android install-location="perferExternal" target-sdk-version="36"/>
-        <config type="android" install-location="preferExternal" minimum-sdk-version="21" gradle-version="8.9" gradle-plugin="8.7.3" target-sdk-version="36"/>
-    </section>
+    <error value="In light of googles choices with how to control android APK installation, this platform is no longer supported.
+should google choose to remove said policies, this platform will gain support again.
+PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
 
     <!--linux upcoming? 👀-->
     <section if="hl||windows||linux"> <!--WHOOPS, FORGOT TO TELL WINDOWS TO USE THESE AS WELL!!--> 
@@ -38,23 +35,19 @@
 
     <source path="source" />
     <source path="source/debug" if="debug"/>
-    <section if="android||html5">
+    <section if="html5">
         <assets path="assets" embed="true"/>
     </section>
     <section if="hl||windows">
         <assets path="assets"/>
     </section>
-    <assets if="android" path="assets/android" embed="true"/> <!-- for things like the joystick ui and stuff. -->
     <assets path="assets/debug" include="*.png" if="debug" /> <!-- for only debug assets. -->
     
     <assets path="assets/"    rename="assets"	exclude="*.ogg" if="web"/>
     <assets path="assets/"    rename="assets"	exclude="*.mp3" unless="web"/>
 
     <!--platform specific enabling and disabling for performance-->
-    <!-- <haxedef name="FLX_NO_KEYBOARD" if="android"/> --> <!--disable keyboard support on android -->
-    <haxedef name="FLX_NO_MOUSE" if="android"/> <!-- disable mouse controls for android (TODO: rewrite the entire weapon fire system to support touch.)-->
-    <!-- <haxedef name="FLX_NO_SOUND_TRAY" if="android"/> --> <!-- sound volume is controlled via device itself on android. -->
-    <!-- <haxedef name="FLX_NO_TOUCH" if="windows||html5||hl"/> --> <!-- disable touch controls on windows, hl, and html5-->
+    <haxedef name="FLX_NO_TOUCH" if="windows||html5||hl"/>
 
     <haxedef name="FLX_NO_DEBUG" unless="debug"/>
     <haxedef name="FLX_NO_HEALTH"/> <!--because im doing it myself.-->

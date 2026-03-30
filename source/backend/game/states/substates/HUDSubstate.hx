@@ -123,13 +123,13 @@ class InventorySlot extends FlxSprite {
         );
     }
     private function loadItemGraphic(item:String) {
-        if(#if (android || html5) Paths.image('ui/items', item)!=null #else FileSystem.exists(Paths.image('ui/items', item))#end) {
+        if(#if (html5) Paths.image('ui/items', item)!=null #else FileSystem.exists(Paths.image('ui/items', item))#end) {
             var outputBitmapData:BitmapData = new BitmapData(Math.floor(width), Math.floor(height), true, 0xFFFFFF);
             var scaleMatrix:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
             scaleMatrix.scale(2, 2);
             outputBitmapData.draw(pixels, scaleMatrix);
             scaleMatrix.scale(1.5, 1.5);
-            outputBitmapData.draw(#if (android||html5) Paths.image('ui/items', item) #else BitmapData.fromFile(Paths.image('ui/items', item)) #end, scaleMatrix);
+            outputBitmapData.draw(#if (html5) Paths.image('ui/items', item) #else BitmapData.fromFile(Paths.image('ui/items', item)) #end, scaleMatrix);
             loadGraphic(outputBitmapData); //hehehehaw! now we *hopefully* can update the hitbox
             setGraphicSize(SIZE, SIZE);
             updateHitbox();
@@ -145,12 +145,7 @@ class InventorySlot extends FlxSprite {
         FlxG.watch.addQuick('held item', Main.curHeldItem);
         //pickup logic
         if(interactable){
-            if((
-                #if(android)
-                    (FlxG.touches.justStarted()[0]?.overlaps(this)&&FlxG.touches.justStarted()[0]?.justPressed) //TODO: make this a hold thing
-                #else
-                    (FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)
-                #end) && !optionsOpen //if the options menu is open we dont wanna try and grab the item.
+            if(((FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)) && !optionsOpen //if the options menu is open we dont wanna try and grab the item.
             ) {
                 if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
                     Main.curHeldItem=curItem;
@@ -162,12 +157,7 @@ class InventorySlot extends FlxSprite {
                     Main.curHeldItem=null;
                 }
             }
-            if((
-                #if(android)
-                    //TODO: logic for this on android
-                #else
-                    (FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressedRight)
-                #end) && hasItem==true
+            if(((FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressedRight)) && hasItem==true
             ) {
                 openRightClickMenu();
                 trace('attempting right click menu');
@@ -280,8 +270,6 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
         //add(outerXP);
         add(outline);
         scale.set(2, 2);
-        //innerHealth.shader = innerHealthShader = new MaskShader(#if (android || html5) Paths.image('ui/health', "flask_inner-MASK")#else BitmapData.fromFile(Paths.image('ui/health', "flask_inner-MASK"))#end);
-        //outerXP.shader = new MaskShader(BitmapData.fromFile("assets/ui/health/flask_outer-MASK.png"));
     }
 
     override function update(elapsed:Float) {
@@ -291,7 +279,6 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
 
 class HUDSubstate extends FlxSubState {
     public static var instance:HUDSubstate;
-    #if android public var Controller:FlxVirtualPad; #end
     public var healthFlask:HealthFlask;
     public var weaponText:FlxText;
     public var fullOpen:Bool=false; //so that we can have the hotbar
@@ -355,7 +342,7 @@ class HUDSubstate extends FlxSubState {
             if(Main.heldItemGraphic==null) {
                 Main.heldItemGraphic = new FlxSprite(FlxG.mouse.viewX, FlxG.mouse.viewY);
                 trace(Main.curHeldItem);
-                if(#if (android || html5) Paths.image('ui/items', Main.curHeldItem.item)!=null #else FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))#end) {
+                if(#if (html5) Paths.image('ui/items', Main.curHeldItem.item)!=null #else FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))#end) {
                     Main.heldItemGraphic.loadGraphic(Paths.image('ui/items', Main.curHeldItem.item));
                     Main.heldItemGraphic.setGraphicSize(32, 32);
                     Main.heldItemGraphic.updateHitbox();
@@ -397,22 +384,11 @@ class HUDSubstate extends FlxSubState {
                 else slots[i].interactable=false;
             }
         }
-
-        #if android
-            if(Controller==null) {
-                Controller = new FlxVirtualPad(ANALOG, A_B_X_Y);
-                add(Controller);
-                Controller.camera = Main.camOther;
-                //Controller.setPosition(0, FlxG.height-Controller.height);
-            }
-        #end
-        
-        #if !android //the pause menu is controlled by the controls substate in android.
-            if(FlxG.keys.anyJustPressed(Main.controls.get('pause'))) { //swapped for anyJustPressed so it doesnt run multiple times in a frame
-                if(Player.onPlayerPause!=null)Player.onPlayerPause(); //so we can pause enemy and object ai/animations/tweens/everything
-                Player.playerPauseRequested = true;
-                openSubState(new PauseMenu()); //open the substate IN the substate. simple fix!
-            }
-        #end
+    
+        if(FlxG.keys.anyJustPressed(Main.controls.get('pause'))) { //swapped for anyJustPressed so it doesnt run multiple times in a frame
+            if(Player.onPlayerPause!=null)Player.onPlayerPause(); //so we can pause enemy and object ai/animations/tweens/everything
+            Player.playerPauseRequested = true;
+            openSubState(new PauseMenu()); //open the substate IN the substate. simple fix!
+        }
     }
 }

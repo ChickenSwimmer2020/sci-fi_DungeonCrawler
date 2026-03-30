@@ -1,27 +1,8 @@
 package states;
-#if android
-class MenuButton extends FlxSprite {
-    var f:Void->Void=null;
-    public function new(x:Float, y:Float, image:String, onClick:Void->Void) {
-        super(x, y);
-        loadGraphic(Paths.image('android/ui', image));
-
-        f=onClick;
-    }
-
-    override public function update(elapsed:Float){
-        super.update(elapsed);
-
-        if(FlxG.touches.justStarted()[0]?.overlaps(this) && FlxG.touches.justStarted()[0]?.justPressed){
-            f(); //run function once clicked.
-        }
-    }
-}
-#end
 
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
-    var buttons:Array<#if(android)MenuButton #else FlxButton #end>=[];
+    var buttons:Array<FlxButton>=[];
     public function new() {
         super();
 
@@ -47,9 +28,7 @@ class MainMenuState extends FlxState {
             ()->{trace('gallery');},
             ()->{trace('achivements');},
             ()->{     
-                #if android
-                    System.exit(1); //TODO: make android app actually close.
-                #elseif html5
+                #if html5
                     js.Browser.window.close();
                 #else
                     Sys.exit(1);
@@ -64,23 +43,12 @@ class MainMenuState extends FlxState {
             Language.getTranslatedKey("menu.awards"),
             Language.getTranslatedKey("menu.quit")
         ];
-        #if android
-            for(i in 0...strings.length) {
-                var button:MenuButton = new MenuButton([
-                    FlxG.width/2-128, FlxG.width/2+128, FlxG.width/2-128, FlxG.width/2+128, FlxG.width/2-128, FlxG.width/2+128
-                ][i], [
-                    0, 0, 108, 108, 216, 216
-                ][i], strings[i], onButtonClicked[i]);
-                buttons.push(button);
-                add(button);
-            }
-        #else
-            for(i in 0...strings.length) {
-                var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], onButtonClicked[i]);
-                buttons.push(button);
-                add(button);
-            }
-        #end
+
+        for(i in 0...strings.length) {
+            var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], onButtonClicked[i]);
+            buttons.push(button);
+            add(button);
+        }
 
         //TODO: cool bg art
         //TODO: menu theme

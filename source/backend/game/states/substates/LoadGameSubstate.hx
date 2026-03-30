@@ -20,14 +20,14 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
             Main.FILE=text.text.split('-')[0].trim(); //should work?
             #if debug FlxG.switchState(()->new TestingState(true)); #end
         }, false);
-        loadButton.loadGraphic("flixel/images/ui/button.png", true, 80, 20); //probably gonna need to fix for android, although this menu is gonna look completely different on android
+        loadButton.loadGraphic("flixel/images/ui/button.png", true, 80, 20);
         loadButton.updateHitbox();
         loadButton.autoCenterLabel();
         deleteButton=new FlxUIButton(BG.width-105, BG.height-25, "", ()->{
             (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
             onSaveDestroyed();
         }, false);
-        deleteButton.loadGraphic(Paths.image('ui/menu', "button_delete"), true, 20, 20); //probably gonna need to fix for android, although this menu is gonna look completely different on android
+        deleteButton.loadGraphic(Paths.image('ui/menu', "button_delete"), true, 20, 20);
         deleteButton.updateHitbox();
         deleteButton.autoCenterLabel();
         deleteButton.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_delete")), 0, 0, true);
@@ -113,20 +113,16 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        #if !android
-            FlxG.watch.addQuick('mouse', FlxG.mouse.wheel);
-            FlxG.watch.addQuick('index', scrollIndex);
-            scrollIndex= scrollIndex.clampf(0, Math.POSITIVE_INFINITY); //TODO: actually fix.
-            if(scrollIndex>=0)
-                scrollIndex-=(FlxG.mouse.wheel*10);
-            else
-                scrollIndex=0;
-            
+        FlxG.watch.addQuick('mouse', FlxG.mouse.wheel);
+        FlxG.watch.addQuick('index', scrollIndex);
+        scrollIndex= scrollIndex.clampf(0, Math.POSITIVE_INFINITY); //TODO: actually fix.
+        if(scrollIndex>=0)
+            scrollIndex-=(FlxG.mouse.wheel*10);
+        else
+            scrollIndex=0;
+        
 
-            scrollCam.scroll.y = scrollIndex;
-            if(FlxG.keys.justPressed.ESCAPE) close();
-        #else
-
-        #end
+        scrollCam.scroll.y = scrollIndex;
+        if(FlxG.keys.justPressed.ESCAPE) close();
     }
 }

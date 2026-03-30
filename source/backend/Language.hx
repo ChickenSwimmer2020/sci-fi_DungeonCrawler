@@ -25,16 +25,16 @@ class Language {
         return null;
     }
     public static function getTranslatedKey(key:String):String { //TODO: way to switch all instances of anything containing FlxText's font and text on the fly without restarting the game.
-        if(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
-            var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
+        if(#if (html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
+            var lang:Dynamic=Json.parse(#if (html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
             if(Reflect.hasField(lang, key)) return Reflect.field(lang, key);
             else return key; //just return the base string ID if there is no entry. prevents issues.
         }else Main.showLanguageError(Main.curLanguage);
         return null;
     }
     public static function getTranslatedErrorMessage(?missingObject:Dynamic, key:String):String {
-        if(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
-            var lang:Dynamic=Json.parse(#if (android || html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
+        if(#if (html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
+            var lang:Dynamic=Json.parse(#if (html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
             if(Reflect.hasField(lang, key)){
                 var error:String=Reflect.field(lang, key);
                 return error.replace('{OBJ}', missingObject);

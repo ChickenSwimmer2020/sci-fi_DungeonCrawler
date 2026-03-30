@@ -9,19 +9,19 @@ class Paths {
     #if (debug) public static final debugPath:String="assets/debug"; #end
 
     public static inline function weaponExists(w:String):Bool{
-        #if (android || html5)
+        #if (html5)
             return Assets.getText(Paths.weapon(w))!=null;
         #else
             return FileSystem.exists(Paths.weapon(w));
         #end
     }
 
-    public static inline function tiles(image:String)#if (android||html5) :BitmapData#else:String#end{
+    public static inline function tiles(image:String)#if (html5) :BitmapData#else:String#end{
         return Paths.image('tiles', image);
     }
     public static inline function lang(l:String):String return '${langPath}/${l.toUpperCase()}.lang';
-    public static inline function image(folder:String,i:String)#if (android||html5) :BitmapData#else:String#end{
-        #if (android || html5)
+    public static inline function image(folder:String,i:String)#if (html5) :BitmapData#else:String#end{
+        #if (html5)
             return Assets.getBitmapData('assets/$folder/$i.png');
         #else
             return 'assets/$folder/$i.png';
@@ -29,7 +29,7 @@ class Paths {
     }
     public static inline function weapon(w:String):String return '${weaponsPath}/$w.weapon'; 
     #if (debug)
-        public static inline function DEBUG(i:String,?ext:String="png")#if(android||html5):BitmapData#else:String#end
+        public static inline function DEBUG(i:String,?ext:String="png")#if(html5):BitmapData#else:String#end
             return Paths.image('debug', i);
     #end
 }

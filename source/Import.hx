@@ -3,13 +3,9 @@ package;
 //flixel (never changes)
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
-#if(debug&&!android)
+#if(debug)
     import flixel.system.debug.DebuggerUtil;
     import flixel.system.debug.Window;
-#end
-#if(android)
-    import flixel.input.touch.FlxTouch;
-    import flixel.ui.FlxVirtualPad;
 #end
 import flixel.text.FlxInputText;
 import flixel.addons.ui.FlxUICheckBox;
@@ -68,11 +64,11 @@ import openfl.geom.Matrix;
 import openfl.display.BitmapData;
 import openfl.filters.ShaderFilter;
 import openfl.geom.Rectangle;
-#if(html5||android)import openfl.Assets;#end
+#if(html5)import openfl.Assets;#end
 
 
 //lime
-#if(html5||android)import lime.utils.Log;#end
+#if(html5)import lime.utils.Log;#end
 import lime.app.Application;
 
 //game (never changes)

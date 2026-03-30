@@ -23,7 +23,7 @@ class Player extends FlxSprite {
         "DEBUG"=>FlxPoint.weak(0, 0)
     ];
     var targetWeaponPosition:FlxPoint;
-    var mousePosition:FlxPoint=new FlxPoint(0, 0); //funny thing, we can actually re-use this for android!
+    var mousePosition:FlxPoint=new FlxPoint(0, 0);
 
     private var ctrlUp:Array<FlxKey>;    
     private var ctrlDown:Array<FlxKey>;  
@@ -61,20 +61,15 @@ class Player extends FlxSprite {
     #end
     public var weaponKickback:FlxPoint=FlxPoint.weak(0, 0);
     var isWeapon:Bool=false;
-    //TODO: implement support for using the scroll wheel to change items in the hotbar
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        mousePosition = #if android
-            FlxG.touches.getFirst()?.getWorldPosition(Main.camGame);
-        #else
-            FlxG.mouse.getWorldPosition(Main.camGame);
-        #end
+        mousePosition=FlxG.mouse.getWorldPosition(Main.camGame);
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(weaponKickback.y > 0 || weaponKickback.y < 0) weaponKickback.y=FlxMath.lerp(0, weaponKickback.y, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(axis(ctrlRight, ctrlLeft)==0 && (velocity.x > 0 || velocity.x < 0)) velocity.x = FlxMath.lerp(0, velocity.x, Math.exp(-elapsed * 3.126 * 2 * 1));
         if(axis(ctrlDown, ctrlUp)== 0 && (velocity.y > 0 || velocity.y < 0)) velocity.y = FlxMath.lerp(0, velocity.y, Math.exp(-elapsed * 3.126 * 2 * 1));
-        #if (debug&&!android) //these are useless on the android build (debugger and FlxKey doesnt exist on the android build).
+        #if (debug)
             addWatchObjects();
             if(FlxG.keys.pressed.LBRACKET) health--;
             if(FlxG.keys.pressed.RBRACKET) health++;
@@ -102,9 +97,9 @@ class Player extends FlxSprite {
         }else{
             isWeapon=((inventory.selectedItem.type==RANGED||inventory.selectedItem.type==MEELEE)||inventory.selectedItem.type==MAGIC);
             weapon.active=weapon.visible=isWeapon;
-            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?#if(android)FlxG.touches.getFirst()?.pressed#else FlxG.mouse.pressed#end:#if(android)FlxG.touches.justStarted()[0]?.justPressed #else FlxG.mouse.justPressed#end) && (weapon.visible && weapon.active)) weapon.onLeftClick();
-            if(#if(android) false #else FlxG.mouse.justPressedRight#end && (weapon.visible && weapon.active)) weapon.onRightClick(); //TODO: android support for advanced weapon functions. other buttons maybe that freeze the game until you select a position to fire twoards?
-            if((#if(android) false #else FlxG.mouse.justPressedMiddle#end && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
+            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?FlxG.mouse.pressed:FlxG.mouse.justPressed) && (weapon.visible && weapon.active)) weapon.onLeftClick();
+            if(FlxG.mouse.justPressedRight && (weapon.visible && weapon.active)) weapon.onRightClick();
+            if((FlxG.mouse.justPressedMiddle && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
 
             if(weapon.visible && weapon.active){
                 targetWeaponPosition.set(x+WEAPON_OFFSET.get(weapon.name)?.x,y+WEAPON_OFFSET.get(weapon.name)?.y);
@@ -117,7 +112,7 @@ class Player extends FlxSprite {
 
 
         
-        #if !android curHotbarSlot+=FlxG.mouse.wheel; curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);  #end //windows/hashlink only
+        curHotbarSlot+=FlxG.mouse.wheel; curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);
         curHotbarSlot=curHotbarSlot.clamp(0, 9); //actually 1-10;
         for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)
             if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
@@ -133,15 +128,12 @@ class Player extends FlxSprite {
             inventory.weaponText.text='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
         }
 
-        #if !android
-            velocity.x = ((velocity.x = velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED))); //add kickback on-top of the normal velocity based movement
-            velocity.y = ((velocity.y = velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED))); //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
-            Main.camGame.zoom = (Main.camGame.zoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
+        
+        velocity.x = ((velocity.x = velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED))); //add kickback on-top of the normal velocity based movement
+        velocity.y = ((velocity.y = velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED))); //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
+        Main.camGame.zoom = (Main.camGame.zoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
 
-            if (Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
-        #else
-            //TODO: controls substate (part of inventory substate because it has to be) actually controlling player.
-        #end
+        if (Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
     }
     inline function axis(pos:Array<FlxKey>, neg:Array<FlxKey>):Float return (FlxG.keys.anyPressed(pos) ? 1 : 0) - (FlxG.keys.anyPressed(neg) ? 1 : 0);
 }

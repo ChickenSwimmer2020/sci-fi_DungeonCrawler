@@ -1,5 +1,7 @@
 package backend.game.states.substates;
 
+import openfl.utils.AssetType;
+
 class OptionsMenuSubstate extends FlxUISubState{
     private var total_Controls:Int=0;
     var tab_menu:FlxUITabMenu;
@@ -14,7 +16,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         tabs=[
 			{name: "tab_general", label: Language.getTranslatedKey("menu.options.tab.general")},
 			{name: "tab_graphics", label: FlxG.random.bool(14)?Language.getTranslatedKey("menu.options.tab.graphicsEG"):Language.getTranslatedKey("menu.options.tab.graphics")},
-			#if !android {name: "tab_controls", label: Language.getTranslatedKey("menu.options.tab.controls")}, #end
+			{name: "tab_controls", label: Language.getTranslatedKey("menu.options.tab.controls")},
 			{name: "tab_difficulty", label: Language.getTranslatedKey("menu.options.tab.difficulty")},
 		];
 
@@ -27,10 +29,8 @@ class OptionsMenuSubstate extends FlxUISubState{
         general=new FlxUI(null, tab_menu, null);
         graphics=new FlxUI(null, tab_menu, null);
         difficulty=new FlxUI(null, tab_menu, null);
-        #if(!android)
-            controls=new FlxUI(null, tab_menu, null);
-            controls.name = "tab_controls";
-        #end
+        controls=new FlxUI(null, tab_menu, null);
+        controls.name = "tab_controls";
         general.name = "tab_general";
         graphics.name = "tab_graphics";
         difficulty.name = "tab_difficulty";
@@ -38,14 +38,14 @@ class OptionsMenuSubstate extends FlxUISubState{
 
         createGeneralUI();
         createGraphicsUI();
-        #if !android createControlsUI(); #end
+        createControlsUI();
         createDifficultyUI();
         
 
 
         tab_menu.addGroup(general);
         tab_menu.addGroup(graphics);
-        #if !android tab_menu.addGroup(controls); #end
+        tab_menu.addGroup(controls);
         tab_menu.addGroup(difficulty);
         add(tab_menu);
     }
@@ -54,81 +54,79 @@ class OptionsMenuSubstate extends FlxUISubState{
 
     }
 
-    #if !android
-        /**CONTROLS SETTINGS OBJECTS AND FUNCTION**/
-        private var saveButton:FlxUIButton;
-        private var controlsText:FlxUIText;
-        private var CONTROLSScrollCamera:FlxCamera;
-        private var SBG:FlxUI9SliceSprite;
-        private var CONTROLSScrollIndex:Float=0;
-        private var ControlObjects:Array<ControlsAssignmentObject>=[];
-        private var index:Int=0;
-        private var a:Int=0;
-        private function reloadControls() {
-            for(ass in ControlObjects) {
-                var keys = Main.controls.get(ass.text.text);
-                if (keys == null) continue;
-                ass.input0.text = Functions.FlxKeyFromInt(keys[0]);
-                ass.input1.text = Functions.FlxKeyFromInt(keys[1]);
-            }
+    /**CONTROLS SETTINGS OBJECTS AND FUNCTION**/
+    private var saveButton:FlxUIButton;
+    private var controlsText:FlxUIText;
+    private var CONTROLSScrollCamera:FlxCamera;
+    private var SBG:FlxUI9SliceSprite;
+    private var CONTROLSScrollIndex:Float=0;
+    private var ControlObjects:Array<ControlsAssignmentObject>=[];
+    private var index:Int=0;
+    private var a:Int=0;
+    private function reloadControls() {
+        for(ass in ControlObjects) {
+            var keys = Main.controls.get(ass.text.text);
+            if (keys == null) continue;
+            ass.input0.text = Functions.FlxKeyFromInt(keys[0]);
+            ass.input1.text = Functions.FlxKeyFromInt(keys[1]);
         }
-        private function createControlsUI() {
-            SBG=new FlxUI9SliceSprite(controls.x+5, controls.y+5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0,0, 490, 370));
-            Save.readSaveFile(Main.FILE); //just in-case. //TODO: add posssible dropdown incase a save file isnt loaded, or a deault save file thingy.
-            CONTROLSScrollCamera = new FlxCamera((FlxG.width/2-250)+5, (FlxG.height/2-200)+25, 490, 370, 1);
-            CONTROLSScrollCamera.bgColor=0x0000FF00;
-            FlxG.cameras.add(CONTROLSScrollCamera, false);
-            for(control => keys in Main.controls) {
-                var assigner:ControlsAssignmentObject = new ControlsAssignmentObject(5, 5+(27*index), control, keys);
-                add(assigner);
-                assigner.camera=CONTROLSScrollCamera;
-                ControlObjects.push(assigner);
-                total_Controls++;
-                index++;
-            }
-
-            if(ControlObjects.length==0) {
-                var pulsingErrorText:FlxText = new FlxText(0, 0, 0, "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**", 12, true);
-                pulsingErrorText.alignment=CENTER;
-                pulsingErrorText.applyMarkup(pulsingErrorText.text, [
-                    new FlxTextFormatMarkerPair(new FlxTextFormat(0xFF0000, false, false, null, false), "**"),
-                    new FlxTextFormatMarkerPair(new FlxTextFormat(0xFF0000, false, true, null, false), "&")
-                ]);
-                pulsingErrorText.camera = CONTROLSScrollCamera;
-                add(pulsingErrorText);
-                pulsingErrorText.alpha=0;
-                pulsingErrorText.setPosition(CONTROLSScrollCamera.width/2-pulsingErrorText.width/2,CONTROLSScrollCamera.height/2-pulsingErrorText.height/2);
-                FlxTween.tween(pulsingErrorText, {alpha: 1}, 1.5428, {ease: FlxEase.sineInOut, type: PINGPONG});
-            }
-
-            controls.add(SBG);
-
-            saveButton=new FlxUIButton(420, 380, Language.getTranslatedKey("menu.options.tab.save.flush"), ()->{
-                var controlsUpload:Array<{c:String, keys:Array<FlxKey>}>=[];
-                for(i in 0...total_Controls) {
-                    trace('generating control scheme object...');
-                    var ReadObject:ControlsAssignmentObject=ControlObjects[i];
-
-                    final key0:FlxKey=(ReadObject.input0.text==""||(ReadObject.input0.text=="NONE"||ReadObject.input0.text=="null"))?NONE:FlxKey.fromString(ReadObject.input0.text);
-                    final key1:FlxKey=(ReadObject.input1.text==""||(ReadObject.input1.text=="NONE"||ReadObject.input1.text=="null"))?NONE:FlxKey.fromString(ReadObject.input1.text);
-                    controlsUpload.push({c:ReadObject.text.text,keys:[key0,key1]});
-                    trace(controlsUpload);
-                }
-                (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE.isEmptySTR()?Flags.DEFAULT_SAVE:Main.FILE).controls=controlsUpload;
-                Main.saveFile.flush();
-                @:privateAccess Save.loadControls(Main.FILE); //WHOOPS. kinda gotta re-call this each time.
-                reloadControls();
-            }, false);
-            saveButton.loadGraphic("flixel/images/ui/button.png", true, 80, 20); //probably gonna need to fix for android, although this menu is gonna look completely different on android
-            saveButton.updateHitbox();
-            saveButton.autoCenterLabel();
-            controls.add(saveButton);
-
-            openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage"), Language.getTranslatedKey("warning.unfinishedlanguage.message"), [
-                {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue"), f:()->{}, c:true}
-            ]));
+    }
+    private function createControlsUI() {
+        SBG=new FlxUI9SliceSprite(controls.x+5, controls.y+5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0,0, 490, 370));
+        Save.readSaveFile(Main.FILE); //just in-case. //TODO: add posssible dropdown incase a save file isnt loaded, or a deault save file thingy.
+        CONTROLSScrollCamera = new FlxCamera((FlxG.width/2-250)+5, (FlxG.height/2-200)+25, 490, 370, 1);
+        CONTROLSScrollCamera.bgColor=0x0000FF00;
+        FlxG.cameras.add(CONTROLSScrollCamera, false);
+        for(control => keys in Main.controls) {
+            var assigner:ControlsAssignmentObject = new ControlsAssignmentObject(5, 5+(27*index), control, keys);
+            add(assigner);
+            assigner.camera=CONTROLSScrollCamera;
+            ControlObjects.push(assigner);
+            total_Controls++;
+            index++;
         }
-    #end
+
+        if(ControlObjects.length==0) {
+            var pulsingErrorText:FlxText = new FlxText(0, 0, 0, "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**", 12, true);
+            pulsingErrorText.alignment=CENTER;
+            pulsingErrorText.applyMarkup(pulsingErrorText.text, [
+                new FlxTextFormatMarkerPair(new FlxTextFormat(0xFF0000, false, false, null, false), "**"),
+                new FlxTextFormatMarkerPair(new FlxTextFormat(0xFF0000, false, true, null, false), "&")
+            ]);
+            pulsingErrorText.camera = CONTROLSScrollCamera;
+            add(pulsingErrorText);
+            pulsingErrorText.alpha=0;
+            pulsingErrorText.setPosition(CONTROLSScrollCamera.width/2-pulsingErrorText.width/2,CONTROLSScrollCamera.height/2-pulsingErrorText.height/2);
+            FlxTween.tween(pulsingErrorText, {alpha: 1}, 1.5428, {ease: FlxEase.sineInOut, type: PINGPONG});
+        }
+
+        controls.add(SBG);
+
+        saveButton=new FlxUIButton(420, 380, Language.getTranslatedKey("menu.options.tab.save.flush"), ()->{
+            var controlsUpload:Array<{c:String, keys:Array<FlxKey>}>=[];
+            for(i in 0...total_Controls) {
+                trace('generating control scheme object...');
+                var ReadObject:ControlsAssignmentObject=ControlObjects[i];
+
+                final key0:FlxKey=(ReadObject.input0.text==""||(ReadObject.input0.text=="NONE"||ReadObject.input0.text=="null"))?NONE:FlxKey.fromString(ReadObject.input0.text);
+                final key1:FlxKey=(ReadObject.input1.text==""||(ReadObject.input1.text=="NONE"||ReadObject.input1.text=="null"))?NONE:FlxKey.fromString(ReadObject.input1.text);
+                controlsUpload.push({c:ReadObject.text.text,keys:[key0,key1]});
+                trace(controlsUpload);
+            }
+            (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE.isEmptySTR()?Flags.DEFAULT_SAVE:Main.FILE).controls=controlsUpload;
+            Main.saveFile.flush();
+            @:privateAccess Save.loadControls(Main.FILE); //WHOOPS. kinda gotta re-call this each time.
+            reloadControls();
+        }, false);
+        saveButton.loadGraphic("flixel/images/ui/button.png", true, 80, 20);
+        saveButton.updateHitbox();
+        saveButton.autoCenterLabel();
+        controls.add(saveButton);
+
+        openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage"), Language.getTranslatedKey("warning.unfinishedlanguage.message"), [
+            {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue"), f:()->{}, c:true}
+        ]));
+    }
 
     /**GRAPHICS SETTINGS OBJECTS AND FUNCTION**/
     private var shadersCheck:FlxUICheckBox;
@@ -149,7 +147,7 @@ class OptionsMenuSubstate extends FlxUISubState{
     private var languageDropdown:FlxUIDropDownMenu;
     private var audioTrackDropdown:FlxUIDropDownMenu;
     private function createGeneralUI() {
-        #if (android||html5)
+        #if (html5)
             final availableLanguages:Array<String>=[
                 "EN_US", "JP"
             ];
@@ -189,7 +187,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     var tab:FlxUIButton=cast(tab_menu.getTab(null, i));
                     tab.label.text = [
                         Language.getTranslatedKey("menu.options.tab.general"),FlxG.random.bool(14)?Language.getTranslatedKey("menu.options.tab.graphicsEG"):Language.getTranslatedKey("menu.options.tab.graphics"),
-                        #if !android Language.getTranslatedKey("menu.options.tab.controls"), #end Language.getTranslatedKey("menu.options.tab.difficulty")
+                        Language.getTranslatedKey("menu.options.tab.controls"), Language.getTranslatedKey("menu.options.tab.difficulty")
                     ][i];
 
                     tab.label.font = FlxAssets.FONT_DEFAULT;
@@ -239,20 +237,16 @@ class OptionsMenuSubstate extends FlxUISubState{
 
     override public function update(elapsed:Float){
         super.update(elapsed);
-        
-        #if !android
-            switch(tab_menu.selected_tab) {
-                case 0:
-                    CONTROLSScrollIndex-=(FlxG.mouse.wheel*10);
-                    CONTROLSScrollCamera.scroll.y=CONTROLSScrollIndex;
-                default:
-            }
-            CONTROLSScrollCamera.visible = tab_menu.selected_tab==0;
 
-            if(FlxG.keys.justPressed.ESCAPE) close(); //TODO: make act like a real internal window because fun
-        #else
-            //TODO: this.
-        #end
+        switch(tab_menu.selected_tab) {
+            case 0:
+                CONTROLSScrollIndex-=(FlxG.mouse.wheel*10);
+                CONTROLSScrollCamera.scroll.y=CONTROLSScrollIndex;
+            default:
+        }
+        CONTROLSScrollCamera.visible = tab_menu.selected_tab==0;
+
+        if(FlxG.keys.justPressed.ESCAPE) close(); //TODO: make act like a real internal window because fun
     }
 }
 
