@@ -7,11 +7,11 @@
 
     <section if="windows">
         <set name="version_prefix" value="PROTOTYE: " /> <!--boom, fixed.-->
-        <meta version="0.03.2"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
+        <meta version="0.03.3"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
     </section>
     
     <section unless="windows">
-        <meta version="PROTOTYPE: 0.03.2"/>
+        <meta version="PROTOTYPE: 0.03.3"/>
     </section>
 
     <!--apple can eat the corn out of my shit.-->
