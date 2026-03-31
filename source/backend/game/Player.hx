@@ -6,7 +6,14 @@ class Player extends FlxSprite {
     public static var stamina:Float = 100;
     public static var xp:Float = 0;
 
-    public static var curHotbarSlot:Int=0;
+    public var curHotbarSlot(default, set):Int=0;
+    public function set_curHotbarSlot(value:Int):Int {
+        curHotbarSlot=value;
+        @:privateAccess if(inventory.slots[curHotbarSlot]?.curItem?.type==RANGED || (inventory.slots[curHotbarSlot]?.curItem?.type==MEELEE || inventory.slots[curHotbarSlot]?.curItem?.type==MAGIC)){
+            if(weapon.name != inventory.slots[curHotbarSlot].curItem?.item) WeaponParser.recycleWeapon(weapon, inventory.slots[curHotbarSlot].curItem?.item); //only do it once IF we need to.
+        }
+        return curHotbarSlot;
+    }
     public var inventory:HUDSubstate; //for easy access without a bunch of extra stuff.
     public var weapon:Weapon;
     public static var INVENTORY_SLOTS:Int = 50; //default to ten for like, idk (CAN BE CHANGED BY SAVE FILE)
@@ -112,20 +119,18 @@ class Player extends FlxSprite {
 
 
         
-        curHotbarSlot+=FlxG.mouse.wheel; curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);
+        curHotbarSlot+=Math.floor(FlxG.mouse.wheel#if(html5).clamp(-1, 1)#end); //so windows doesnt require normailzation, but html5 does. wtf.
+        curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);
         curHotbarSlot=curHotbarSlot.clamp(0, 9); //actually 1-10;
         for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)
             if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
                 curHotbarSlot=i;
-                @:privateAccess
-                    if(inventory.slots[curHotbarSlot]?.curItem?.type==RANGED || (inventory.slots[curHotbarSlot]?.curItem?.type==MEELEE || inventory.slots[curHotbarSlot]?.curItem?.type==MAGIC))
-                        WeaponParser.recycleWeapon(weapon, inventory.slots[curHotbarSlot].curItem?.item);
                 break;
             }else continue;
 
         //HORRIBLE way to do it, but good enough.
-        if(inventory.weaponText.text!='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
-            inventory.weaponText.text='${Language.getTranslatedKey('weapon.${inventory.selectedItem?.item}')}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
+        if(inventory.weaponText.text!='${Language.getTranslatedKey('${inventory.selectedItem?.weaponType==NULL?"":"weapon."}${inventory.selectedItem?.item}', null)}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
+            inventory.weaponText.text='${Language.getTranslatedKey('${inventory.selectedItem?.weaponType==NULL?"":"weapon."}${inventory.selectedItem?.item}', null)}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
         }
 
         

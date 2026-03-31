@@ -1,5 +1,5 @@
 package states;
-
+import backend.Music;
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
     var buttons:Array<FlxButton>=[];
@@ -10,7 +10,7 @@ class MainMenuState extends FlxState {
         add(logo); //TODO: placeholder graphic
         final onButtonClicked:Array<Void->Void>=[
             ()->{
-                trace('new game');
+                #if(debug&&(windows||hl)) Main.LOG('new game'); #end
                 #if debug
                     Save.DEBUGSAVE('test');
                     Save.DEBUGSAVE('test1');
@@ -19,63 +19,58 @@ class MainMenuState extends FlxState {
                     Save.DEBUGSAVE('test4');
                 #end
             },
-            ()->{
-                openSubState(new LoadGameSubstate());
-            },
-            ()->{
-                openSubState(new OptionsMenuSubstate());
-            },
-            ()->{trace('gallery');},
-            ()->{trace('achivements');},
-            ()->{     
-                #if html5
-                    js.Browser.window.close();
-                #else
-                    Sys.exit(1);
-                #end
-            }
+            ()->{openSubState(new LoadGameSubstate());},
+            ()->{openSubState(new OptionsMenuSubstate());},
+            ()->{#if(debug&&(windows||hl)) Main.LOG('gallery');#end},
+            ()->{#if(debug&&(windows||hl)) Main.LOG('achivements');#end},
+            #if(windows||hl)()->{Sys.exit(1);}#end
         ];
         final strings:Array<String>=[
-            Language.getTranslatedKey("menu.new_game"),
-            Language.getTranslatedKey("menu.load_game"),
-            Language.getTranslatedKey("menu.config"),
-            Language.getTranslatedKey("menu.art"),
-            Language.getTranslatedKey("menu.awards"),
-            Language.getTranslatedKey("menu.quit")
+
         ];
 
-        for(i in 0...strings.length) {
-            var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), strings[i], onButtonClicked[i]);
+        for(i in 0...#if(windows||hl)5#else 4#end) {
+            var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), "", onButtonClicked[i]);
+            button.text = [
+                Language.getTranslatedKey("menu.new_game", button),
+                Language.getTranslatedKey("menu.load_game", button),
+                Language.getTranslatedKey("menu.config", button),
+                Language.getTranslatedKey("menu.art", button),
+                Language.getTranslatedKey("menu.awards", button),
+                #if(windows||hl)Language.getTranslatedKey("menu.quit", button)#end
+            ][i];
             buttons.push(button);
             add(button);
         }
 
         //TODO: cool bg art
-        //TODO: menu theme
+        Music.playMusic("CellCompilation");
 
 
         #if (debug)
-            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 200, Language.getTranslatedKey("menu.debug.debugger"), ()->{
+            var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 200, "", ()->{
                 openSubState(new DebuggerChooser());
             });
+            debuggerButton.text = Language.getTranslatedKey("menu.debug.debugger", debuggerButton);
             add(debuggerButton);
         #end
     }
 }
 
+
 #if (debug)
 class DebuggerChooser extends FlxSubState {
     final debuggerOptions:Map<String, Void->Void>=[
-        Language.getTranslatedKey("debugger.map") => ()->{
+        Language.getTranslatedKey("debugger.map", null) => ()->{
             FlxG.switchState(MapDebugger.new);
         },
-        Language.getTranslatedKey("debugger.testing")=>()->{
+        Language.getTranslatedKey("debugger.testing", null)=>()->{
             FlxG.switchState(()->new TestingState(false));
         },
-        Language.getTranslatedKey("debugger.save")=>()->{
+        Language.getTranslatedKey("debugger.save", null)=>()->{
             FlxG.switchState(SaveDebugger.new);
         },
-        Language.getTranslatedKey("debugger.alphabet")=>()->{
+        Language.getTranslatedKey("debugger.alphabet", null)=>()->{
             FlxG.switchState(AlphabetDebugger.new);
         }
     ];

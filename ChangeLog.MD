@@ -1,5 +1,38 @@
 # ChangeLog
 
+## Prototype Update 0.03.4 (Controls Migration)
+
+* Created `Tasks.md` still needs to be filled out.
+* Removed `.markdownlint.json` as i found a better way to fix things.
+* Removed `assets/android`
+* Created pickup graphics for: `burstgun`, `DEBUGCONSUMABLE`, `pistol`, `railgun`, `rifle`, and `burstgun`.
+* Updated `EN_US` lang file slightly.
+* Finally gave burstgun an inventory graphic.
+* Added `Music` system properly, functional on all builds.
+* Added `Cellcompilation-p`.
+* Updated `Changelog.md`.
+* Created system to only include .ogg files on native builds, and mp3 on web builds.
+* Updated `README.md` to make markdownlint stop complaining about in-line html tags
+* Attempted to fix Discord, but failed.
+* The map system can now load no map, will show a warning of a map failing to load.
+* Pickups can now load graphics.
+* Replaced most traces with Main.LOG, which on debug builds will output to a log file on crash/close.
+* `Language` system now attempts to change language of all on-screen object (disabled for now, very buggy.)
+* Added new "autopause" setting to settings.
+* Options menu can now be opened from the pause menu.
+* `MapGenerator` properly saves save file when generating maps.
+* `MapGenerator` is broken and doesnt export maps :/
+* `Save` now stores controls globally instead of per-save.
+* Added `ScrollableArea` class.
+* Removed `controls` field from `Flags.DEFAULT_SAVE`
+* Added new logging system to generate a log file at program crash/close.
+* `MainMenuState` now plays the prototype theme
+* BUG FIXES:
+* * Player hotbar now properly changes depending on scrollwheel input.
+* * Player weapon text will only show `weapon.` if the item is a weapon.
+* * Player hotbar scrolling no longer goes at mach 10.
+* * `LoadGameSubstate` and `OptionsMenuSubstate` no longer let you scroll below the minimum.
+
 ## prototype update 0.03.3 (android removal)
 
 * Android is no longer a supported target.
@@ -91,6 +124,7 @@
 * added `.markdownlint.json` for the markdownlint plugin (VSCODE)
 
 ## Prototype Update 0.02.2 (Loading Saves)
+
 >DEV NOTE
 >
 >the system is a bit fucky, but it gets the job done

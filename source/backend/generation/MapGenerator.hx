@@ -48,6 +48,7 @@ class MapGenerator {
         }else map[y][x]=tile;
     }
     public static function generateMap(width:Int, height:Int) {  
+        #if(debug&&(windows||hl)) Main.LOG('attempting to generate map with width $width and height $height'); #end
         var outputTiles:Array<Array<TilePointer>> = [];
         var toMapFile:MapFile = {
             name: "PLACEHOLDER",
@@ -58,7 +59,7 @@ class MapGenerator {
         //TODO: rewrite generation system to be based off of extensions, kinda like what minecraft random structures do.
         for(h in 0...height) outputTiles[h]=[]; //just for assigning and making sure we dont access nulls in the arrays because im too lazy to initilize properly.
         outputTiles[Math.floor(outputTiles.length/2)][Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)]={collides: false,type: "",specialType:SPAWN,special: true};
-
+        #if(debug&&(windows||hl)) Main.LOG('placed spawn tile at ${Math.floor(outputTiles.length/2)}, ${Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)} tiles: ${outputTiles.length}, $outputTiles'); #end
         var generatedHallway:Bool=false;
         for(h in 0...height){
             for(w in 0...width) {
@@ -77,8 +78,12 @@ class MapGenerator {
         }
 
         toMapFile.tiles = outputTiles;
+        #if(debug&&(windows||hl)) Main.LOG('finished generating mapFile $toMapFile'); #end
         if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null)(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=([]:Array<MapFile>);
+        #if(debug&&(windows||hl)) Main.LOG('attempting to push... BEFORE: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps}'); #end
         (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
+        #if(debug&&(windows||hl)) Main.LOG('attempting to push... AFTER: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps}'); #end
+        Main.saveFile.flush(); //should probably do this im realizing. maybe i should add a setter or something to automatically do this for me.
     }
     private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){
         var hallwayLength:Int = FlxG.random.int(HALLWAY_MIN_LENGTH, HALLWAY_MAX_LENGTH);
@@ -108,16 +113,17 @@ class MapGenerator {
 
     public static function createMap(file:String):GameMap {
         var hasMap:Bool=false;
-        for(map in 0...(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.length)if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[map].name==file)hasMap=true; //check if we have the target map in the save file.
+        var save:SaveFile = (Main.saveFile.data.saves:Map<String, SaveFile>).get(Main.FILE);
+        for(map in 0...save.maps.length)if(save.maps[map].name==file)hasMap=true; //check if we have the target map in the save file.
         if(hasMap) {
             var internalMap:Null<MapFile>=null;
-            for(possibleMap in 0...(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.length) {
-                if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].name == file){
+            for(possibleMap in 0...save.maps.length) {
+                if(save.maps[possibleMap].name == file){
                     internalMap={
-                        name: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].name??"ERROR",
-                        width: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].width??0,
-                        height: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].height??0,
-                        tiles: (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
+                        name: save.maps[possibleMap].name??"ERROR",
+                        width: save.maps[possibleMap].width??0,
+                        height: save.maps[possibleMap].height??0,
+                        tiles: save.maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
                     }
                 }
             }
@@ -133,8 +139,12 @@ class MapGenerator {
             FlxG.worldBounds.set(0, 0, 0+(16*internalMap.width), 0+(16*internalMap.height));
             return returnMap;
         }else{
-            Main.showError("MISSINGMAP", file);
-            return null;
+            //Save.genereateMapFile shows this error. we dont need to do it twice.
+            //Main.showError("MAPNULL", file); //swapped to new error, same message though.
+            var returnMap:GameMap = new GameMap(null);
+            returnMap.generate();
+            FlxG.worldBounds.set(0, 0, 0+(16*1), 0+(16*1));
+            return returnMap;
         }
         return null;
     }
@@ -146,7 +156,7 @@ class MapGenerator {
                 Main.foundMaps.push((Main.saveFile.data.maps:Array<MapFile>)[i].name);
             }
         }else{
-            trace('no maps found in save file, this is okay.');
+            #if(debug&&(windows||hl)) Main.LOG('no maps found in save file, this is okay.'); #end
         }
     }
 }

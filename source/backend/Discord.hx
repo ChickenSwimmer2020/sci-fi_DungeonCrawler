@@ -14,18 +14,19 @@ package backend;
 
         public function new(clientId:String) {connect(clientId);};
 
-        private function connect(clientId:String):Void { //TODO: fix the ~10 second wait between connecting and game starting.
+        //TODO: fix crash when trying to close while discord is attempting to connect.
+        private function connect(clientId:String):Void {
             thread = Thread.create(() -> {
                 try {
                     var path = "\\\\.\\pipe\\discord-ipc-0";
-                    pipe = sys.io.File.update(path);
-                    pipeIn = sys.io.File.read(path, true);
+                    pipe = sys.io.File.append(path, true); // binary mode
+                    pipeIn = sys.io.File.read(path, true);  // keep this for reading
                     connected = true;
-                    trace('discord connected');
+                    #if(debug&&(windows||hl)) Main.LOG('discord connected'); #end
 
                     _send(0, haxe.Json.stringify({v: 1, client_id: clientId}));
                     var response = _read();
-                    trace('handshake: $response');
+                    #if(debug&&(windows||hl)) Main.LOG('handshake: $response'); #end
 
                     while (connected) {
                         mutex.acquire();
@@ -38,15 +39,32 @@ package backend;
 
                         try {
                             var response = _read();
-                            if (response != "") trace('discord: $response');
+                            #if(debug&&(windows||hl)) if (response != "") Main.LOG('discord: $response'); #end
                         } catch(_) {}
 
                         Sys.sleep(0.1);
                     }
                 } catch(e:Dynamic) {
-                    trace('discord thread error: $e');
+                    #if(debug&&(windows||hl)) Main.LOG('discord thread error: $e'); #end
                 }
             });
+        }
+
+        private function _send(opcode:Int, payload:String):Void {
+            var json = haxe.io.Bytes.ofString(payload);
+            var len = json.length;
+            var buf = haxe.io.Bytes.alloc(8 + len);
+            buf.set(0, opcode & 0xFF);
+            buf.set(1, (opcode >> 8) & 0xFF);
+            buf.set(2, (opcode >> 16) & 0xFF);
+            buf.set(3, (opcode >> 24) & 0xFF);
+            buf.set(4, len & 0xFF);
+            buf.set(5, (len >> 8) & 0xFF);
+            buf.set(6, (len >> 16) & 0xFF);
+            buf.set(7, (len >> 24) & 0xFF);
+            buf.blit(8, json, 0, len);
+            pipe.writeBytes(buf, 0, buf.length);
+            // no flush() - named pipes auto-flush on write
         }
 
         // call this from main thread safely
@@ -84,23 +102,6 @@ package backend;
             mutex.release();
         }
 
-        private function _send(opcode:Int, payload:String):Void {
-            var json = haxe.io.Bytes.ofString(payload);
-            var len = json.length;
-            var buf = haxe.io.Bytes.alloc(8 + len);
-            buf.set(0, opcode & 0xFF);
-            buf.set(1, (opcode >> 8) & 0xFF);
-            buf.set(2, (opcode >> 16) & 0xFF);
-            buf.set(3, (opcode >> 24) & 0xFF);
-            buf.set(4, len & 0xFF);
-            buf.set(5, (len >> 8) & 0xFF);
-            buf.set(6, (len >> 16) & 0xFF);
-            buf.set(7, (len >> 24) & 0xFF);
-            buf.blit(8, json, 0, len);
-            pipe.writeBytes(buf, 0, buf.length);
-            pipe.flush();
-        }
-
         private function _read():String {
             var header = haxe.io.Bytes.alloc(8);
             pipeIn.readFullBytes(header, 0, 8);
@@ -112,7 +113,16 @@ package backend;
         }
 
         public function close():Void {
+            if (!connected) return;
             connected = false;
+            
+            try {
+                // send close opcode so discord cleans up properly
+                _send(2, "{}");
+            } catch(_) {}
+            
+            Sys.sleep(0.1); // give discord a moment to process it
+            
             try { pipe.close(); } catch(_) {}
             try { pipeIn.close(); } catch(_) {}
         }

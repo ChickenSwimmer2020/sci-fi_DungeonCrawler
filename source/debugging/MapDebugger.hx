@@ -7,12 +7,12 @@ class MapDebugger extends FlxUIState{
     var GenerateButton:FlxUIButton;
     public function new() {
         super();
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.map.exit"), 24, true);
+        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.map.exit", null), 24, true);
         add(text);
 
         // Define the tabs:
 		var tabs = [
-			{name: "tab_1", label: Language.getTranslatedKey("debugger.map.generatemenu")},
+			{name: "tab_1", label: Language.getTranslatedKey("debugger.map.generatemenu", null)},
 		];
 
 		// Make the tab menu itself:
@@ -30,8 +30,8 @@ class MapDebugger extends FlxUIState{
         tab_group_1.add(widthStepper);
         tab_group_1.add(heightStepper);
 
-        GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey("debugger.map.generate"), ()->{
-            trace('generate map');
+        GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey("debugger.map.generate", null), ()->{
+            #if(debug&&(windows||hl)) Main.LOG('generate map'); #end
         });
         tab_group_1.add(GenerateButton);
 

@@ -1,5 +1,7 @@
 package backend.game.states.substates;
 
+import backend.ui.ScrollableArea;
+
 class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
     public var onSaveDestroyed:Void->Void;
     private var BG:FlxUI9SliceSprite;
@@ -16,7 +18,7 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         BG=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, 380, 100));
         CUTOUT=new FlxUI9SliceSprite(5, 5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, 90, 90));
         text=new FlxUIText(100, 5, BG.width-105, '{NAME} - {DIFFICULTY}\n{H}:{M}:{S} || {DEPTH}\n{LEVEL}', 14, true);
-        loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave"), ()->{
+        loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave", loadButton), ()->{
             Main.FILE=text.text.split('-')[0].trim(); //should work?
             #if debug FlxG.switchState(()->new TestingState(true)); #end
         }, false);
@@ -63,7 +65,7 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
     var BG:FlxUI9SliceSprite;
     var SBG:FlxUI9SliceSprite;
 
-    var scrollCam:FlxCamera;
+    var scrollCam:ScrollableArea;
 
     private var loadedSaves:Int=0;
     private var saveBoxes:Array<SaveBox>=[];
@@ -85,14 +87,13 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
         SBG = new FlxUI9SliceSprite(BG.x+5,BG.y+5,FlxUIAssets.IMG_CHROME_INSET,new Rectangle(0, 0, 390, 590));
         add(SBG);
 
-        scrollCam=new FlxCamera(SBG.x, SBG.y, Math.floor(SBG.width), Math.floor(SBG.height), 1);
-        scrollCam.bgColor=0x00000000;
+        scrollCam=new ScrollableArea(SBG.x, SBG.y, Math.floor(SBG.width), Math.floor(SBG.height), 1);
         FlxG.cameras.add(scrollCam, false);
     
 
         for(key => save in (Main.saveFile.data.saves:Map<String,SaveFile>)??([]:Map<String,SaveFile>)) {
             if(save?.meta?.name == key){
-                trace('valid save file $key, loading...');
+                #if(debug&&(windows||hl)) Main.LOG('valid save file $key, loading...'); #end
                 var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
                 add(box);
                 saveBoxes.push(box);
@@ -113,16 +114,6 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        FlxG.watch.addQuick('mouse', FlxG.mouse.wheel);
-        FlxG.watch.addQuick('index', scrollIndex);
-        scrollIndex= scrollIndex.clampf(0, Math.POSITIVE_INFINITY); //TODO: actually fix.
-        if(scrollIndex>=0)
-            scrollIndex-=(FlxG.mouse.wheel*10);
-        else
-            scrollIndex=0;
-        
-
-        scrollCam.scroll.y = scrollIndex;
         if(FlxG.keys.justPressed.ESCAPE) close();
     }
 }

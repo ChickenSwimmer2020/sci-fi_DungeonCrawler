@@ -92,7 +92,7 @@ class InventorySlot extends FlxSprite {
                     RightClickOptions.push("Drink");
                     RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
                         ()->{
-                            trace('player has drank something.');
+                            #if(debug&&(windows||hl)) Main.LOG('player has drank something.'); #end
                             onItemUsed("drink", curItem);
                             unloadItem();
                         }
@@ -102,7 +102,7 @@ class InventorySlot extends FlxSprite {
                     RightClickOptions.push("Eat");
                     RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
                         ()->{
-                            trace('player has eaten something.');
+                            #if(debug&&(windows||hl)) Main.LOG('player has eaten something.'); #end
                             onItemUsed("consume", curItem);
                             unloadItem();
                         }
@@ -160,7 +160,7 @@ class InventorySlot extends FlxSprite {
             if(((FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressedRight)) && hasItem==true
             ) {
                 openRightClickMenu();
-                trace('attempting right click menu');
+                #if(debug&&(windows||hl)) Main.LOG('attempting right click menu'); #end
             }
         }
 
@@ -190,7 +190,7 @@ class InventorySlot extends FlxSprite {
                 RightClickOptions.push("Drink");
                 RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
                     ()->{
-                        trace('player has drank something.');
+                        #if(debug&&(windows||hl)) Main.LOG('player has drank something.'); #end
                         onItemUsed("drink", curItem);
                         unloadItem();
                     }
@@ -200,7 +200,7 @@ class InventorySlot extends FlxSprite {
                 RightClickOptions.push("Eat");
                 RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
                     ()->{
-                        trace('player has eaten something.');
+                        #if(debug&&(windows||hl)) Main.LOG('player has eaten something.'); #end
                         onItemUsed("consume", curItem);
                         unloadItem();
                     }
@@ -310,7 +310,7 @@ class HUDSubstate extends FlxSubState {
                     case "drink": inventory[slots.indexOf(slot)] = "EMPTY";
 
                     case "drop": inventory[slots.indexOf(slot)] = "EMPTY"; //so the slot doesnt get IMMEDIATELY overwritten by inventory reloading items constantly.
-                    default: trace('unknown action tyep $action on $item');
+                    default: #if(debug&&(windows||hl)) Main.LOG('unknown action tyep $action on $item'); #end
                 }
             }
             index++;
@@ -341,7 +341,7 @@ class HUDSubstate extends FlxSubState {
             //create the small graphic that follows the cursor when holding an item
             if(Main.heldItemGraphic==null) {
                 Main.heldItemGraphic = new FlxSprite(FlxG.mouse.viewX, FlxG.mouse.viewY);
-                trace(Main.curHeldItem);
+                #if(debug&&(windows||hl)) Main.LOG(Main.curHeldItem); #end
                 if(#if (html5) Paths.image('ui/items', Main.curHeldItem.item)!=null #else FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))#end) {
                     Main.heldItemGraphic.loadGraphic(Paths.image('ui/items', Main.curHeldItem.item));
                     Main.heldItemGraphic.setGraphicSize(32, 32);
@@ -362,7 +362,7 @@ class HUDSubstate extends FlxSubState {
             Main.heldItemGraphic=null;
         }
         @:privateAccess weaponText.visible=Player.instance.isWeapon;
-        selectedItem=slots[Player.curHotbarSlot]?.curItem??{
+        selectedItem=slots[Player.instance.curHotbarSlot]?.curItem??{
             type: NULL,
             weaponType: NULL,
             gunType: NULL,
@@ -374,7 +374,7 @@ class HUDSubstate extends FlxSubState {
         healthFlask.y=(fullOpen?(InventorySlot.SIZE*(slots.length/10)):0+InventorySlot.SIZE)+10;
         for(i in 0...slots.length){ //im going to make sure i only have ONE for loop in the update function, since these get out of hand QUICKLY.
             slots[i].color=0xFFFFFFFF;
-            if(slots[Player.curHotbarSlot]!=null) slots[Player.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
+            if(slots[Player.instance.curHotbarSlot]!=null) slots[Player.instance.curHotbarSlot].color = 0xFF00FF00; //override the color then just after setting it.
             if(fullOpen){
                 if(slots[i].visible==false || slots[i].interactable==false){
                     slots[i].visible=slots[i].active=slots[i].alive=slots[i].interactable=true;

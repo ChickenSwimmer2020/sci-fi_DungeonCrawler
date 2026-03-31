@@ -13,7 +13,11 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     public function new(file:MapFile) {
         super();
         instance=this;
-        tiles = file.tiles;
+        if(file==null){
+            tiles = [];
+        }else{
+            tiles = file.tiles;
+        }
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
     public function generate(?testingState:Bool=false){

@@ -26,12 +26,12 @@ class PauseMenu extends FlxSubState {
 
         for(i in 0...(#if(debug)Main.loadedTestedState?6:5#else 5#end)) {
             var button:FlxButton = new FlxButton(FlxG.width-85, FlxG.height, [
-                Language.getTranslatedKey("pause.resume"),
+                Language.getTranslatedKey("pause.resume", buttons[i]),
+                Language.getTranslatedKey("pause.settings", buttons[i]),
                 "",
                 "",
                 "",
-                "",
-                Language.getTranslatedKey("pause.debug.exittestingstate")
+                Language.getTranslatedKey("pause.debug.exittestingstate", buttons[i])
             ][i], [
                 ()->{
                     FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
@@ -41,7 +41,11 @@ class PauseMenu extends FlxSubState {
                         FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
                     }
                 },
-                ()->{},
+                ()->{
+                    var options:FlxSubState = new OptionsMenuSubstate();
+                    options.camera = Main.camHUD;
+                    openSubState(options);
+                },
                 ()->{},
                 ()->{},
                 ()->{},

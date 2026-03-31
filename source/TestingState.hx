@@ -25,8 +25,9 @@ class TestingState extends flixel.FlxState {
                 MapGenerator.generateMap(100, 100);
                 add(MapGenerator.createMap('PLACEHOLDER'));
             }else{
-                trace('is this even working?');
-                add(Save.getMapFromSaveFile(Main.FILE, "PLACEHOLDER")); //placeholder logic for map loading.
+                 #if(debug&&(windows||hl)) Main.LOG('is this even working?'); #end
+                var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "PLACEHOLDER");
+                add(map);
                 Save.readSaveFile(Main.FILE);
             }
         #else

@@ -11,7 +11,16 @@ class Pickup extends FlxSprite {
             Main.showError('NULLITEM');
             destroy();
         }
-        makeGraphic(10, 10, 0xFF00FF00);
+        #if (windows||hl)
+            if(FileSystem.exists(Paths.image('items/images', data.item))){
+                loadGraphic(Paths.image('items/images', data.item));
+                setGraphicSize(0, 10);
+                updateHitbox();
+            }else{
+                makeGraphic(32, 32, 0xFFFF00FF);
+                setGraphicSize(0, 10);
+                updateHitbox();
+                Main.showError("RENDERFAILURE", data.item);
         camera=Main.camGame; //just gonna do this automatically.
         //TODO: graphic loading system
     }

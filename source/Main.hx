@@ -1,8 +1,38 @@
 package;
 
+import lime.utils.Resource;
+import lime.ui.FileDialog;
+#if html5
+    import js.html.FileSystem;
+    import js.html.File;
+    import js.Browser;
+#end
+import openfl.events.UncaughtErrorEvent;
+import openfl.events.Event;
 import backend.Discord;
 
 class Main extends openfl.display.Sprite {
+    #if (debug&&(windows||hl))
+        public static function LOG(str:Dynamic) {
+            if(FlxG.log.redirectTraces) FlxG.log.add(str); //still fully functional.
+            else trace(str);
+            DEBUGLOG.push(str);
+        }
+        public static var DEBUGLOG:Array<Dynamic>=[];
+        public static function BUILDDEBUGLOGFILE() {
+            var content:String="";
+            for(line in DEBUGLOG) {
+                content += line + "\n";
+            }
+
+            var dateString:String = '${Date.now()}';
+            dateString = dateString.replace(':', '-'); //replace colons with dashes to avoid issues with file naming on windows.
+
+            
+            if(!FileSystem.exists('DebugLogs')) FileSystem.createDirectory('DebugLogs');
+            File.saveContent('DebugLogs/debuglog$dateString.txt', content);
+        }
+    #end
     public static var controls:Map<String, Array<Int>>=[
         "moveUP" => [UP, W],
         "moveDOWN" => [DOWN, S],
@@ -18,15 +48,56 @@ class Main extends openfl.display.Sprite {
     public static var curHeldItem:Null<Item>=null;
     public static var heldItemGraphic:Null<FlxSprite>=null;
 
-    public static var curLanguage:Lang=EN_US;
+    public static var curLanguage(default, set):Lang=EN_US;
+    //TODO: make this work, it already SOMEWHAT works, but its fucky.
+    public static function set_curLanguage(value:Lang) {
+        curLanguage = value;
+
+        for(key => object in Language.activeLanguageObject) {
+            trace(Type.getClass(object));
+            //if(Std.isOfType(object, FlxText) || Std.isOfType(object, FlxUIText)) {
+            //    var textObject:FlxText = cast object;
+            //    textObject.text = Language.getTranslatedKey(key, null);
+            //    textObject.font = switch(curLanguage){
+            //        case EN_US: "Nokia Cellphone FC Small";
+            //        case JP: "assets/ui/fonts/k8x12L.ttf";
+            //        case ES: "Nokia Cellphone FC Small";
+            //    }
+            //}else if(Std.isOfType(object, FlxUIButton)) {
+            //    var buttonObject:FlxButton = cast object;
+            //    buttonObject.text = Language.getTranslatedKey(key, null);
+            //    buttonObject.label.font = switch(curLanguage){
+            //        case EN_US: "Nokia Cellphone FC Small";
+            //        case JP: "assets/ui/fonts/k8x12L.ttf";
+            //        case ES: "Nokia Cellphone FC Small";
+            //    }
+            //}else if(Std.isOfType(object, FlxButton)) {
+            //    var buttonObject:FlxButton = cast object;
+            //    buttonObject.text = Language.getTranslatedKey(key, null);
+            //    buttonObject.label.font = switch(curLanguage){
+            //        case EN_US: "Nokia Cellphone FC Small";
+            //        case JP: "assets/ui/fonts/k8x12L.ttf";
+            //        case ES: "Nokia Cellphone FC Small";
+            //    }
+            //}
+            //if(Std.isOfType(object, FlxText) || (Reflect.hasField(object, "text") || (Reflect.hasField(object, "text") && Reflect.hasField(object.text, "text")))) { //if it has a text field, we can assume its a FlxText or something similar and update the text.
+            //    trace(Type.getClass(object));
+            //    var textObject:FlxText = cast object;
+            //    textObject.text = Language.getTranslatedKey(key, null);
+            //}
+        }
+
+        return value;
+    }
     public static final ErrorType:Map<String, Array<String>>=[
         "TEST"=>["window title", "message box"],
         "IOERROR"=>["error.nullio", "error.nullio.message"],
         "RENDERFAILURE"=>["error.renderfailure", "error.renderfailure.message"],
         "SAVENOTCACHED"=>["error.cachefault", "error.cachefault.message"],
         "MISSINGLANG"=>["error.languagemissing", "error.languagemissing.mesage"],
-        "MISSINGMAP"=>["error.mapnotfound", "error.mapnotfound.message"],
+        //"MISSINGMAP"=>["error.mapnotfound", "error.mapnotfound.message"], //!CUT CONTENT (removed in 0.02)
         "NULLITEM"=>["error.nullitem", "error.nullitem.message"],
+        "MAPNULL"=>["error.mapnotfound", "error.mapnotfound.message"] //LOL imma just reuse this cut error message
     ];
     //hehe we can store static varibles here to be accessed EVERYWHERE.
     public static var foundMaps:Array<String> = []; //we can store all the currently found maps from the game files and mods (if implemented.)
@@ -157,7 +228,7 @@ class Main extends openfl.display.Sprite {
         if(forceLanguage!=null)curLanguage=forceLanguage; //since we dont have language input on Language.getTranslatedKey anymore.
         var type:Array<String> = ErrorType.get(input);
         var Message:String=Language.getTranslatedErrorMessage(missingObject, type[1]);
-        var Title:String=Language.getTranslatedKey(type[0]);
+        var Title:String=Language.getTranslatedKey(type[0], null);
         var close:Bool=false;
         var gotomenu:Bool=false;
         if(Message.indexOf('[SHUTDOWN]')!=-1){
@@ -187,6 +258,27 @@ class Main extends openfl.display.Sprite {
     #if sys public static var discord:Discord; #end
     public function new() {
         super();
+        //i hope this works.
+        #if (debug)
+            //yeah this probably works better.
+            Application.current.window.onClose.add(()->{
+                #if sys if(discord!=null) discord.close(); #end
+                #if (debug&&(windows||hl)) BUILDDEBUGLOGFILE(); #end
+            });
+            Application.current.window.stage.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, (event:UncaughtErrorEvent) -> {
+                var errorMessage:String = "An unexpected error has occurred:\n";
+                if (Std.isOfType(event.error, Error)) {
+                    var error:Error = cast event.error;
+                    errorMessage += "${error.message}\n${error.stack}";
+                } else if (Std.isOfType(event.error, String)) {
+                    errorMessage += cast event.error;
+                } else {
+                    errorMessage += "Unknown error type.";
+                }
+                Application.current.window.alert(errorMessage, "Unexpected Error");
+                #if (debug&&(windows||hl)) BUILDDEBUGLOGFILE(); #end
+            });
+        #end
         
         #if (html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
         saveFile.bind("SAVES");
@@ -200,7 +292,7 @@ class Main extends openfl.display.Sprite {
             FILE=lastLoadedSaveName;
             saveFile.flush();
         }else FILE=Flags.DEFAULT_SAVE;
-        musicPostfix = Main.saveFile.data.musicPF??""; //default to none if the musicPF is null.
+        musicPostfix = Main.saveFile.data.musicPF??"D"; //default to default if the musicPF is null.
         Application.current.window.title = Language.applicationTitles.get(Main.curLanguage);
         FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
             case EN_US: "Nokia Cellphone FC Small";
@@ -214,18 +306,32 @@ class Main extends openfl.display.Sprite {
         //by not compiling during runtime.
 
         addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
-        #if sys
+        #if (windows||hl)
             discord = new Discord("1487613766077120724");
             discord.setActivity("IPC RICH PRESENCE TEST 01");
         #end
         initDefaultSaveParemeters();
         #if (debug&&!html5) initDebugWindows(); #end
+
+        FlxG.autoPause = saveFile.data.autoPause??true; //default to true if not specified.
     }
     private static function initDefaultSaveParemeters() {
         if((saveFile.data.saves:Map<String,SaveFile>).get(Flags.DEFAULT_SAVE)==null){
             (saveFile.data.saves:Map<String,SaveFile>).set(Flags.DEFAULT_SAVE, Flags.DEFAULT_SAVEFILE);
         }
         if(saveFile.data.shaders==null)saveFile.data.shaders=true;
+        if(saveFile.data.autoPause==null)saveFile.data.autoPause=true;
+        if(saveFile.data.controls==null)saveFile.data.controls=([
+            {c:"moveUP", keys:["UP", "W"]},
+            {c:"moveDOWN", keys:["DOWN", "S"]},
+            {c:"moveRIGHT", keys:["RIGHT", "D"]},
+            {c:"moveLEFT", keys:["LEFT", "A"]},
+            {c:"zoomIN", keys:["PLUS", "NONE"]},
+            {c:"zoomOUT", keys:["MINUS", "NONE"]},
+            {c:"pause", keys:["ESCAPE", "BACKSPACE"]},
+            {c:"inventory", keys:["I", "NONE"]},
+            {c:"interact", keys:["E", "ENTER"]}
+        ]:Array<{c:String, keys:Array<FlxKey>}>); //default init.
         if(saveFile.data.language==null)saveFile.data.language="EN_US";
     }
 }

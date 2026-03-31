@@ -25,7 +25,6 @@ class Flags {
         stamina: 0,
         xp: 0,
         position: {x:0, y:0},
-        controls: [],
         inventory: [],
         maps: [],
     };

@@ -12,6 +12,8 @@
     "menu.options.tab.graphicsEG": "Grapchis",
     "menu.options.general.language": "Language",
     "menu.options.general.audiotrack": "Audio version",
+    "menu.options.general.autopause": "Auto-Pause",
+    "menu.options.controls.nocontrols": "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**",
 
     "menu.new_game": "New Game",
     "menu.load_game": "Load Game",
@@ -34,6 +36,11 @@
     "debugger.save.returned": "Returned Value:",
     "debugger.save.nosaves": "NO SAVES",
 
+    "weapon.pistol": "Pistol",
+    "weapon.shotgun": "Shotgun",
+    "weapon.rifle": "Rifle",
+    "weapon.burstgun": "Burst Gun",
+    "weapon.railgun": "Rail Gun",
 
     "error.nullitem": "Null Item Exception",
     "error.nullitem.message": "An Pickup attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL.",
@@ -46,5 +53,5 @@
     "error.languagemissing": "Language Fault",
     "error.languagemissing.mesage": "The language file for {OBJ} could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]",
     "error.mapnotfound": "Map read Failure",
-    "error.mapnotfound.message": "The map file {OBJ} could not be loaded. This error is not fatal, and you will be returned to the main menu.[MENU]"
+    "error.mapnotfound.message": "The map file {OBJ} could not be loaded. This error is not fatal"
 }

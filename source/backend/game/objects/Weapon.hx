@@ -204,7 +204,7 @@ class WeaponParser {
         return null;
     }
     private static function parseXML(path:String):WeaponData {
-        trace('Parsing weapon file: $path');
+        #if(debug&&(windows||hl)) Main.LOG('Parsing weapon file: $path'); #end
         if(#if(html5) Assets.getText(path)!=null #else FileSystem.exists(path)#end){
             var xmlToParse:Xml = Xml.parse(#if(html5) Assets.getText(path) #else File.getContent(path)#end);
             var damge:Map<String, Float>=[];
@@ -228,7 +228,7 @@ class WeaponParser {
                 animations:[],
                 damage:[]
             };
-            trace(returnedWeapon); //WHAT THE FUCK IS BROKEN.
+            #if(debug&&(windows||hl)) Main.LOG(returnedWeapon); #end //WHAT THE FUCK IS BROKEN.
             for(element in root.elements()) {
                 if(element.nodeName=="Animation") anims.push({n:element.get('name'),f:element.get('frames').contains('...')?element.get('frames').StringToArray():element.get('frames').StringToArray(true),fr:Std.parseInt(element.get('frameRate')),l:element.get('loop').toBool(),fl:{x:element.get('flipX').toBool(),y:element.get('flipY').toBool()}});
                 else if(element.nodeName=="Damage") damge.set(element.get('type'), Std.parseFloat(element.get('value')));

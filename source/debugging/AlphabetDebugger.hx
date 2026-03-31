@@ -7,10 +7,10 @@ class AlphabetDebugger extends FlxUIState{
     var GenerateButton:FlxUIButton;
     public function new() {
         super();
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.alphabet.exit"), 24, true);
+        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.alphabet.exit", null), 24, true);
         add(text);
 
-        var alphabet:FlxText=new FlxText(0, 50, 0, Language.getTranslatedKey("debugger.alphabet.allsymbols"), 12);
+        var alphabet:FlxText=new FlxText(0, 50, 0, Language.getTranslatedKey("debugger.alphabet.allsymbols", null), 12);
         add(alphabet);
     }
     override public function update(elapsed:Float) {

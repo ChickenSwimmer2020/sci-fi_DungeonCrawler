@@ -77,7 +77,7 @@ class Tile extends FlxSprite {
         }
         if(checkTile(tiles, xPosition, yPosition+1).t?.suround.contains('/up') && checkTile(tiles, xPosition, yPosition-1).t?.suround.contains('/down')) suround="up/down"; //if im correct, i can force states like this!
         frame = frames.getByIndex(mapTiles.get(curImage==""?"placeholder":curImage).get(suround??"none"));
-        //trace(tiles); //will take forever, but i just want to make sure that the tile gets the tiles around it.
+        //#if(debug&&(windows||hl)) Main.LOG(tiles); //will take forever, but i just want to make sure that the tile gets the tiles around it.
     }
     
     private function initTileGraphic(image:String) {
