@@ -258,6 +258,10 @@ class Main extends openfl.display.Sprite {
     #if sys public static var discord:Discord; #end
     public function new() {
         super();
+        trace('Inputted 65. Expecting FlxKey 65(A).');
+        var key:FlxKey = Functions.FlxKeyFromInt(65);
+        var iKey:Int = key;
+        trace('Got FlxKey ${iKey}(${key}).');
         //i hope this works.
         #if (debug)
             //yeah this probably works better.
