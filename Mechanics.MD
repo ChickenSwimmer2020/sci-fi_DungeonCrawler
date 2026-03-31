@@ -1,3 +1,3 @@
 # mechanic ideas
 
-* Level starts to collapse after you turn the power on for each level. (ᄂΣ MIПƬ)
+* Security system starts up after enabling level power (REQUIRES FUZE (HARDMODE EXCLUSIVE))
