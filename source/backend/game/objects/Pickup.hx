@@ -21,8 +21,20 @@ class Pickup extends FlxSprite {
                 setGraphicSize(0, 10);
                 updateHitbox();
                 Main.showError("RENDERFAILURE", data.item);
+            }
+        #else
+            if(Paths.image('items/images', data.item)!=null){
+                loadGraphic(Paths.image('items/images', data.item));
+                setGraphicSize(0, 10);
+                updateHitbox();
+            }else{
+                makeGraphic(10, 10, 0xFFFF00FF);
+                setGraphicSize(0, 10);
+                updateHitbox();
+                Main.showError("RENDERFAILURE", data.item);
+            }
+        #end
         camera=Main.camGame; //just gonna do this automatically.
-        //TODO: graphic loading system
     }
     var sin:Float=0;
     override public function update(elapsed:Float) {
@@ -42,7 +54,7 @@ class Pickup extends FlxSprite {
                     destroy();
                     interactionPopup(false);
                 }else{
-                    trace('TODO: logic for showing the text telling you that your inventory is full');
+                    #if(debug&&(windows||hl)) Main.LOG('TODO: logic for showing the text telling you that your inventory is full'); #end
                 }
             }
         }else{
