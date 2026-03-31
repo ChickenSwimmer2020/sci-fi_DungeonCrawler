@@ -1,5 +1,11 @@
 package backend.ui;
 
+import flixel.graphics.frames.FlxFrame;
+import openfl.display.Bitmap;
+import openfl.display.Sprite;
+import openfl.filters.BlurFilter;
+import openfl.geom.Point;
+
 class WarningPopup extends FlxSubState {
     private var background:FlxUI9SliceSprite;
     private var background2:FlxUI9SliceSprite;
@@ -11,13 +17,34 @@ class WarningPopup extends FlxSubState {
     public function new(title:String, b:String, buttons:Array<{l:String,f:Void->Void,c:Bool}>) {
         super();
         popupCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
-        popupCamera.bgColor=0x7C000000; //darkens stuff behind it :3 //TODO: maybe make blur through a filter if shaders are enabled.
+        popupCamera.bgColor=0x00000000; //darkens stuff behind it :3 //TODO: maybe make blur through a filter if shaders are enabled.
         FlxG.cameras.add(popupCamera, false);
+
+
+
         if(buttons.length>4){
             throw Error.Custom("Value outside of bounds. (4 buttons max!)");
             return;
         }
         group=new FlxSpriteGroup(0, 0);
+
+        var backgroundCapture:BitmapData = new BitmapData(FlxG.width, FlxG.height);
+        backgroundCapture.draw(FlxG.camera.canvas);
+
+        //TODO: make not lag.
+        var smallRect = new openfl.geom.Rectangle(0, 0, 1280, 720);
+        var dest:BitmapData = new BitmapData(1280, 720, false);
+        dest.draw(backgroundCapture, null, null, null, smallRect, true);
+        var bmp = new Bitmap(dest);
+        bmp.filters = [new BlurFilter(8, 8, 2)];
+        var blurred:BitmapData = new BitmapData(1280, 720, false);
+        blurred.draw(bmp);
+        
+        var blurDarkenSprite:FlxSprite = new FlxSprite(0, 0).loadGraphic(blurred);
+        blurDarkenSprite.alpha=0.5;
+        //add(blurDarkenSprite); //TODO: fix.
+        
+
         add(group);
 
         background=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, FlxG.width/4, FlxG.height/4));

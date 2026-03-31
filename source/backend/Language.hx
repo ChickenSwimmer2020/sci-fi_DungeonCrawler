@@ -27,7 +27,7 @@ class Language {
 
         return null;
     }
-    public static function getTranslatedKey(key:String, object:Null<Dynamic>):String { //TODO: way to switch all instances of anything containing FlxText's font and text on the fly without restarting the game.
+    public static function getTranslatedKey(key:String, object:Null<Dynamic>):String {
         if(#if (html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
             var lang:Dynamic=Json.parse(#if (html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
             if(object!=null && activeLanguageObject.get(key)==null){

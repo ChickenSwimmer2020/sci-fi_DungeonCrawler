@@ -14,7 +14,6 @@ typedef SaveFile = {
     var stamina:Int;
     var xp:Int;
     var position:{x:Float, y:Float};
-    //var controls:Array<{c:String, keys:Array<FlxKey>}>; //TODO: store in MAIN save, not per save instance.
     var inventory:Array<Array<Item>>; //Items are a typedef, we can save these here!
     var maps:Array<MapFile>; //store every map in the user save file so that we dont have to do a bunch of extra stuff to regenerate them.
 }

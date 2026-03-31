@@ -73,7 +73,7 @@ class OptionsMenuSubstate extends FlxUISubState{
     }
     private function createControlsUI() {
         SBG=new FlxUI9SliceSprite(controls.x+5, controls.y+5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0,0, 490, 370));
-        Save.readSaveFile(Main.FILE); //just in-case. //TODO: add posssible dropdown incase a save file isnt loaded, or a deault save file thingy.
+        Save.readSaveFile(Main.FILE); //just in-case.
         ControlsScroll = new ScrollableArea((FlxG.width/2-250)+5, (FlxG.height/2-200)+25, 490, 370, 1);
         FlxG.cameras.add(ControlsScroll, false);
         #if(debug&&(windows||hl)) Main.LOG(Main.controls); #end
