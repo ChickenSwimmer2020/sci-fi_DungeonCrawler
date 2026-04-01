@@ -1,5 +1,6 @@
 package;
 
+import sys.thread.Thread;
 import lime.utils.Resource;
 import lime.ui.FileDialog;
 #if html5
@@ -13,10 +14,20 @@ import backend.Discord;
 
 class Main extends openfl.display.Sprite {
     #if (debug&&(windows||hl))
+        private static var OutputThread:Thread;
         public static function LOG(str:Dynamic) {
-            if(FlxG.log.redirectTraces) FlxG.log.add(str); //still fully functional.
-            else trace(str);
-            DEBUGLOG.push(str);
+            //this is just to make it so that the console isnt freezing the game when we try to trace a fucking save file.
+            if(Std.string(str).length>100) {
+                if(FlxG.log.redirectTraces) FlxG.log.add("log is longer than 100 chars. outputting directly to file."); //still fully functional.
+                else trace("log is longer than 100 chars. outputting directly to file.");
+                OutputThread = Thread.create(() -> { //apparently this auto-kills after it finishes.
+                    DEBUGLOG.push(str);
+                });
+            }else{
+                if(FlxG.log.redirectTraces) FlxG.log.add(str); //still fully functional.
+                else trace(str);
+                DEBUGLOG.push(str);
+            }
         }
         public static var DEBUGLOG:Array<Dynamic>=[];
         public static function BUILDDEBUGLOGFILE() {

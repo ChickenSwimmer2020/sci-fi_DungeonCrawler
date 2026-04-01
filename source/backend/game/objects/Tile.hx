@@ -35,49 +35,57 @@ class Tile extends FlxSprite {
         return tiles[y][x]!=null?{a: true, t:tiles[y][x]}:{a:false, t:null};
     }
     public var suround:String="";
-    private function checkNeighbors(tiles:Array<Array<Tile>>, row:Int, colum:Int){
-        var xPosition:Int=0;
-        var yPosition:Int=0;
-        xPosition=Math.floor(row/16);
-        yPosition=Math.floor(colum/16);
-        
+    //soo, i wanted to fix this. and i think claude might have cooked.
+    private function checkNeighbors(tiles:Array<Array<Tile>>, row:Int, col:Int) {
+        var x = Math.floor(row / 16);
+        var y = Math.floor(col / 16);
 
-        var checkCorners:Bool = ((checkTile(tiles, xPosition-1, yPosition-1).a && checkTile(tiles, xPosition+1, yPosition-1).a) && (checkTile(tiles, xPosition-1, yPosition+1).a && checkTile(tiles, xPosition+1, yPosition+1).a));
-        var surroundedBy:{TPL:Bool,TP:Bool,TPR:Bool,BTL:Bool,BT:Bool,BTR:Bool,LFT:Bool,RGT:Bool}={
-            TPL: checkCorners?checkTile(tiles, xPosition-1, yPosition-1).a:false,
-            TP:  checkTile(tiles, xPosition, yPosition-1).a,
-            TPR: checkCorners?checkTile(tiles, xPosition+1, yPosition-1).a:false,
+        // Helper to check if a tile is solid
+        inline function solid(dx:Int, dy:Int):Bool
+            return checkTile(tiles, x + dx, y + dy).a;
 
-            LFT: checkTile(tiles, xPosition-1, yPosition).a,
-            RGT: checkTile(tiles, xPosition+1, yPosition).a,
+        // Cardinal neighbors
+        var up    = solid( 0, -1);
+        var down  = solid( 0,  1);
+        var left  = solid(-1,  0);
+        var right = solid( 1,  0);
 
-            BTL: checkCorners?checkTile(tiles, xPosition-1, yPosition+1).a:false,
-            BT:  checkTile(tiles, xPosition, yPosition+1).a,
-            BTR: checkCorners?checkTile(tiles, xPosition+1, yPosition+1).a:false,
-        };
-        switch(surroundedBy) {
-            case {TPL:true,TP:true,TPR:true,BTL:true,BT:true,BTR:true,LFT:true,RGT:true}:suround="all";
-            default: suround="none";
+        // Corners only count if BOTH adjacent cardinals are solid
+        var tl = (up && left)  && solid(-1, -1);
+        var tr = (up && right) && solid( 1, -1);
+        var bl = (down && left)  && solid(-1,  1);
+        var br = (down && right) && solid( 1,  1);
 
-            case {TPL:false,TP:false,TPR:false,BTL:false,BT:false,BTR:false,LFT:true,RGT:true}:suround="left/right";
+        // Encode as bitmask: up=1, down=2, left=4, right=8, tl=16, tr=32, bl=64, br=128
+        var mask:Int = 0;
+        if (up)    mask |= 1;
+        if (down)  mask |= 2;
+        if (left)  mask |= 4;
+        if (right) mask |= 8;
+        if (tl)    mask |= 16;
+        if (tr)    mask |= 32;
+        if (bl)    mask |= 64;
+        if (br)    mask |= 128;
 
-            case {TPL:false,TP:true,TPR:false,BTL:false,BT:true,BTR:false,LFT:false,RGT:false}:suround="up/down";
-
-            case {TPL:false,TP:false,TPR:false,BTL:false,BT:true,BTR:false,LFT:true,RGT:false}:suround="left/down";
-            case {TPL:false,TP:false,TPR:false,BTL:false,BT:true,BTR:false,LFT:false,RGT:true}:suround="right/down";
-
-            case {TPL:false,TP:true,TPR:false,BTL:false,BT:false,BTR:false,LFT:true,RGT:false}:suround="left/up";
-            case {TPL:false,TP:true,TPR:false,BTL:false,BT:false,BTR:false,LFT:false,RGT:true}:suround="right/up";
-
-            case {TPL:false,TP:true,TPR:false,BTL:false,BT:false,BTR:false,LFT:true,RGT:true}:suround="left/right/up";
-            case {TPL:false,TP:false,TPR:false,BTL:false,BT:true,BTR:false,LFT:true,RGT:true}:suround="left/right/down";
-
-            case {TPL:false,TP:true,TPR:false,BTL:false,BT:true,BTR:false,LFT:true,RGT:false}:suround="up/down/left";
-            case {TPL:false,TP:true,TPR:false,BTL:false,BT:true,BTR:false,LFT:false,RGT:true}:suround="up/down/right";
+        suround = switch(mask) {
+            case 0xFF:          "all";
+            case 0x0C:          "left/right";
+            case 0x03:          "up/down";
+            case 0x06:          "left/down";
+            case 0x0A:          "right/down";
+            case 0x05:          "left/up";
+            case 0x09:          "right/up";
+            case 0x0D:          "left/right/up";
+            case 0x0E:          "left/right/down";
+            case 0x07:          "up/down/left";
+            case 0x0B:          "up/down/right";
+            default:            "none";
         }
-        if(checkTile(tiles, xPosition, yPosition+1).t?.suround.contains('/up') && checkTile(tiles, xPosition, yPosition-1).t?.suround.contains('/down')) suround="up/down"; //if im correct, i can force states like this!
-        frame = frames.getByIndex(mapTiles.get(curImage==""?"placeholder":curImage).get(suround??"none"));
-        //#if(debug&&(windows||hl)) Main.LOG(tiles); //will take forever, but i just want to make sure that the tile gets the tiles around it.
+
+        frame = frames.getByIndex(
+            mapTiles.get(curImage == "" ? "placeholder" : curImage)
+                    .get(suround ?? "none")
+        );
     }
     
     private function initTileGraphic(image:String) {

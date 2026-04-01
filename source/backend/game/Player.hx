@@ -97,8 +97,8 @@ class Player extends FlxSprite {
             weapon.camera=camera; //move the weapn to the player camera;
             FlxG.state.add(weapon);
             weapon.setActions(
-                ()->{weapon.playAnimation('a', true); weapon.shoot();},
-                ()->{weapon.playAnimation('b', true);}
+                ()->{weapon.shoot();},
+                ()->{}
             );
             weapon.visible=weapon.active=false;
         }else{

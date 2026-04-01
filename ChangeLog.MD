@@ -1,5 +1,32 @@
 # ChangeLog
 
+## Prototype Update 0.03.5 (Weapons Fixes)
+
+* Updated `Changelog` to include changes from 0.03.⅘
+* Created `Bullet_impact.png`
+* `.Weapon` now allows for `fireTime` implementation.
+* `Weapon` now plays firing animation automatically when implemented properly.
+* Added all missing Lang strings for EN_US.
+* Removed ui/item graphics.
+* Bullet impact effects are now animated.
+* Reworked Tile adjacentcy detection. (NEEDS PROPER TESTING)
+* Weapon cooldown timers and ammo ammounts are now tied to weapon name instead of globally.
+* `HUDSubstate.InventorySlot` now extends `FlxTypedSpriteGroup<FlxSprite>` and loads items properly
+* `HUDSubstate.InventorySlot` now loads Pickup graphics when no ui graphic is found
+* `MapGenerator`'s random generation was re-implemented for testing.
+* `Flags.FALLBACK_WEAPON` now contains `fireTime` varible
+* `Main.LOG` will now open a second thread to save logs over 100 characters to the file.
+
+## Prototype Update 0.03.⅘ (Lore and shtuff)
+
+* Created `Lore.md`.
+* `Pickup` will now show an inventory full popup. (NEEDS TESTING)
+* Added WIP blur feature for popups, needs to be re-written to work properly.
+* Fixed buttons on MainMenuState.
+* Removed TODO's from:
+* * `Language`
+* * `OPtionsMenuSubstate`
+
 ## Prototype Update 0.03.4 (Controls Migration)
 
 * Created `Tasks.md` still needs to be filled out.

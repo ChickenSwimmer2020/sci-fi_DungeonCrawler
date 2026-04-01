@@ -6,6 +6,7 @@ class Flags {
         damage: [],
         fireMode: SEMI,
         format: NULL,
+        fireTime: 0.0,
         sprite: {n:"",a:false,f:{w:0,h:0}},
         weaponType: NULL,
         name: "",

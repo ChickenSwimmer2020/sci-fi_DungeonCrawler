@@ -64,25 +64,22 @@ class MapGenerator {
         for(h in 0...height){
             for(w in 0...width) {
                 //generateTileAt({type: "placeholder", collides: FlxG.random.bool(50), specialType: HALLWAY, special: true}, 0, 0, outputTiles);
-                //generateTileAt(
-                //    FlxG.random.bool(50)?{
-                //        type: "placeholder",
-                //        collides: FlxG.random.bool(50),
-                //        special: !generatedHallway,
-                //        specialType: !generatedHallway?HALLWAY:NONE
-                //    }:null,
-                //    w, h, outputTiles
-                //);
+                generateTileAt(
+                    FlxG.random.bool(50)?{
+                        type: "placeholder",
+                        collides: FlxG.random.bool(50),
+                        special: false,
+                        specialType: NONE
+                    }:null,
+                    w, h, outputTiles
+                );
                 //generatedHallway=true;
             }
         }
 
         toMapFile.tiles = outputTiles;
-        #if(debug&&(windows||hl)) Main.LOG('finished generating mapFile $toMapFile'); #end
         if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null)(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=([]:Array<MapFile>);
-        #if(debug&&(windows||hl)) Main.LOG('attempting to push... BEFORE: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps}'); #end
         (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
-        #if(debug&&(windows||hl)) Main.LOG('attempting to push... AFTER: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps}'); #end
         Main.saveFile.flush(); //should probably do this im realizing. maybe i should add a setter or something to automatically do this for me.
     }
     private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){

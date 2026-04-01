@@ -4,6 +4,7 @@ typedef WeaponData = {
     var weaponType:ItemType;
     var name:String;
     var damage:Map<String, Float>;
+    var fireTime:Float;
     var format:WeaponType;
     var gunType:GunType;
     var fireMode:GunFireMode;
@@ -41,6 +42,7 @@ class Weapon extends FlxSprite{
     public static final BULLET_SPEED:Float = 500.0;
     public static final MAX_BULLETSPREAD:Float = 25.2;
     public static final POWER_INCREMENT:Float = 0.5;
+    public static final POWER_MAX:Float=100.0;
     public static final KICKBACK_STRENGTH:Float=30; //reversed, higher value means less kickback. TODO: possibly make this weaponfile dependant
     public var activeProjectiles:Array<Bullet>=[]; // for tracking, editing, and removal purposes.
     public var onLeftClick:Void->Void;
@@ -52,7 +54,13 @@ class Weapon extends FlxSprite{
     public var charge_time:Float=0;
     public var frMode:GunFireMode=SEMI; //for default
 
-    public var charges:Int=1000; //ammo
+    public var charges:Map<String,Int>=[
+        "pistol" => 1000,
+        "burstgun" => 1000,
+        "railgun" => 1000,
+        "rifle" => 1000,
+        "shotgun" => 1000
+    ]; //ammo
     
     private var justShotFail:Bool=false;
     private var coolDownTimer:FlxTimer=new FlxTimer();
@@ -69,23 +77,33 @@ class Weapon extends FlxSprite{
     }
     var increment:Int=0;
     var power:Float=0;
+    var fireTimers:Map<String, FlxTimer>=[];
     public function shoot() {
-        if(FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) return; //cancel if holding an item. much simpler fix than anything else honestly.
-        if(charges<=0)return; //cancel if we have no ammo.
+        if(
+            fireTimers.get(name)!=null||
+            ((FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) || charges.get(name)<=0)
+        ) return; //cancel if either the gun has been fired, the mouse overlaps the inventory/inventory is open, or theres no charges left.
         increment=0;
-        if(coolDownTimer.finished){
-            switch(frMode) {
-                case SEMI: fire(); charges--;
-                case BURST: for(i in 0...3)Functions.wait(shoot_time*(0.15*i), (_)->{charges--;fire(_);});
-                case FULLAUTO:increment++;Functions.wait(shoot_time*(0.15*increment), (_)->{charges--;fire(_);});
-                case RAIL: power+=POWER_INCREMENT; power=Math.max(0, Math.min(power, 100));
-                case SHOTGUN: for(i in 0...9){fire(1, true, i);charges--;}
-                case NULL:
-            }
-            if(frMode!=RAIL) coolDownTimer.start(frMode==BURST?shoot_time*3:shoot_time);
+        
+        switch(frMode) {
+            case SEMI:fire();charges.set(name, charges.get(name)-1);
+            case BURST: for(i in 0...3)Functions.wait(shoot_time*(0.15*i), (_)->{charges.set(name, charges.get(name)-1);fire(_);});
+            case FULLAUTO:increment++;Functions.wait(0.15*(0.15*increment), (_)->{charges.set(name, charges.get(name)-1);fire(_);}); //no changes needed lol.
+            case RAIL:power+=POWER_INCREMENT; power=power.clampf(0, POWER_MAX);
+            case SHOTGUN:for(i in 0...9)fire(1, true, i);charges.set(name, charges.get(name)-1);
+            case NULL:
+        }
+        if(name!='railgun'){
+            var nameOnStart:String = name;
+            fireTimers.set(nameOnStart, Functions.wait(frMode==BURST?shoot_time*3:shoot_time, (_)->{
+                fireTimers.remove(nameOnStart);
+            }));
         }
     }
     private function fire(?_timer:FlxTimer,?railPower:Float=1,?shotgun:Bool=false,?shotgunIndex:Int=0) {
+        if(animation.exists('shoot'.toUpperCase())) animation.play("shoot");
+        else if(animation.exists('fire'.toUpperCase())) animation.play('fire');
+
         if(_timer!=null)_timer.destroy();
         var bullet:Bullet = new Bullet(x, y, damageTypes);
         bullet.onRemove=()->{
@@ -115,7 +133,7 @@ class Weapon extends FlxSprite{
             var internal:WeaponData = Flags.FALLBACK_WEAPON;
             name=internal.name;
             frMode=internal.fireMode;
-            shoot_time=switch(internal.fireMode){case SEMI: 0.25; case FULLAUTO: 0.1; case SHOTGUN: 1.5; case BURST: 0.4; case RAIL: 5.2; case NULL:0.0;};
+            shoot_time=internal.fireTime;
             if(internal.fireMode==RAIL) charge_time=0.5;
             loadGraphic(internal.sprite.n, internal.sprite.a, internal.sprite.f.w, internal.sprite.f.h);
             for(anim in internal.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
@@ -124,7 +142,7 @@ class Weapon extends FlxSprite{
         }else{
             name=data.name;
             frMode=data.fireMode;
-            shoot_time=switch(data.fireMode){case SEMI: 0.25; case FULLAUTO: 0.1; case SHOTGUN: 1.5; case BURST: 0.4; case RAIL: 5.2; case NULL:0.0;};
+            shoot_time=data.fireTime;
             if(data.fireMode==RAIL) charge_time=0.5;
             loadGraphic(data.sprite.n, data.sprite.a, data.sprite.f.w, data.sprite.f.h);
             for(anim in data.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
@@ -137,9 +155,9 @@ class Weapon extends FlxSprite{
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
-        if(coolDownTimer.finished){
+        if(fireTimers.get('railgun')==null){
             if(frMode==RAIL&&FlxG.mouse.justReleased){
-                if(power<25) justShotFail=true; //failure if under 25%
+                if(power < (POWER_MAX*0.25))justShotFail=true; //failure if under 25% of max power.
                 else{
                     railFireShader=new RailFire();
                     railFireShader.intensity.value=[0.01];
@@ -150,20 +168,24 @@ class Weapon extends FlxSprite{
                     Main.camGame.filters.push(new ShaderFilter(railFireShader));
                     Main.camHUD.filters.push(new ShaderFilter(railFireShader));
                     Main.camOther.filters.push(new ShaderFilter(railFireShader));
-                    charges-=10; //railgun has higher max ammo, but it drains faster to compensate.
+                    //HARD-CODED.
+                    charges.set("railgun", charges.get(name)-10); //railgun has higher max ammo, but it drains faster to compensate.
                     fire(power/100);
                     power=0;
-                    coolDownTimer.start(shoot_time, (_)->{
+                    fireTimers.set("railgun", Functions.wait(shoot_time, (_)->{
                         Main.camGame.filters.remove(Main.camGame.filters[0]);
                         Main.camHUD.filters.remove(Main.camHUD.filters[0]);
                         Main.camOther.filters.remove(Main.camOther.filters[0]);
                         railFireShader=null;
-                    });
+                        fireTimers.remove("railgun");
+                    }));
                 }
             }else if(frMode==RAIL && justShotFail){
                 justShotFail=false;
                 power=0;
-                coolDownTimer.start(shoot_time/2);
+                fireTimers.set("railgun", Functions.wait(shoot_time/2, (_)->{
+                    fireTimers.remove("railgun");
+                }));
             }
         }
         if(railFireShader!=null){
@@ -174,11 +196,12 @@ class Weapon extends FlxSprite{
 
         FlxG.watch.addQuick("cooldown timer", coolDownTimer.timeLeft);
         FlxG.watch.addQuick("rail power", power);
+        FlxG.watch.addQuick("Weapon.fireTimers:", fireTimers);
     }
 }
 class WeaponParser {
     public static function buildWeaponItemPointer(data:WeaponData):Item{
-        //if(data.weaponType!=RANGED||(data.weaponType!=MEELEE||data.weaponType!=MAGIC)) return null;
+        //if(data.weaponType==NULL||(data.weaponType!=RANGED||(data.weaponType!=MEELEE||data.weaponType!=MAGIC))) return null; //BROKEN, DONT USE
         return {
             type: data.weaponType,
             weaponType: data.format,
@@ -217,6 +240,7 @@ class WeaponParser {
                 gunType: root.get('gunType'),
                 fireMode: root.get('fireMode'),
                 magicType: root.get('magicType'),
+                fireTime: root.get('fireTime').toFloat(),
                 sprite: {
                     n: root.get('spriteName'),
                     a: root.get('spriteAnimated').toBool(),

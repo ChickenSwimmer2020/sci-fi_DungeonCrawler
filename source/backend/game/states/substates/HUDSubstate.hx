@@ -67,7 +67,7 @@ typedef Item = {
     @:optional var charges:Float; //also affects guns
 }
 
-class InventorySlot extends FlxSprite {
+class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
     public var onItemUsed:(String, Item)->Void; //action, item
     public var onItemMoveStart:Void->Void;
     public var onItemMoveEnd:Void->Void;
@@ -77,11 +77,16 @@ class InventorySlot extends FlxSprite {
     public var locked:Bool=false;
     public var interactable:Bool=true;
 
+    private var slot:FlxSprite;
+    private var object:Null<FlxSprite>;
+
     public function new(x:Float,y:Float, ?item:Item) {
         super(x, y);
-        loadGraphic(Paths.image('ui/inventory', 'slot'));
-        setGraphicSize(SIZE, SIZE);
-        updateHitbox();
+        slot=new FlxSprite(0, 0).loadGraphic(Paths.image('ui/inventory', 'slot'));
+        slot.setGraphicSize(SIZE, SIZE);
+        slot.updateHitbox();
+        add(slot);
+
         scrollFactor.set();
         camera=Main.camHUD;
         RightClickOptions=[];
@@ -123,20 +128,21 @@ class InventorySlot extends FlxSprite {
         );
     }
     private function loadItemGraphic(item:String) {
-        if(#if (html5) Paths.image('ui/items', item)!=null #else FileSystem.exists(Paths.image('ui/items', item))#end) {
-            var outputBitmapData:BitmapData = new BitmapData(Math.floor(width), Math.floor(height), true, 0xFFFFFF);
-            var scaleMatrix:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
-            scaleMatrix.scale(2, 2);
-            outputBitmapData.draw(pixels, scaleMatrix);
-            scaleMatrix.scale(1.5, 1.5);
-            outputBitmapData.draw(#if (html5) Paths.image('ui/items', item) #else BitmapData.fromFile(Paths.image('ui/items', item)) #end, scaleMatrix);
-            loadGraphic(outputBitmapData); //hehehehaw! now we *hopefully* can update the hitbox
-            setGraphicSize(SIZE, SIZE);
-            updateHitbox();
+        var file:#if(html5)BitmapData#else String#end = Paths.image('ui/items', item);
+        if(#if(html5)file!=null#else !FileSystem.exists(file)#end) file = Paths.image('items/images', item); //fallback check.
+        if(#if(html5)file!=null#else FileSystem.exists(file)#end) {
+            if(object==null) object = new FlxSprite(0, 0).loadGraphic(file);
+            object.visible=true;
+            object.setGraphicSize(SIZE);
+            object.updateHitbox();
+            add(object);
+            object.setPosition(slot.x+slot.width/2-object.width/2, slot.y+slot.height/2-object.height/2);
         }else{
-            makeGraphic(SIZE, SIZE, 0xFFFF00FF);
-            setGraphicSize(SIZE, SIZE);
-            updateHitbox();
+            if(object==null) object = new FlxSprite(0, 0).makeGraphic(SIZE, SIZE, 0xFFFF00FF);
+            object.visible=true;
+            object.setGraphicSize(SIZE, SIZE);
+            object.updateHitbox();
+            add(object);
             Main.showError("RENDERFAILURE", item);
         }
     }
@@ -173,10 +179,7 @@ class InventorySlot extends FlxSprite {
     public function unloadItem() {
         curItem=null;
         hasItem=false;
-        graphic.bitmap.fillRect(graphic.bitmap.rect, 0x00000000);
-        loadGraphic(Paths.image('ui/inventory', 'slot'));
-        setGraphicSize(SIZE, SIZE);
-        updateHitbox();
+        object.visible=false;
     }
     public function setItem(item:Item) {
         hasItem=true;

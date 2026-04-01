@@ -5,7 +5,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     public static final TILE_SIZE:Int = 16; //we can avvoid MAGIC numbers
     public static final COLLISION_RADIUS:Int=2;
 
-    public var tiles:Array<Array<TilePointer>>; //quick access to each tile without problems.
+    public var tiles:Array<Array<TilePointer>> = []; //quick access to each tile without problems.
     public var tileObjects:Array<Array<Tile>> = [];
     public var plr:Player;
    
@@ -13,11 +13,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     public function new(file:MapFile) {
         super();
         instance=this;
-        if(file==null){
-            tiles = [];
-        }else{
-            tiles = file.tiles;
-        }
+        if(file!=null) tiles = file.tiles;
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
     public function generate(?testingState:Bool=false){
@@ -105,13 +101,15 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                             //TODO: fix bullets clipping through walls
                             FlxG.collide(bullet, tile, (d1, d2)->{
                                 bullet.forceRemoval();
-                                var effect:FlxSprite = new FlxSprite(bullet.x, bullet.y).makeGraphic(5, 5, 0xFFFFFFFF); //TODO: real graphic
+                                var effect:FlxSprite = new FlxSprite(bullet.x, bullet.y).loadGraphic(Paths.image('fx', 'Bullet_impact'), true, 16, 16); //TODO: real graphic
+                                effect.animation.add('hit', [0,1,2,3,4,5], 24, false, false, false);
+                                effect.animation.play('hit');
+                                effect.animation.onFinish.add((_)->{
+                                    if(_=='hit') effect.destroy();
+                                });
                                 effect.setPosition(bullet.x-effect.width/2, bullet.y-effect.height/2);
                                 FlxG.state.add(effect);
                                 effect.camera=plr?.camera;
-                                Functions.wait(0.5, (_)->{ //TODO until animation length
-                                    effect.destroy();
-                                });
                             });
                         }
                     }

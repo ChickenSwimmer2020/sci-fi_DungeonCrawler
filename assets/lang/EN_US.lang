@@ -5,7 +5,12 @@
     "warning.unfinishedlanguage.continue": "Okay",
     "warning.unfinishedlanguage.message": "The language file selected's translation is INCOMPLETE\nIt will be updated in the future.\n\nPLEASE RESTART THE GAME FOR THIS TO TAKE EFFECT PROPERLY.",
 
+    "pause.resume": "Resume",
+    "pause.settings": "Settings",
+    "pause.debug.exittestingstate": "Exit Testing",
+
     "menu.options.tab.controls": "Controls",
+    "menu.options.tab.save.flush": "Save",
     "menu.options.tab.difficulty": "Difficulty",
     "menu.options.tab.general": "General",
     "menu.options.tab.graphics": "Graphics",
@@ -22,8 +27,19 @@
     "menu.awards": "Achivements",
     "menu.quit": "Quit",
     "menu.debug.debugger": "Debugger",
+    "menu.save.loadsave": "Load Save",
     
+    "debugger.alphabet": "Alphabet Debugger",
+    "debugger.alphabet.exit": "Press BACKSPACE to exit",
     "debugger.alphabet.allsymbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ \n abcdefghijklmnopqrstuvwxyz \n 0123456789 \n ~!@#$%^&*()_+{}|:\"<>? \n `-=[]\\;',./",
+
+    "debugger.map": "Map Debugger",
+    "debugger.map.generate": "Generate",
+    "debugger.map.generatemenu": "Generation",
+    "debugger.map.exit": "Press BACKSPACE to exit",
+    "debugger.testing": "Testing State",
+
+
     "debugger.save": "Save Debugger",
     "debugger.save.exit": "Press BACKSPACE to exit",
     "debugger.save.readmenu": "Read",
@@ -35,6 +51,8 @@
     "debugger.save.parse": "Parse",
     "debugger.save.returned": "Returned Value:",
     "debugger.save.nosaves": "NO SAVES",
+    
+
 
     "weapon.pistol": "Pistol",
     "weapon.shotgun": "Shotgun",
