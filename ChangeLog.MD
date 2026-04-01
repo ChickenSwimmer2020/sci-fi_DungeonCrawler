@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Prototype Update 0.03.5.1 (Tiles repair)
+
+* Updated Tiles placeholder graphics.
+* Tiles now connect correctly, minus very specific circumstances that i really dont care about right now
+
 ## Prototype Update 0.03.5 (Weapons Fixes)
 
 * Updated `Changelog` to include changes from 0.03.⅘
