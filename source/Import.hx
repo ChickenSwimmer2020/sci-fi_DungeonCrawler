@@ -13,7 +13,10 @@ import flixel.ui.FlxBar;
 import flixel.addons.ui.FlxUIBar;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxHorizontalAlign;
+import flixel.FlxObject;
+import flixel.sound.FlxSound;
 import flixel.FlxG;
+import flixel.math.FlxRect;
 import flixel.util.typeLimit.OneOfTwo;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
@@ -30,6 +33,7 @@ import flixel.animation.FlxAnimationController;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.system.ui.FlxSoundTray;
 import flixel.system.FlxAssets;
 
 //flixel ui stuff
@@ -52,26 +56,47 @@ import flixel.addons.ui.FlxUIRadioGroup;
 import haxe.Json;
 import haxe.io.Error;
 
+//js
+#if html5
+    import js.html.FileSystem;
+    import js.html.File;
+    import js.Browser;
+#end
+
 //sys (does change depending on platform.)
-#if !html5
+#if sys
     import sys.FileSystem;
     import sys.io.File;
+    import sys.thread.Mutex;
+    import sys.thread.Thread;
 #end
 
 //openfl (never changes)
+import openfl.events.UncaughtErrorEvent;
+import openfl.events.Event;
 import openfl.text.TextField;
 import openfl.geom.Matrix;
 import openfl.display.BitmapData;
+import openfl.Lib;
+import openfl.display.Bitmap;
+import openfl.text.TextFormat;
+import openfl.text.TextFormatAlign;
 import openfl.filters.ShaderFilter;
 import openfl.geom.Rectangle;
-#if(html5)import openfl.Assets;#end
+#if(html5)
+    import openfl.Assets;
+    import openfl.utils.AssetType;
+#end
 
 
 //lime
 #if(html5)import lime.utils.Log;#end
+import lime.utils.Resource;
+import lime.ui.FileDialog;
 import lime.app.Application;
 
 //game (never changes)
+import backend.game.states.GameState;
 import backend.save.Save;
 import backend.Paths;
 import backend.generation.MapGenerator;
@@ -82,18 +107,30 @@ import states.MainMenuState;
 import backend.shaders.RailFire;
 import backend.ShaderCache;
 import backend.game.objects.Pickup;
-import backend.game.objects.Tile;
+import backend.game.objects.tiles.Tile;
 import backend.game.objects.Weapon;
 import backend.game.GameMap;
 import Flags;
+import backend.Conductor;
+import backend.SoundTray;
+import backend.Music;
+import states.IntroState;
 import backend.ui.WarningPopup;
 import backend.game.states.substates.LoadGameSubstate;
+import backend.shaders.ScreenShake;
+import backend.game.objects.tiles.Breaker;
+import backend.ai.BaseEnemy;
+import backend.ui.ScrollableArea;
+import backend.ui.InspectPopup;
+import backend.game.objects.tiles.SpecialTile;
 #if (debug)
     import debugging.SaveDebugger;
     import debugging.MapDebugger;
     import debugging.AlphabetDebugger;
 #end
+import backend.Discord;
 
 using StringTools;
 using backend.Additions;
 using flixel.util.FlxSpriteUtil;
+using flixel.util.FlxStringUtil;

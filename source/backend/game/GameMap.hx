@@ -8,6 +8,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     public var tiles:Array<Array<TilePointer>> = []; //quick access to each tile without problems.
     public var tileObjects:Array<Array<Tile>> = [];
     public var plr:Player;
+    public var enemies:Array<BaseEnemy>=[];
    
     
     public function new(file:MapFile) {
@@ -30,6 +31,17 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 item: "pistol",
                 damage: []
             }));
+
+            //var testEnemy:BaseEnemy = new BaseEnemy(playerSpawnPoint.x-32, playerSpawnPoint.y);
+            //add(testEnemy);
+            //testEnemy.camera=Main.camGame;
+
+            add(generateObjectViaTile({
+                type: "",
+                collides: true,
+                special: true,
+                specialType: BREAKER
+            }, Math.floor((playerSpawnPoint.x/TILE_SIZE) + 1), Math.floor((playerSpawnPoint.y/TILE_SIZE))));
             
             add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y-50, {type: RANGED,item: "pistol",damage: []}));
             add(new Pickup(playerSpawnPoint.x+50, playerSpawnPoint.y-50, {type: RANGED,item: "railgun",damage: []}));
@@ -50,33 +62,38 @@ class GameMap extends FlxTypedGroup<Dynamic> {
             }
         }
     }
-    private inline function generateObjectViaTile(type:TilePointer, x:Int, y:Int){
+    var tileToBeAdded:Tile;
+    private inline function generateObjectViaTile(type:TilePointer, x:Int, y:Int):Tile{
         if(type==null) { //:3
             tileObjects[y][x] = null;
             return null;
         }
-        var tile:Tile = new Tile(0 + (TILE_SIZE*x), 0+(TILE_SIZE*y), tileObjects, type.type);
-        tile.immovable = true;
-        tile.allowCollisions = type.collides?ANY:NONE;
-        if(tile.allowCollisions==NONE) tile.alpha = 0.25;
-        tileObjects[y][x] = tile;
-        tile.camera=Main.camGame;
-
+        tileToBeAdded = new Tile(0 + (TILE_SIZE*x), 0+(TILE_SIZE*y), tileObjects, type.type);
         if(type.special==true){
             switch(type.specialType) {
                 case SPAWN:
                     #if (debug)
-                        tile.loadGraphic(Paths.DEBUG('entry'));
-                        tile.color=0x7100FF00;
+                        tileToBeAdded.loadGraphic(Paths.DEBUG('entry'));
+                        tileToBeAdded.color=0x7100FF00;
                     #end
-                    playerSpawnPoint=FlxPoint.weak(tile.x, tile.y);
+                    playerSpawnPoint=FlxPoint.weak(tileToBeAdded.x, tileToBeAdded.y);
                     //createElevator() //TODO: elevator & stuff.
-                case WALKABLEAREA: #if (debug) tile.color = 0xFF00FF00; #end
+                case WALKABLEAREA: #if (debug) tileToBeAdded.color = 0xFF00FF00; #end
+                case BREAKER:
+                    tileToBeAdded = new Breaker(0+(TILE_SIZE*x), 0+(TILE_SIZE*y), tileObjects);
+                    tileToBeAdded.immovable = true;
+                    tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
+                    tileObjects[y][x] = tileToBeAdded;
+                    tileToBeAdded.camera=Main.camGame;
                 default: //for special types that dont really do anything. like hallway, since thats only used during generation itself.
             }
-
         }
-        return tile;
+        tileToBeAdded.immovable = true;
+        tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
+        if(tileToBeAdded.allowCollisions==NONE) tileToBeAdded.alpha = 0.25;
+        tileObjects[y][x] = tileToBeAdded;
+        tileToBeAdded.camera=Main.camGame;
+        return tileToBeAdded;
     }
 
     override public function update(elapsed:Float) {
@@ -90,6 +107,14 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                     tile.active=tile.alive=tile.visible=tile.isOnScreen(Main.camGame);
                 }
                 if(tile!=null && tile.allowCollisions == ANY){
+                    for(enemy in enemies) {
+                        var vx = Math.abs(Math.floor(enemy.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE));
+                        var vy = Math.abs(Math.floor(enemy.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE));
+                        if(vx <= COLLISION_RADIUS && vy <= COLLISION_RADIUS){
+                            FlxG.collide(enemy??null, tile);
+                        }
+                    }
+
                     if ((Math.abs(Math.floor(plr?.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE))) <= COLLISION_RADIUS && (Math.abs(Math.floor(plr.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE))) <= COLLISION_RADIUS){
                         FlxG.collide(plr??null, tile);
                         FlxG.collide(plr?.weapon, tile); //to hopefully move the weapon so it doesnt shoot through blocks

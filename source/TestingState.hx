@@ -1,20 +1,9 @@
 package;
 
-class TestingState extends flixel.FlxState {
+class TestingState extends GameState {
     public function new(?LoadingFromSave:Bool=false) {
         super();
         #if (debug) Main.loadedTestedState=true; #end
-        Main.camGame = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1); //TODO: intiate in gamestate when that exists.
-        Main.camGame.bgColor=0x00FFFFFF;
-        FlxG.cameras.add(Main.camGame, false);
-
-        Main.camHUD = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
-        Main.camHUD.bgColor=0x00FFFFFF;
-        FlxG.cameras.add(Main.camHUD, false);
-
-        Main.camOther = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
-        Main.camOther.bgColor=0x00FFFFFF;
-        FlxG.cameras.add(Main.camOther, false);
 
         FlxG.watch.addQuick("main file", Main.FILE);
 
@@ -25,7 +14,7 @@ class TestingState extends flixel.FlxState {
                 MapGenerator.generateMap(100, 100);
                 add(MapGenerator.createMap('PLACEHOLDER'));
             }else{
-                 #if(debug&&(windows||hl)) Main.LOG('is this even working?'); #end
+                #if(debug&&(windows||hl)) Main.LOG('is this even working?'); #end
                 var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "PLACEHOLDER");
                 add(map);
                 Save.readSaveFile(Main.FILE);

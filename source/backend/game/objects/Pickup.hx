@@ -56,7 +56,6 @@ class Pickup extends FlxSprite {
                 }else{
                     var popup:WarningPopup = new WarningPopup(Language.getTranslatedKey("inventory.full", null), Language.getTranslatedKey("inventory.full.message", null), [{
                         l: Language.getTranslatedKey("inventory.full.ok", null),
-                        f: ()->{},
                         c: true
                     }]);
                     FlxG.state.openSubState(popup);

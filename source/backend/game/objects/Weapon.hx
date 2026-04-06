@@ -4,6 +4,7 @@ typedef WeaponData = {
     var weaponType:ItemType;
     var name:String;
     var damage:Map<String, Float>;
+    var kickback:Float;
     var fireTime:Float;
     var format:WeaponType;
     var gunType:GunType;
@@ -43,7 +44,7 @@ class Weapon extends FlxSprite{
     public static final MAX_BULLETSPREAD:Float = 25.2;
     public static final POWER_INCREMENT:Float = 0.5;
     public static final POWER_MAX:Float=100.0;
-    public static final KICKBACK_STRENGTH:Float=30; //reversed, higher value means less kickback. TODO: possibly make this weaponfile dependant
+    public var KICKBACK_STRENGTH:Float=30; //reversed, higher value means less kickback.
     public var activeProjectiles:Array<Bullet>=[]; // for tracking, editing, and removal purposes.
     public var onLeftClick:Void->Void;
     public var onRightClick:Void->Void;
@@ -81,7 +82,7 @@ class Weapon extends FlxSprite{
     public function shoot() {
         if(
             fireTimers.get(name)!=null||
-            ((FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) || charges.get(name)<=0)
+            ((((FlxG.mouse.overlaps(Player.instance.inventory)&&Player.instance.inventory.fullOpen) || charges.get(name)<=0) || SpecialTile.optionsMenuOpenOnAnyTile) || Main.InspectPopupVisible)
         ) return; //cancel if either the gun has been fired, the mouse overlaps the inventory/inventory is open, or theres no charges left.
         increment=0;
         
@@ -121,8 +122,8 @@ class Weapon extends FlxSprite{
         //if we're firing the shotgun we want to times KICKBACK_STRENGTH by the number of pellets, because otherwise it jumps back WAY to far.
         setPosition(x-(cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)), y-(sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH))); //do this **after** we set the velocity to hopefuly prevent bullets from spawning behind the player
         Player.instance.velocity.set( //should add some kickback to the player. hopefully.
-            Player.instance.weaponKickback.x-cos/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH),
-            Player.instance.weaponKickback.y-sin/(shotgun?(KICKBACK_STRENGTH*9):KICKBACK_STRENGTH)
+            Player.instance.weaponKickback.x-cos/(shotgun?((KICKBACK_STRENGTH/9)*2):KICKBACK_STRENGTH),
+            Player.instance.weaponKickback.y-sin/(shotgun?((KICKBACK_STRENGTH/9)*2):KICKBACK_STRENGTH)
         );
     }
     private function setUpWeapon(data:WeaponData) { 
@@ -134,6 +135,7 @@ class Weapon extends FlxSprite{
             name=internal.name;
             frMode=internal.fireMode;
             shoot_time=internal.fireTime;
+            KICKBACK_STRENGTH = internal.kickback;
             if(internal.fireMode==RAIL) charge_time=0.5;
             loadGraphic(internal.sprite.n, internal.sprite.a, internal.sprite.f.w, internal.sprite.f.h);
             for(anim in internal.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
@@ -143,6 +145,7 @@ class Weapon extends FlxSprite{
             name=data.name;
             frMode=data.fireMode;
             shoot_time=data.fireTime;
+            KICKBACK_STRENGTH = data.kickback;
             if(data.fireMode==RAIL) charge_time=0.5;
             loadGraphic(data.sprite.n, data.sprite.a, data.sprite.f.w, data.sprite.f.h);
             for(anim in data.animations) animation.add(anim.n, anim.f, anim.fr, anim.l, anim.fl.x, anim.fl.y);
@@ -237,6 +240,7 @@ class WeaponParser {
                 weaponType: root.get('type'),
                 name: root.get('name'),
                 format: root.get('format'),
+                kickback: root.get('kickback').toFloat(),
                 gunType: root.get('gunType'),
                 fireMode: root.get('fireMode'),
                 magicType: root.get('magicType'),

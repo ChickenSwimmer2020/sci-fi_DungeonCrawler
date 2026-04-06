@@ -1,9 +1,11 @@
 package;
 
 class Flags {
+    public static final SECURITY_SECONDSTILLACTIVATION:Int = 120;
     public static final FALLBACK_WEAPON:WeaponData = {
         animations: [],
         damage: [],
+        kickback: 0,
         fireMode: SEMI,
         format: NULL,
         fireTime: 0.0,

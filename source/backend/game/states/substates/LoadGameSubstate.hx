@@ -1,9 +1,8 @@
 package backend.game.states.substates;
 
-import backend.ui.ScrollableArea;
-
 class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
-    public var onSaveDestroyed:Void->Void;
+    public var requestSubstateOpen:(String,String,Array<{l:String,?f:Void->Void,c:Bool}>)->Void;
+    public var onSaveDestroyed:(String)->Void;
     private var BG:FlxUI9SliceSprite;
     private var CUTOUT:FlxUI9SliceSprite;
     private var loadButton:FlxUIButton;
@@ -20,14 +19,20 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         text=new FlxUIText(100, 5, BG.width-105, '{NAME} - {DIFFICULTY}\n{H}:{M}:{S} || {DEPTH}\n{LEVEL}', 14, true);
         loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave", loadButton), ()->{
             Main.FILE=text.text.split('-')[0].trim(); //should work?
-            #if debug FlxG.switchState(()->new TestingState(true)); #end
+            FlxG.switchState(()->new GameState(true));
         }, false);
         loadButton.loadGraphic("flixel/images/ui/button.png", true, 80, 20);
         loadButton.updateHitbox();
         loadButton.autoCenterLabel();
         deleteButton=new FlxUIButton(BG.width-105, BG.height-25, "", ()->{
-            (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
-            onSaveDestroyed();
+            requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
+                {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
+                {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
+                    onSaveDestroyed(text.text.split('-')[0].trim());
+                    (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
+                    trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
+                }, c:true}
+            ]);
         }, false);
         deleteButton.loadGraphic(Paths.image('ui/menu', "button_delete"), true, 20, 20);
         deleteButton.updateHitbox();
@@ -99,7 +104,7 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
                 saveBoxes.push(box);
                 box.setData(save);
                 loadedSaves++;
-                box.onSaveDestroyed = ()->{
+                box.onSaveDestroyed = (saveName:String)->{
                     var destroyedBox:Int = saveBoxes.indexOf(box);
                     //box.destroy();
                     remove(box, true);
@@ -107,6 +112,9 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
                         saveBoxes[furtherBox].y-=(5+saveBoxes[furtherBox].height);
                     }
                 };
+                box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
+                    openSubState(new WarningPopup(title, message, buttons));
+                }
             }
         }
         

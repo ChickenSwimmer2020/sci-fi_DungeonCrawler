@@ -1,7 +1,5 @@
 package backend.save;
 
-import haxe.ds.StringMap;
-
 typedef SaveFile = {
     var meta:{
         name:String,

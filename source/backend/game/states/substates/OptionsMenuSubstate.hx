@@ -1,7 +1,5 @@
 package backend.game.states.substates;
 
-import backend.ui.ScrollableArea;
-import openfl.utils.AssetType;
 
 class OptionsMenuSubstate extends FlxUISubState{
     private var total_Controls:Int=0;
@@ -57,6 +55,7 @@ class OptionsMenuSubstate extends FlxUISubState{
 
     /**CONTROLS SETTINGS OBJECTS AND FUNCTION**/
     private var saveButton:FlxUIButton;
+    private var deleteButton:FlxUIButton;
     private var controlsText:FlxUIText;
     private var ControlsScroll:ScrollableArea;
     private var SBG:FlxUI9SliceSprite;
@@ -64,6 +63,7 @@ class OptionsMenuSubstate extends FlxUISubState{
     private var index:Int=0;
     private var a:Int=0;
     private function reloadControls() {
+        if(Player.instance!=null) Player.instance.updateControls();
         for(ass in ControlObjects) {
             var keys = Main.controls.get(ass.text.text);
             if (keys == null) continue;
@@ -102,6 +102,8 @@ class OptionsMenuSubstate extends FlxUISubState{
         }
         controls.add(SBG);
 
+
+
         saveButton=new FlxUIButton(420, 380, Language.getTranslatedKey("menu.options.tab.save.flush", saveButton), ()->{
             var controlsUpload:Array<{c:String, keys:Array<FlxKey>}>=[];
             for(i in 0...total_Controls) {
@@ -123,8 +125,24 @@ class OptionsMenuSubstate extends FlxUISubState{
         saveButton.autoCenterLabel();
         controls.add(saveButton);
 
+        deleteButton=new FlxUIButton(320, 380, Language.getTranslatedKey("menu.settings.clear.button", null), ()->{
+            openSubState(new WarningPopup(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.settings.clear.message", null), [
+                {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
+                {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
+                    Main.resetGlobalSettings();
+                }, c:true}
+            ]));
+        }, false);
+        deleteButton.loadGraphic(Paths.image('ui/menu', 'button_clearSettings'), true, 100, 20);
+        deleteButton.updateHitbox();
+        deleteButton.autoCenterLabel();
+        deleteButton.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_delete")), 0, 0, false);
+        controls.add(deleteButton);
+        deleteButton.label.alignment=RIGHT;
+        deleteButton.labelOffsets = [FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 1), FlxPoint.weak(-5, 0)];
+
         openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage", null), Language.getTranslatedKey("warning.unfinishedlanguage.message", null), [
-            {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), f:()->{}, c:true}
+            {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
         ]));
     }
 
@@ -202,9 +220,8 @@ class OptionsMenuSubstate extends FlxUISubState{
                 }
             }
             if(Language.WIPLanguages.contains(_)) openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage", null), Language.getTranslatedKey("warning.unfinishedlanguage.message", null), [
-                {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), f:()->{}, c:true}
+                {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
             ]));
-
         });
         for(languageOption in languageDropdown.list) {
             switch(languageOption.name) {

@@ -1,11 +1,5 @@
 package backend.ui;
 
-import flixel.graphics.frames.FlxFrame;
-import openfl.display.Bitmap;
-import openfl.display.Sprite;
-import openfl.filters.BlurFilter;
-import openfl.geom.Point;
-
 class WarningPopup extends FlxSubState {
     private var background:FlxUI9SliceSprite;
     private var background2:FlxUI9SliceSprite;
@@ -14,10 +8,10 @@ class WarningPopup extends FlxSubState {
     private var body:FlxText;
     private var group:FlxSpriteGroup;
     private var popupCamera:FlxCamera;
-    public function new(title:String, b:String, buttons:Array<{l:String,f:Void->Void,c:Bool}>) {
+    public function new(title:String, b:String, buttons:Array<{l:String,?f:Null<Void->Void>,c:Bool}>) {
         super();
         popupCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
-        popupCamera.bgColor=0x00000000; //darkens stuff behind it :3 //TODO: maybe make blur through a filter if shaders are enabled.
+        popupCamera.bgColor=0x00000000; //darkens stuff behind it :3
         FlxG.cameras.add(popupCamera, false);
 
 
@@ -27,29 +21,15 @@ class WarningPopup extends FlxSubState {
             return;
         }
         group=new FlxSpriteGroup(0, 0);
-
-        var backgroundCapture:BitmapData = new BitmapData(FlxG.width, FlxG.height);
-        backgroundCapture.draw(FlxG.camera.canvas);
-
-        //TODO: make not lag.
-        var smallRect = new openfl.geom.Rectangle(0, 0, 1280, 720);
-        var dest:BitmapData = new BitmapData(1280, 720, false);
-        dest.draw(backgroundCapture, null, null, null, smallRect, true);
-        var bmp = new Bitmap(dest);
-        bmp.filters = [new BlurFilter(8, 8, 2)];
-        var blurred:BitmapData = new BitmapData(1280, 720, false);
-        blurred.draw(bmp);
-        
-        var blurDarkenSprite:FlxSprite = new FlxSprite(0, 0).loadGraphic(blurred);
-        blurDarkenSprite.alpha=0.5;
-        //add(blurDarkenSprite); //TODO: fix.
-        
-
+        var blurDarkenSprite:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width+200, FlxG.height+200, 0xFF000000);
+        blurDarkenSprite.alpha=0.75;
+        add(blurDarkenSprite);
+        blurDarkenSprite.camera = popupCamera;
         add(group);
 
         background=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, FlxG.width/4, FlxG.height/4));
         background2=new FlxUI9SliceSprite(5, 15, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, FlxG.width/4-10, FlxG.height/4-30));
-        header = new FlxText(2, 2, background.width, title, 12); //8
+        header = new FlxText(2, 0, background.width, title, 12); //8
         header.setBorderStyle(OUTLINE, 0xFF000000, 1, 1);
         header.alignment=CENTER;
 
@@ -60,7 +40,7 @@ class WarningPopup extends FlxSubState {
         group.add(body);
 
         for(object in buttons) {
-            var butt:FlxUIButton=new FlxUIButton(0, 0, object.l, ()->{object.f(); if(object.c) close();});
+            var butt:FlxUIButton=new FlxUIButton(0, 0, object.l, ()->{if(object.f!=null) object.f(); if(object.c) close();});
             butts.push(butt);
             group.add(butt);
             butt.loadGraphic("flixel/images/ui/button.png", true, 80, 20);
@@ -78,6 +58,11 @@ class WarningPopup extends FlxSubState {
 
         group.screenCenter();
         group.camera = popupCamera;
+        popupCamera.zoom = 0.95;
+        blurDarkenSprite.alpha = 0;
+
+        FlxTween.tween(popupCamera, {zoom: 1}, 0.75, {ease: FlxEase.expoOut});
+        FlxTween.tween(blurDarkenSprite, {alpha: 0.75}, 0.75, {ease: FlxEase.expoOut});
     }
 
     override public function destroy() {

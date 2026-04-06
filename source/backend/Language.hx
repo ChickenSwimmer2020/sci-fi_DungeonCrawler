@@ -27,14 +27,19 @@ class Language {
 
         return null;
     }
-    public static function getTranslatedKey(key:String, object:Null<Dynamic>):String {
+    public static function getTranslatedKey(key:String, object:Null<Dynamic>, ?overrides:Map<String,String>):String {
         if(#if (html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
             var lang:Dynamic=Json.parse(#if (html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
+            var targetString:String = "";
             if(object!=null && activeLanguageObject.get(key)==null){
                 activeLanguageObject.set(key, object);
             }
-            if(Reflect.hasField(lang, key)) return Reflect.field(lang, key);
+            if(Reflect.hasField(lang, key)) targetString = Reflect.field(lang, key);
             else return key; //just return the base string ID if there is no entry. prevents issues.
+            if(overrides!=null){
+                for(key => replacer in overrides) targetString = targetString.replace(key, replacer);
+                return targetString;
+            }else return targetString;
         }else Main.showLanguageError(Main.curLanguage);
         return null;
     }

@@ -1,16 +1,23 @@
 package backend.game;
 
 class Player extends FlxSprite {
+    public static var onPlayerSave:Void->Void;
     public static var instance:Player;
     public static var health:Float = 100;
     public static var stamina:Float = 100;
     public static var xp:Float = 0;
 
+    //SLS (Seconds since Last Save)
+    public static var SLS:Int=0;
+
     public var curHotbarSlot(default, set):Int=0;
     public function set_curHotbarSlot(value:Int):Int {
         curHotbarSlot=value;
         @:privateAccess if(inventory.slots[curHotbarSlot]?.curItem?.type==RANGED || (inventory.slots[curHotbarSlot]?.curItem?.type==MEELEE || inventory.slots[curHotbarSlot]?.curItem?.type==MAGIC)){
-            if(weapon.name != inventory.slots[curHotbarSlot].curItem?.item) WeaponParser.recycleWeapon(weapon, inventory.slots[curHotbarSlot].curItem?.item); //only do it once IF we need to.
+            if(weapon.name != inventory.slots[curHotbarSlot].curItem?.item){
+                WeaponParser.recycleWeapon(weapon, inventory.slots[curHotbarSlot].curItem?.item); //only do it once IF we need to.
+                weaponJustActivated=true;
+            }
         }
         return curHotbarSlot;
     }
@@ -23,7 +30,8 @@ class Player extends FlxSprite {
     public static var onPlayerPause:Void->Void = null; //JUST in-case i ever need it.
     public static var MOVE_SPEED:Float=50; // or whatever your speed is
     public static var MAX_MOVE_SPEED:Float=50; //for some reason always has 50 added while moving??
-
+    public static var SPRINT_MULT:Float = 1.4213;
+    
     private static final MAX_ZOOM:Float=10;
     private static final MIN_ZOOM:Float=1;
     private static final WEAPON_OFFSET:Map<String, FlxPoint> = [
@@ -39,6 +47,18 @@ class Player extends FlxSprite {
     private var ctrlZoomIn:Array<FlxKey>;  
     private var ctrlZoomOut:Array<FlxKey>; 
     private var ctrlInv:Array<FlxKey>;   
+    private var ctrlSprint:Array<FlxKey>;   
+    public function updateControls() {
+        trace(Main.controls);
+        ctrlUp = Main.controls.get('moveUP');
+        ctrlDown = Main.controls.get('moveDOWN');
+        ctrlLeft = Main.controls.get('moveLEFT');
+        ctrlRight = Main.controls.get('moveRIGHT');
+        ctrlZoomIn = Main.controls.get('zoomIN');
+        ctrlZoomOut = Main.controls.get('zoomOUT');
+        ctrlInv = Main.controls.get('inventory');
+        ctrlSprint = Main.controls.get('sprint');
+    }
     public function new() {
         super(0, 0);
         targetWeaponPosition=new FlxPoint(x, y);
@@ -52,6 +72,7 @@ class Player extends FlxSprite {
         ctrlZoomIn = Main.controls.get('zoomIN');
         ctrlZoomOut = Main.controls.get('zoomOUT');
         ctrlInv = Main.controls.get('inventory');
+        ctrlSprint = Main.controls.get('sprint');
     }
     #if (debug)
         function addWatchObjects() {
@@ -66,6 +87,7 @@ class Player extends FlxSprite {
             FlxG.watch.addQuick("xp", xp??0);
         }
     #end
+    private var weaponJustActivated:Bool=false;
     public var weaponKickback:FlxPoint=FlxPoint.weak(0, 0);
     var isWeapon:Bool=false;
     override public function update(elapsed:Float) {
@@ -109,6 +131,12 @@ class Player extends FlxSprite {
             if((FlxG.mouse.justPressedMiddle && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
 
             if(weapon.visible && weapon.active){
+                if(weaponJustActivated){
+                    targetWeaponPosition.set(x+WEAPON_OFFSET.get(weapon.name)?.x,y+WEAPON_OFFSET.get(weapon.name)?.y);
+                    weapon.x=targetWeaponPosition.x;
+                    weapon.y=targetWeaponPosition.y;
+                    weaponJustActivated=false;
+                }
                 targetWeaponPosition.set(x+WEAPON_OFFSET.get(weapon.name)?.x,y+WEAPON_OFFSET.get(weapon.name)?.y);
                 weapon.x=FlxMath.lerp(targetWeaponPosition.x, weapon.x, Math.exp(-elapsed*3.125*4*1)); //this should make it that the weapon can collide with the blocks too, HOPEFULLY to prevent hsooting through blocks.
                 weapon.y=FlxMath.lerp(targetWeaponPosition.y, weapon.y, Math.exp(-elapsed*3.125*4*1));
@@ -134,9 +162,10 @@ class Player extends FlxSprite {
         }
 
         
-        velocity.x = ((velocity.x = velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED))); //add kickback on-top of the normal velocity based movement
-        velocity.y = ((velocity.y = velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED))); //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
-        Main.camGame.zoom = (Main.camGame.zoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
+        velocity.x = ((velocity.x = (velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED)))+(axis(ctrlSprint, [NONE])*SPRINT_MULT)); //add kickback on-top of the normal velocity based movement
+        velocity.y = ((velocity.y = (velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED)))+(axis(ctrlSprint, [NONE])*SPRINT_MULT));    //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
+        Main.targetCamGameZoom = (Main.targetCamGameZoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
+        Main.camGame.zoom = Main.targetCamGameZoom + Main.camGameZoomIncrement;
 
         if (Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
     }

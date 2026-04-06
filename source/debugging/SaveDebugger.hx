@@ -26,11 +26,11 @@ class SaveDebugger extends FlxUIState{
 
 		/***TAB GROUP 1***/
 	    tabs_radio_1 = new FlxUIRadioGroup(10, 10, ["HEALTH", "STAMINA", "XP", "INVENTORY", "OTHER"], [
-			Language.getTranslatedKey("debugger.save.radio.Health", null),
-			Language.getTranslatedKey("debugger.save.radio.Stamina", null),
-			Language.getTranslatedKey("debugger.save.radio.Experience", null),
-			Language.getTranslatedKey("debugger.save.radio.Inventory", null),
-            Language.getTranslatedKey("debugger.save.radio.Custom", null)
+			Language.getTranslatedKey("debugger.save.radio.health", null),
+			Language.getTranslatedKey("debugger.save.radio.stamina", null),
+			Language.getTranslatedKey("debugger.save.radio.experience", null),
+			Language.getTranslatedKey("debugger.save.radio.inventory", null),
+            Language.getTranslatedKey("debugger.save.radio.custom", null)
 		]);
         READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey("debugger.save.parse", null), ()->{
             returnText.text='${Language.getTranslatedKey("debugger.save.returned", null)}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, READING_textInputOther.text)}';

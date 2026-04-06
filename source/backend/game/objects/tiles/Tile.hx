@@ -1,4 +1,4 @@
-package backend.game.objects;
+package backend.game.objects.tiles;
 
 class Tile extends FlxSprite {
     public static var curImage:String="";
@@ -32,7 +32,7 @@ class Tile extends FlxSprite {
     public function new(x:Int, y:Int, tiles:Array<Array<Tile>>, tileMap:String) {
         super(x, y);
         makeGraphic(1, 1, 0x00FFFFFF); //forgot to make the graphic before overriding it.
-        if(tileMap!="") initTileGraphic(tileMap); //just dont make any graphic if its empty, because it probably gets overridden with a proper graphic somewhere else
+        if(tileMap!=null && tileMap!="") initTileGraphic(tileMap); //just dont make any graphic if its empty, because it probably gets overridden with a proper graphic somewhere else
     }
     private function checkTile(tiles:Array<Array<Tile>>, x:Int, y:Int):{a:Bool, t:Tile}{
         if(tiles[y]==null) return {a:false, t:null};

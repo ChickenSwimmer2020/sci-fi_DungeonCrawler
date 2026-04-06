@@ -8,9 +8,17 @@ enum abstract ItemType(String) from String to String {
     var MAGIC="MAGIC";
     var NULL="NULL";
 }
-enum abstract ConsumableType(String) from String to String {
-    var POTION="POTION"; //TODO: implement
+enum abstract PotionType(String) from String to String {
+    var HEALTH="HEALTH";
     
+    public static function getPotionEffect(type:String) {
+        switch(type) {
+            case HEALTH: trace('used health potion');
+            default: trace("test");
+        }
+    }
+}
+enum abstract ConsumableType(String) from String to String {
     var CRUMB="CRUMB";
     var SNACK="SNACK";
     var MEAL="MEAL";
@@ -60,6 +68,8 @@ typedef Item = {
     @:optional var gunType:GunType;
     @:optional var MagicType:MagicType;
     var item:String;
+    @:optional var isPotion:Bool;
+    @:optional var potionType:PotionType;
     @:optional var durability:Float;
     @:optional var damage:Map<String, Float>; //so we can apply MANY damage types to anything.
     @:optional var consumable:Bool;
@@ -93,7 +103,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
         RightClickFunctions=[];
         if(item!=null){
             if(item.consumable==true){
-                if(((item.consumableType==SHOT||(item.consumableType==GLASS||item.consumableType==BOTTLE)||item.consumableType==POTION))){
+                if(((item.consumableType==SHOT||(item.consumableType==GLASS||item.consumableType==BOTTLE)||item.isPotion))){
                     RightClickOptions.push("Drink");
                     RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
                         ()->{
@@ -129,9 +139,10 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
     }
     private function loadItemGraphic(item:String) {
         var file:#if(html5)BitmapData#else String#end = Paths.image('ui/items', item);
-        if(#if(html5)file!=null#else !FileSystem.exists(file)#end) file = Paths.image('items/images', item); //fallback check.
+        if(#if(html5)file==null#else !FileSystem.exists(file)#end) file = Paths.image('items/images', item); //fallback check.
         if(#if(html5)file!=null#else FileSystem.exists(file)#end) {
-            if(object==null) object = new FlxSprite(0, 0).loadGraphic(file);
+            if(object==null) object = new FlxSprite(0, 0);
+            object.loadGraphic(file);
             object.visible=true;
             object.setGraphicSize(SIZE);
             object.updateHitbox();
@@ -189,7 +200,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
         RightClickFunctions=[];
 
         if(item?.consumable==true){ //null safety hopefully.
-            if(((item?.consumableType==SHOT||(item?.consumableType==GLASS||item?.consumableType==BOTTLE)||item?.consumableType==POTION))){
+            if(((item?.consumableType==SHOT||(item?.consumableType==GLASS||item?.consumableType==BOTTLE)||item?.isPotion))){
                 RightClickOptions.push("Drink");
                 RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
                     ()->{
@@ -294,7 +305,6 @@ class HUDSubstate extends FlxSubState {
         super();
         instance=this;
         inventory=items??[];
-    
         var index:Int=0;
         for(i in 0...Player.INVENTORY_SLOTS) {
             if(i%MAX_SLOTS==0)index=0;
@@ -318,6 +328,8 @@ class HUDSubstate extends FlxSubState {
             }
             index++;
         }
+
+        PotionType.getPotionEffect(PotionType.HEALTH);
 
         weaponText=new FlxText(0+(InventorySlot.SIZE*index), 0, 0, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
         add(weaponText);
