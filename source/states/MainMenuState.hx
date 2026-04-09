@@ -24,6 +24,7 @@ class MainMenuState extends FlxState {
             ()->{#if(debug&&(windows||hl)) Main.LOG('achivements');#end},
             #if(windows||hl)()->{Sys.exit(1);}#end
         ];
+        Music.stopLoops();
         Music.playMusic("CellCompilation", true, "", true, "loop");
 
         for(i in 0...#if(windows||hl)6#else 5#end) {

@@ -6,6 +6,7 @@ class Paths {
     public static final itemPath:String="assets/items";
     public static final weaponsPath:String="assets/items/weapons";
     public static final musicPath:String="assets/audio/music";
+    public static final soundPath:String="assets/audio/sfx";
     #if (debug) public static final debugPath:String="assets/debug"; #end
 
     public static inline function weaponExists(w:String):Bool{

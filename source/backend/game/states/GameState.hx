@@ -3,7 +3,7 @@ package backend.game.states;
 class GameState extends FlxState {
     public static var generatedCameras:Bool=false;
     public static var securitySystemActivated:Bool=false;
-    public static var timeLeftUntilSecuritySystemActive:Int=0;
+    public static var timeLeftUntilSecuritySystemActive:Float=0;
     public static var pulledBreaker(default, set):Bool=false;
 
     public static function set_pulledBreaker(value:Bool):Bool {
@@ -13,19 +13,19 @@ class GameState extends FlxState {
     }
     public static function beginCountdown() {
         timeLeftUntilSecuritySystemActive = Flags.SECURITY_SECONDSTILLACTIVATION;
-        Functions.wait(1, (_)->{
-            timeLeftUntilSecuritySystemActive--;
+        Functions.wait(0.1, (_)->{
+            timeLeftUntilSecuritySystemActive-=0.1;
             trace(timeLeftUntilSecuritySystemActive);
             switch(timeLeftUntilSecuritySystemActive) {
-                case 60: Music.playLoopingMusic("ProtocalValidation", "looptense1min", "looptense30s");
-                case 30: Music.playLoopingMusic("ProtocalValidation", "looptense30s", "looptense15s");
-                case 15: Music.playLoopingMusic("ProtocalValidation", "looptense15s", "end");
+                case 197: Music.playLoopingMusic("ProtocolValidation", "looptense1min", "looptense30s"); //about half-way through.
+                case 132: Music.playLoopingMusic("ProtocolValidation", "looptense30s", "looptense15s");
+                case 66: Music.playLoopingMusic("ProtocolValidation", "looptense15s", "end");
                 case 0: FlxG.sound.music.stop();
-                    Music.playOnce("ProtocalValidation", "escapeEnd", "end", null, ()->{
+                    Music.playOnce("ProtocolValidation", "escapeEnd", "end", null, ()->{
                         Music.flushAudio();
                     });
             }
-        }, Flags.SECURITY_SECONDSTILLACTIVATION);
+        }, Flags.SECURITY_SECONDSTILLACTIVATION.floor());
     }
     public function new(LoadingFromSave:Bool=false) {
         super();
@@ -41,6 +41,9 @@ class GameState extends FlxState {
             var saveFile:SaveFile = Save.readSaveFile(Main.FILE); //just realized i can do this lol.
             var map:GameMap = Save.getMapFromSaveFile(Main.FILE, saveFile.maps[saveFile.meta.depth].name);
             add(map);
+
+            Music.stopMusic();
+            DynamicMusic.playDynamicMusic('SubLayers', "default", "piano");
         }
     }
 

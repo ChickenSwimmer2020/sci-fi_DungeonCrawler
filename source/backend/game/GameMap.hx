@@ -48,6 +48,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
             add(new Pickup(playerSpawnPoint.x+100, playerSpawnPoint.y-50, {type: RANGED,item: "shotgun",damage: []}));
             add(new Pickup(playerSpawnPoint.x+150, playerSpawnPoint.y-50, {type: RANGED,item: "rifle",damage: []}));
             add(new Pickup(playerSpawnPoint.x+200, playerSpawnPoint.y-50, {type: RANGED,item: "burstgun",damage: []}));
+            add(new Pickup(playerSpawnPoint.x+250, playerSpawnPoint.y-50, {type: RANGED,item: "minigun",damage: []}));
 
             //test pickup for consumables and right clickable items.
             add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y, {type: CONSUMABLE, item: "DEBUGCONSUMABLE", consumable: true, consumableType: CRUMB}));

@@ -92,7 +92,7 @@ class Player extends FlxSprite {
     var isWeapon:Bool=false;
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        mousePosition=FlxG.mouse.getWorldPosition(Main.camGame);
+        if(Main.camGame!=null) mousePosition=FlxG.mouse.getWorldPosition(Main.camGame);
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(weaponKickback.y > 0 || weaponKickback.y < 0) weaponKickback.y=FlxMath.lerp(0, weaponKickback.y, Math.exp(-elapsed * 3.126 * 4 * 1));
@@ -126,7 +126,7 @@ class Player extends FlxSprite {
         }else{
             isWeapon=((inventory.selectedItem.type==RANGED||inventory.selectedItem.type==MEELEE)||inventory.selectedItem.type==MAGIC);
             weapon.active=weapon.visible=isWeapon;
-            if(((weapon.frMode==RAIL||weapon.frMode==FULLAUTO)?FlxG.mouse.pressed:FlxG.mouse.justPressed) && (weapon.visible && weapon.active)) weapon.onLeftClick();
+            if(((weapon.frMode==RAIL||(weapon.frMode==FULLAUTO||weapon.frMode==MINIGUN))?FlxG.mouse.pressed:FlxG.mouse.justPressed) && (weapon.visible && weapon.active)) weapon.onLeftClick();
             if(FlxG.mouse.justPressedRight && (weapon.visible && weapon.active)) weapon.onRightClick();
             if((FlxG.mouse.justPressedMiddle && weapon.onMiddleClick!=null) && (weapon.visible && weapon.active)) weapon.onMiddleClick();
 

@@ -6,7 +6,7 @@ class Breaker extends SpecialTile {
     public function new(x:Int,y:Int, tiles:Array<Array<Tile>>) {
         super(x,y, tiles);
         tileName = "Breaker";
-        Music.playLooping(false, "ProtocalValidation", "BreakerLoop", "introloop", "hitcutscene");
+        Music.playLooping(false, "ProtocolValidation", "BreakerLoop", "introloop", "hitcutscene");
         loopedMusicObject = Music.activeMusicObjects.get('BreakerLoop');
         loopedMusicObject.pitch = 0.85;
         options = [
@@ -14,6 +14,7 @@ class Breaker extends SpecialTile {
                 HUDSubstate.instance.openSubState(new InspectPopup("test", "test 2x", Paths.image('tiles', 'breaker'), true, FlxPoint.weak(16, 16)));
             },
             Language.getTranslatedKey("game.specialtile.breaker.interact", null)=>()->{
+                FlxG.sound.play('${Paths.soundPath}/breakerpull.${#if(html5)'mp3'#else'ogg'#end}');
                 animation.play('pull');
             }
         ];
@@ -48,15 +49,15 @@ class Breaker extends SpecialTile {
                     FlxG.sound.music.volume = 1;
                     loopedMusicObject.kill();
                     FlxG.sound.music.kill();
-                    Music.playOnce("ProtocalValidation", "HitCutscene", "hitcutscene", "mainloop", ()->{
-                        Music.playLoopingMusic("ProtocalValidation", "mainloop", "looptense1min");
+                    Music.playOnce("ProtocolValidation", "HitCutscene", "hitcutscene", "mainloop", ()->{
+                        Music.playLoopingMusic("ProtocolValidation", "mainloop", "looptense1min");
                         Conductor.targetAudioObject = FlxG.sound.music;
                         Conductor.cameraBopRate = 2;
                         GameState.beginCountdown();
                     });
 
                     Conductor.targetAudioObject = Music.activeMusicObjects.get('HitCutscene');
-                    Conductor.BPM = Music.musicInfos.get('ProtocalValidation').BPM;
+                    Conductor.BPM = Music.musicInfos.get('ProtocolValidation').BPM;
 
                     Conductor.pitch = 0.85;
                     FlxTween.tween(Conductor, {pitch: 1}, 2.412, {ease:FlxEase.expoIn});

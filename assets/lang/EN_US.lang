@@ -74,11 +74,12 @@
     
 
 
-    "weapon.pistol": "Pistol",
-    "weapon.shotgun": "Shotgun",
-    "weapon.rifle": "Rifle",
-    "weapon.burstgun": "Burst Gun",
+    "weapon.pistol": "Glock 17",
+    "weapon.shotgun": "Spaz-12",
+    "weapon.rifle": "M16AR",
+    "weapon.burstgun": "BurstGun",
     "weapon.railgun": "Rail Gun",
+    "weapon.minigun": "M134",
 
     "error.nullitem": "Null Item Exception",
     "error.nullitem.message": "An Pickup attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL.",

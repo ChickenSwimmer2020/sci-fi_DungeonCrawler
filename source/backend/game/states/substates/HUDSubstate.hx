@@ -36,6 +36,7 @@ enum abstract GunType(String) from String to String {
     var NULL="NULL";
 }
 enum abstract GunFireMode(String) from String to String {
+    var MINIGUN="MINIGUN";
     var FULLAUTO="FULLAUTO";
     var SEMI="SEMI";
     var SHOTGUN="SHOTGUN";

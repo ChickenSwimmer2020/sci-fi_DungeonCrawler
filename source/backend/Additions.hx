@@ -15,7 +15,7 @@ final class Functions {
     public static function wait(time:Float, onComplete:FlxTimer->Void, ?loops:Int=1) {
         return new FlxTimer().start(time, (_)->{
             onComplete(_);
-            if(_.loopsLeft==0) _.destroy();
+            if(_.loopsLeft==0 && loops!=0) _.destroy();
         }, loops);
     }
     /**
