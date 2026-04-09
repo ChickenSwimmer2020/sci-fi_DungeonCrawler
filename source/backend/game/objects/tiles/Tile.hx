@@ -69,12 +69,12 @@ class Tile extends FlxSprite {
             case "UDR": "up/down/right";
             default: "none";
         }
-
-        frame=frames.getByIndex(mapTiles.get(curImage==""?"placeholder":curImage).get(suround??"none"));
+        animation.add('a', [mapTiles.get(curImage==""?"placeholder":curImage).get(suround??"none")], 30);
+        animation.play('a');
     }
     
     private function initTileGraphic(image:String) {
         curImage=image;
-        frames = FlxTileFrames.fromGraphic(FlxG.bitmap.add(Paths.tiles(curImage)), FlxPoint.get(16, 16), null, FlxPoint.weak(1, 1));
+        loadGraphic(Paths.tiles(curImage), true, 16, 16);
     }
 }
