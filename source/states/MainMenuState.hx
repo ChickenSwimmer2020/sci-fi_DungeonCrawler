@@ -1,5 +1,4 @@
 package states;
-import backend.Music;
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
     var buttons:Array<FlxButton>=[];
@@ -25,11 +24,9 @@ class MainMenuState extends FlxState {
             ()->{#if(debug&&(windows||hl)) Main.LOG('achivements');#end},
             #if(windows||hl)()->{Sys.exit(1);}#end
         ];
-        final strings:Array<String>=[
+        Music.playMusic("CellCompilation", true, "", true, "loop");
 
-        ];
-
-        for(i in 0...#if(windows||hl)5#else 4#end) {
+        for(i in 0...#if(windows||hl)6#else 5#end) {
             var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), "", onButtonClicked[i]);
             button.text = [
                 Language.getTranslatedKey("menu.new_game", button),
@@ -44,7 +41,6 @@ class MainMenuState extends FlxState {
         }
 
         //TODO: cool bg art
-        Music.playMusic("CellCompilation");
 
 
         #if (debug)

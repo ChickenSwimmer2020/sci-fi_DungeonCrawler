@@ -5,6 +5,7 @@ enum abstract SpecialTileType(Int) from Int to Int {
     var SPAWN=0;
     var HALLWAY=1;
     var WALKABLEAREA=2; //can be used for pathfinding, mainly used for setting things up to actually work and generate properly. hopefully.
+    var BREAKER=3;
 }
 
 typedef TilePointer = {
@@ -58,31 +59,29 @@ class MapGenerator {
         };
         //TODO: rewrite generation system to be based off of extensions, kinda like what minecraft random structures do.
         for(h in 0...height) outputTiles[h]=[]; //just for assigning and making sure we dont access nulls in the arrays because im too lazy to initilize properly.
-        outputTiles[Math.floor(outputTiles.length/2)][Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)]={collides: false,type: "",specialType:SPAWN,special: true};
-        #if(debug&&(windows||hl)) Main.LOG('placed spawn tile at ${Math.floor(outputTiles.length/2)}, ${Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)} tiles: ${outputTiles.length}, $outputTiles'); #end
         var generatedHallway:Bool=false;
         for(h in 0...height){
             for(w in 0...width) {
                 //generateTileAt({type: "placeholder", collides: FlxG.random.bool(50), specialType: HALLWAY, special: true}, 0, 0, outputTiles);
-                //generateTileAt(
-                //    FlxG.random.bool(50)?{
-                //        type: "placeholder",
-                //        collides: FlxG.random.bool(50),
-                //        special: !generatedHallway,
-                //        specialType: !generatedHallway?HALLWAY:NONE
-                //    }:null,
-                //    w, h, outputTiles
-                //);
+                generateTileAt(
+                    FlxG.random.bool(50)?{
+                        type: "placeholder",
+                        collides: FlxG.random.bool(50),
+                        special: false,
+                        specialType: NONE
+                    }:null,
+                    w, h, outputTiles
+                );
                 //generatedHallway=true;
             }
         }
+        outputTiles[Math.floor(outputTiles.length/2)][Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)]={collides: false,type: "",specialType:SPAWN,special: true};
+        #if(debug&&(windows||hl)) Main.LOG('placed spawn tile at ${Math.floor(outputTiles.length/2)}, ${Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)} tiles: ${outputTiles.length}, $outputTiles'); #end
+        //force override tile 0, 0 with the breaker for testing.
 
         toMapFile.tiles = outputTiles;
-        #if(debug&&(windows||hl)) Main.LOG('finished generating mapFile $toMapFile'); #end
         if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null)(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=([]:Array<MapFile>);
-        #if(debug&&(windows||hl)) Main.LOG('attempting to push... BEFORE: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps}'); #end
         (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
-        #if(debug&&(windows||hl)) Main.LOG('attempting to push... AFTER: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps}'); #end
         Main.saveFile.flush(); //should probably do this im realizing. maybe i should add a setter or something to automatically do this for me.
     }
     private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){

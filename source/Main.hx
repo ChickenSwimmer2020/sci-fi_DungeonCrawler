@@ -1,22 +1,21 @@
 package;
 
-import lime.utils.Resource;
-import lime.ui.FileDialog;
-#if html5
-    import js.html.FileSystem;
-    import js.html.File;
-    import js.Browser;
-#end
-import openfl.events.UncaughtErrorEvent;
-import openfl.events.Event;
-import backend.Discord;
-
 class Main extends openfl.display.Sprite {
     #if (debug&&(windows||hl))
+        private static var OutputThread:Thread;
         public static function LOG(str:Dynamic) {
-            if(FlxG.log.redirectTraces) FlxG.log.add(str); //still fully functional.
-            else trace(str);
-            DEBUGLOG.push(str);
+            //this is just to make it so that the console isnt freezing the game when we try to trace a fucking save file.
+            if(Std.string(str).length>100) {
+                if(FlxG.log.redirectTraces) FlxG.log.add("log is longer than 100 chars. outputting directly to file."); //still fully functional.
+                else trace("log is longer than 100 chars. outputting directly to file.");
+                OutputThread = Thread.create(() -> { //apparently this auto-kills after it finishes.
+                    DEBUGLOG.push(str);
+                });
+            }else{
+                if(FlxG.log.redirectTraces) FlxG.log.add(str); //still fully functional.
+                else trace(str);
+                DEBUGLOG.push(str);
+            }
         }
         public static var DEBUGLOG:Array<Dynamic>=[];
         public static function BUILDDEBUGLOGFILE() {
@@ -33,6 +32,7 @@ class Main extends openfl.display.Sprite {
             File.saveContent('DebugLogs/debuglog$dateString.txt', content);
         }
     #end
+    public static var InspectPopupVisible:Bool=false;
     public static var controls:Map<String, Array<Int>>=[
         "moveUP" => [UP, W],
         "moveDOWN" => [DOWN, S],
@@ -44,6 +44,7 @@ class Main extends openfl.display.Sprite {
         "pause" => [ESCAPE, BACKSPACE],
         "inventory" => [I, NONE],
         "interact" => [E, ENTER],
+        "sprint" => [SHIFT, NONE],
     ];
     public static var curHeldItem:Null<Item>=null;
     public static var heldItemGraphic:Null<FlxSprite>=null;
@@ -255,9 +256,13 @@ class Main extends openfl.display.Sprite {
     public static var saveFile:FlxSave = new FlxSave();
     public static var lastLoadedSaveName:Null<String>;
     public static var FILE:Null<String>;
+
+    public static var targetCamGameZoom:Float=1.0;
+    public static var camGameZoomIncrement:Float=0.0;
     #if sys public static var discord:Discord; #end
     public function new() {
         super();
+        #if html5 stage.showDefaultContextMenu = false; #end
         //i hope this works.
         #if (debug)
             //yeah this probably works better.
@@ -300,12 +305,19 @@ class Main extends openfl.display.Sprite {
             case ES: "Nokia Cellphone FC Small";
         }
 
+        addEventListener(Event.ENTER_FRAME, (_)->{
+            Music.manualUpdate(FlxG.elapsed??0);
+            Conductor.update(FlxG.elapsed??0);
+        });
+
         Save.findSaves(); //find the save files within SAVES
         MapGenerator.findMaps(); //find the maps within SAVES
         ShaderCache.preload(); //preload shaders before loading everything to HOPEFULLY make the game run faster when shaders compile.
         //by not compiling during runtime.
-
-        addChild(new flixel.FlxGame(0, 0, MainMenuState, 60, 60, false, false));
+        var game:flixel.FlxGame;
+        game = new flixel.FlxGame(0, 0, IntroState, 60, 60, false, false);
+        @:privateAccess game._customSoundTray = SoundTray;
+        addChild(game);
         #if (windows||hl)
             discord = new Discord("1487613766077120724");
             discord.setActivity("IPC RICH PRESENCE TEST 01");
@@ -314,6 +326,15 @@ class Main extends openfl.display.Sprite {
         #if (debug&&!html5) initDebugWindows(); #end
 
         FlxG.autoPause = saveFile.data.autoPause??true; //default to true if not specified.
+    }
+    public static function resetGlobalSettings() {
+        for(setting in Reflect.fields(saveFile.data)) {
+            switch(setting) {
+                case "saves","lastLoadedSave","language": //donothing
+                default: Reflect.setField(saveFile.data, setting, null);
+            }
+        }
+        initDefaultSaveParemeters();
     }
     private static function initDefaultSaveParemeters() {
         if((saveFile.data.saves:Map<String,SaveFile>).get(Flags.DEFAULT_SAVE)==null){
@@ -330,7 +351,8 @@ class Main extends openfl.display.Sprite {
             {c:"zoomOUT", keys:["MINUS", "NONE"]},
             {c:"pause", keys:["ESCAPE", "BACKSPACE"]},
             {c:"inventory", keys:["I", "NONE"]},
-            {c:"interact", keys:["E", "ENTER"]}
+            {c:"interact", keys:["E", "ENTER"]},
+            {c:"sprint", keys:["SHIFT", "NONE"]}
         ]:Array<{c:String, keys:Array<FlxKey>}>); //default init.
         if(saveFile.data.language==null)saveFile.data.language="EN_US";
     }

@@ -1,7 +1,5 @@
 package backend.ui;
 
-import flixel.FlxObject;
-
 class ScrollableArea extends FlxCamera {
     public var scrollIndex:Float=0;
     private var detectionObject:FlxObject;

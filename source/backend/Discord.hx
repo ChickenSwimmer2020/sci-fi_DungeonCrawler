@@ -1,9 +1,6 @@
 package backend;
 
 #if sys //this is a SYS feature only, because it uses sockets n shit.
-    import sys.thread.Thread;
-    import sys.thread.Mutex;
-
     class Discord {
         var pipe:sys.io.FileOutput;
         var pipeIn:sys.io.FileInput;

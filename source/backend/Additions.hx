@@ -10,12 +10,13 @@ final class Functions {
      * wait a specific ammount of time, then run code.
      * @param time how long to wait
      * @param onComplete function to run after time is done
+     * @param loops Int how many times to loop, defaults to 1 for one loop.
      */
-    public static function wait(time:Float, onComplete:FlxTimer->Void) {
+    public static function wait(time:Float, onComplete:FlxTimer->Void, ?loops:Int=1) {
         return new FlxTimer().start(time, (_)->{
             onComplete(_);
-            _.destroy();
-        });
+            if(_.loopsLeft==0) _.destroy();
+        }, loops);
     }
     /**
      * justPressed but ignore NONE 
@@ -70,9 +71,23 @@ final class Functions {
         }
         return FlxKey.NONE;
     }
+    /**
+     * get the Milliseconds value out of a FL Studio Time pointer (M:S:CS)
+     * @param M Minutes
+     * @param S Seconds
+     * @param CS Centi-Seconds
+     * @return Milliseconds.
+     */
+    public static inline function MSCSToMS(M:Int, S:Int, CS:Int):Float return (M*60*1000)+(S*1000)+(CS*10);
 }
 final class Additions{
     //for math
+    /**
+     * return positive version of negative input number
+     * @param number number to make positive.
+     * @return positive number input
+     */
+    public static inline function toPositive(number:Float):Float return number+(number*2);
     /**
      * floor a number
      * @param n input number
@@ -196,9 +211,16 @@ final class Additions{
      * @param a input array
      * @return Array<Dynamic>
      */
-    public static function flip(a:Array<Dynamic>):Array<Dynamic>{
-        var reversed:Array<Dynamic>=new Array<Dynamic>();
-        for(object in a.length...0)reversed[object] = a[object];
+    public static function reverse(a:Array<Dynamic>):Array<Dynamic>{
+        var reversed:Array<Dynamic> = a;
+        reversed.reverse();
         return reversed;
+    }
+
+    //actual objects.
+    public static function center(spr:FlxSprite, on:FlxObject):FlxSprite {
+        spr.x = on.x+on.width/2-spr.width/2;
+        spr.y = on.y+on.height/2-spr.height/2;
+        return spr;
     }
 }

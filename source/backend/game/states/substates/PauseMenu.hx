@@ -6,6 +6,14 @@ class PauseMenu extends FlxSubState {
     var buttons:Array<FlxButton> = [];
     public function new() {
         super();
+
+        if(FlxG.sound.music.playing) FlxG.sound.music.fadeOut(1.5, FlxG.sound.music.volume-0.75);
+        for(key => object in Music.activeMusicObjects) {
+            if(object.playing){
+                object.fadeOut(1.5, object.volume-0.75); //gives us 0.25
+            }
+        }
+        
         FlxG.state.persistentUpdate = false;
         pauseCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
         pauseCamera.bgColor = 0x00000000;
@@ -29,8 +37,8 @@ class PauseMenu extends FlxSubState {
                 Language.getTranslatedKey("pause.resume", buttons[i]),
                 Language.getTranslatedKey("pause.settings", buttons[i]),
                 "",
-                "",
-                "",
+                Language.getTranslatedKey("pause.exit", buttons[i]),
+                Language.getTranslatedKey("pause.exitnosave", buttons[i]),
                 Language.getTranslatedKey("pause.debug.exittestingstate", buttons[i])
             ][i], [
                 ()->{
@@ -47,8 +55,22 @@ class PauseMenu extends FlxSubState {
                     openSubState(options);
                 },
                 ()->{},
-                ()->{},
-                ()->{},
+                ()->{
+                    //TODO: save progress.
+                    FlxG.switchState(MainMenuState.new);
+                },
+                ()->{
+                    openSubState(new WarningPopup(Language.getTranslatedKey("pause.exitnosave.popup.title", null), Language.getTranslatedKey("pause.exitnosave.popup.message", null), [
+                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit.unsafe", null), f:()->{
+                            FlxG.switchState(MainMenuState.new);
+                        }, c:true},
+                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
+                            //TODO: save progress.
+                            FlxG.switchState(MainMenuState.new);
+                        }, c:true},
+                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
+                    ]));
+                },
                 ()->{
                     FlxG.switchState(MainMenuState.new);
                 }
@@ -74,7 +96,13 @@ class PauseMenu extends FlxSubState {
     override public function update(elapsed:Float) {
         super.update(elapsed);
             if(FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE])){
-                        FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
+                if(FlxG.sound.music.playing) FlxG.sound.music.fadeIn(1.5, FlxG.sound.music.volume, 1);
+                for(key => object in Music.activeMusicObjects) {
+                    if(object.playing){
+                        object.fadeIn(1.5, object.volume, 1);
+                    }
+                }
+                FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
                 close();
             }});
             for(i in 0...buttons.length) {

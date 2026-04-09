@@ -1,5 +1,95 @@
 # ChangeLog
 
+## Prototype Update 0.03.6 (Breaker and placeholder enemy)
+
+* Created debug enemy sprites.
+* `burstgun`, `pistol`, `railgun`, `rifle`, and `shotgun.weapon` were given a kickback varible.
+* Added new keys to `EN_US`.
+* Created Braker placeholder sprites.
+* Created `chrome_inspect.png`.
+* Created `escapeAlarm.png`. (UNUSED FOR NOW)
+* Created `button_clearSettings.png`.
+* Created `musicpopup.png`.
+* Added `Conductor`.
+* Added `BaseEnemy`, more of a placeholder though. (SOLAR FEEL FREE TO TOUCHUP)
+* Added `Breaker`.
+* Added `SpecialTile` with custom interactions.
+* Added (currently unused) field `onPlayerSave` to `Player`.
+* Added `updateControls` to `Player`.
+* Potions FINALLY exist, albeit unfinished.
+* Added dynamic override system to `Language`.
+* FINALLY added `GameState`.
+* Added `BREAKER` SpecialTileType to `MapGenerator`.
+* Fixed looping on ProtocalValidation and CellCompilation.
+* Added `ScreenShake` shader.
+* Added `SoundTray`.
+* Added `InspectPopup`.
+* Added `IntroState`.
+* Added `SEURITY_SECONDSTILLACTIVATION` to `Flags`.
+
+> Changes
+
+* `Functions.wait` now supports loops.
+* Added `Functions.MSCToMS`.
+* Moved imports to `Import`
+* `GameMap` creates a test enemy and breaker. (enemy is disabled for now)
+* `Tile` was moved to `source\backend\game\tiles`.
+* `LoadGameSubstate` now loads `GameState` instead of `TestingState`.
+* Global settings can now be cleared inside of `OptionsMenuSubstate`.
+* `PauseMenu` now lowers volume automatically when open. (BUGGY, SHOULD FIX)
+* `MapGenerator` now places spawn point correctly.
+* Completely re-wrote the `Music` system.
+* Buttons for `WarningPopup` can now have null functions and not crash.
+* Made `SaveDebugger`'s language keys not have uppercase.
+* Rewrote cam zoom system to be based on lerp and allow for camera bopping.
+* `MainMenuState` will now override music correctly.
+* `TestingState` no longer initiates cameras.
+* `TestingState` now extends `GameState`.
+
+> fixes
+
+* Saves
+* * Trying to delete a save now makes a popup warning.
+* Weapon
+* * Kickback is stored in .weapon files.
+* * Shotgun Kickback is functional FINALLY.
+* * Weapon no longer fires if `SpecialTile`'s option menu is open at all.
+* * Weapon no longer fires if `Main.InspectPopupVisible` is true.
+* * Weapon no longer lags behind player when first equipped after dequipping.
+
+
+## Prototype Update 0.03.5.1 (Tiles repair)
+
+* Updated Tiles placeholder graphics.
+* Tiles now connect correctly, minus very specific circumstances that i really dont care about right now
+
+## Prototype Update 0.03.5 (Weapons Fixes)
+
+* Updated `Changelog` to include changes from 0.03.⅘
+* Created `Bullet_impact.png`
+* `.Weapon` now allows for `fireTime` implementation.
+* `Weapon` now plays firing animation automatically when implemented properly.
+* Added all missing Lang strings for EN_US.
+* Removed ui/item graphics.
+* Bullet impact effects are now animated.
+* Reworked Tile adjacentcy detection. (NEEDS PROPER TESTING)
+* Weapon cooldown timers and ammo ammounts are now tied to weapon name instead of globally.
+* `HUDSubstate.InventorySlot` now extends `FlxTypedSpriteGroup<FlxSprite>` and loads items properly
+* `HUDSubstate.InventorySlot` now loads Pickup graphics when no ui graphic is found
+* `MapGenerator`'s random generation was re-implemented for testing.
+* `Flags.FALLBACK_WEAPON` now contains `fireTime` varible
+* `Main.LOG` will now open a second thread to save logs over 100 characters to the file.
+
+## Prototype Update 0.03.⅘ (Lore and shtuff)
+
+* Created `Lore.md`.
+* `Pickup` will now show an inventory full popup. (NEEDS TESTING)
+* Added WIP blur feature for popups, needs to be re-written to work properly.
+* Fixed buttons on MainMenuState.
+* Removed TODO's from:
+* * `Language`
+* * `OPtionsMenuSubstate`
+
 ## Prototype Update 0.03.4 (Controls Migration)
 
 * Created `Tasks.md` still needs to be filled out.
