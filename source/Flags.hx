@@ -1,7 +1,12 @@
 package;
 
 class Flags {
-    public static final SECURITY_SECONDSTILLACTIVATION:Int = 120;
+
+
+    public static final CONDUCTOR_BPM_CHECK_INTERVAL:Int=1;
+
+    //intro loop twice, then tense loop twice, then super-tense loop twice
+    public static final SECURITY_SECONDSTILLACTIVATION:Float = 263.28;
     public static final FALLBACK_WEAPON:WeaponData = {
         animations: [],
         damage: [],

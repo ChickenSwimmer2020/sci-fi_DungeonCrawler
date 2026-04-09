@@ -51,13 +51,11 @@ class SoundTray extends FlxSoundTray {
 		if (_timer > 0){
 			_timer -= (MS / 1000);
 			expo=1;
-		}else if (x > -width)
-		{
+		}else if (x > -width) {
 			expo+=expo;
 			x += (MS / 1000) * width * expo/4;
 
-			if (x <= width)
-			{
+			if (x >= FlxG.width + width) {
 				visible = false;
 				active = false;
 

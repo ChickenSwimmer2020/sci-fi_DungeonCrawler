@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Prototype Update 0.03.7 (Dynamic Music)
+
+* ProtocalValidation was changed to ProtocolValidation (typo lol.)
+
 ## Prototype Update 0.03.6 (Breaker and placeholder enemy)
 
 * Created debug enemy sprites.
@@ -56,7 +60,6 @@
 * * Weapon no longer fires if `SpecialTile`'s option menu is open at all.
 * * Weapon no longer fires if `Main.InspectPopupVisible` is true.
 * * Weapon no longer lags behind player when first equipped after dequipping.
-
 
 ## Prototype Update 0.03.5.1 (Tiles repair)
 

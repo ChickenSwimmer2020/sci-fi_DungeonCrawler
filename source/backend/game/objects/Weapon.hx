@@ -60,7 +60,8 @@ class Weapon extends FlxSprite{
         "burstgun" => 1000,
         "railgun" => 1000,
         "rifle" => 1000,
-        "shotgun" => 1000
+        "shotgun" => 1000,
+        "minigun" => 10000
     ]; //ammo
     
     private var justShotFail:Bool=false;
@@ -90,6 +91,7 @@ class Weapon extends FlxSprite{
             case SEMI:fire();charges.set(name, charges.get(name)-1);
             case BURST: for(i in 0...3)Functions.wait(shoot_time*(0.15*i), (_)->{charges.set(name, charges.get(name)-1);fire(_);});
             case FULLAUTO:increment++;Functions.wait(0.15*(0.15*increment), (_)->{charges.set(name, charges.get(name)-1);fire(_);}); //no changes needed lol.
+            case MINIGUN:Functions.wait(0.01, (_)->{charges.set(name, charges.get(name)-1);fire(_);});
             case RAIL:power+=POWER_INCREMENT; power=power.clampf(0, POWER_MAX);
             case SHOTGUN:for(i in 0...9)fire(1, true, i);charges.set(name, charges.get(name)-1);
             case NULL:
