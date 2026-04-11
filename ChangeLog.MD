@@ -2,7 +2,7 @@
 
 ## Prototype Update 0.03.7 (Dynamic Music)
 
-> yeah alright, fine. ill do this TWO commits after i was supposed ta.
+> yeah alright, fine. ill do this ~~TWO~~ *THREE* commits after i was supposed ta.
 
 * Created MINIGUN weapon type.
 * Weapon names now use real weapon names.
