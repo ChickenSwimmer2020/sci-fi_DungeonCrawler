@@ -27,11 +27,11 @@ PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
         <window allow-high-dpi="true" hardware="true" vsync="true" width="1280" height="720"/> <!--default window params-->
     </section>
 
-    <haxelib name="flixel"/>
-    <haxelib name="flixel-ui"/>
-    <haxelib name="flixel-addons"/>
-    <haxelib name="openfl"/>
-    <haxelib name="hxcpp"/>
+    <haxelib name="flixel" version="6.1.2"/>
+    <haxelib name="flixel-ui" version="2.6.4"/>
+    <haxelib name="flixel-addons" version="3.3.2"/>
+    <haxelib name="openfl" version="9.5.1"/>
+    <haxelib name="hxcpp" version="4.3.2"/>
 
     <source path="source" />
     <source path="source/debug" if="debug"/>

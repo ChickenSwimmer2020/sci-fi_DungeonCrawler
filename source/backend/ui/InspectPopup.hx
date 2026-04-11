@@ -21,7 +21,7 @@ class InspectPopup extends FlxSubState {
         background2=new FlxUI9SliceSprite(5, 15, FlxUIAssets.IMG_BOX, new Rectangle(0, 0, FlxG.width/4-10, FlxG.height/4-30));
         background2.color = 0xFFFFCA;
         background3=new FlxUI9SliceSprite(5, 20, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, 100, 100));
-        background3.x = background2.x+background2.width-105;
+        background3.x = background2.x+background2.width-(background3.width+5);
         header = new FlxText(2, 0, background.width, title, 12); //8
         header.setBorderStyle(OUTLINE, 0xFF000000, 1, 1);
         header.alignment=CENTER;
@@ -32,7 +32,7 @@ class InspectPopup extends FlxSubState {
             objectPreview.animation.add("a", [0], 0);
             objectPreview.animation.play('a');
         }
-        objectPreview.setGraphicSize(75, 75);
+        objectPreview.setGraphicSize(background3.width-25, background3.height-25);
         objectPreview.updateHitbox();
         objectPreview.center(background3);
 

@@ -53,7 +53,6 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUIRadioGroup;
 
 //haxe (never changes)
-import haxe.Json;
 import haxe.io.Error;
 
 //js
@@ -99,6 +98,7 @@ import lime.app.Application;
 import backend.game.states.GameState;
 import backend.save.Save;
 import backend.Paths;
+import backend.parsing.*;
 import backend.generation.MapGenerator;
 import backend.game.states.substates.OptionsMenuSubstate;
 import backend.Language;
@@ -127,6 +127,7 @@ import backend.game.objects.tiles.SpecialTile;
     import debugging.SaveDebugger;
     import debugging.MapDebugger;
     import debugging.AlphabetDebugger;
+    import debugging.ErrorDebugger;
 #end
 import backend.Discord;
 

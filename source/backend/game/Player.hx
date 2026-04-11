@@ -1,11 +1,16 @@
 package backend.game;
 
+import debugging.GameDebugger;
+
 class Player extends FlxSprite {
     public static var onPlayerSave:Void->Void;
     public static var instance:Player;
     public static var health:Float = 100;
     public static var stamina:Float = 100;
     public static var xp:Float = 0;
+
+    public var canMove:Bool=true;
+    public var canOpenInventory:Bool=true;
 
     //SLS (Seconds since Last Save)
     public static var SLS:Int=0;
@@ -88,11 +93,15 @@ class Player extends FlxSprite {
         }
     #end
     private var weaponJustActivated:Bool=false;
+    public var mustUpdateWeaponText:Bool=false;
     public var weaponKickback:FlxPoint=FlxPoint.weak(0, 0);
     var isWeapon:Bool=false;
+    var weaponTextTextTarget:String;
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        if(Main.camGame!=null) mousePosition=FlxG.mouse.getWorldPosition(Main.camGame);
+        if(weaponTextTextTarget!='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}')
+            weaponTextTextTarget='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}';
+        if(Main.camGame!=null) mousePosition=FlxG.mouse.getWorldPosition(Main.camGame)??FlxPoint.weak(0, 0);
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(weaponKickback.y > 0 || weaponKickback.y < 0) weaponKickback.y=FlxMath.lerp(0, weaponKickback.y, Math.exp(-elapsed * 3.126 * 4 * 1));
@@ -145,6 +154,14 @@ class Player extends FlxSprite {
         }
         Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
 
+        #if(debug)
+            if(inventory.subState==null && FlxG.keys.justPressed.SLASH) {
+                inventory.openSubState(new GameDebugger(Main.camHUD));
+            }else{
+                if(FlxG.keys.justPressed.SLASH && GameDebugger.isOpen) GameDebugger.instance.close();
+            }
+        #end
+
 
         
         curHotbarSlot+=Math.floor(FlxG.mouse.wheel#if(html5).clamp(-1, 1)#end); //so windows doesnt require normailzation, but html5 does. wtf.
@@ -157,17 +174,14 @@ class Player extends FlxSprite {
             }else continue;
 
         //HORRIBLE way to do it, but good enough.
-        if(inventory.weaponText.text!='${Language.getTranslatedKey('${inventory.selectedItem?.weaponType==NULL?"":"weapon."}${inventory.selectedItem?.item}', null)}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}'){
-            inventory.weaponText.text='${Language.getTranslatedKey('${inventory.selectedItem?.weaponType==NULL?"":"weapon."}${inventory.selectedItem?.item}', null)}\n${inventory.selectedItem?.charges}/{M}|${inventory.selectedItem?.durability}';
-        }
-
+        if(inventory.weaponText.text!=weaponTextTextTarget) inventory.weaponText.text=weaponTextTextTarget;
         
-        velocity.x = ((velocity.x = (velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED)))+(axis(ctrlSprint, [NONE])*SPRINT_MULT)); //add kickback on-top of the normal velocity based movement
-        velocity.y = ((velocity.y = (velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED)))+(axis(ctrlSprint, [NONE])*SPRINT_MULT));    //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
+        if(canMove) velocity.x = ((velocity.x = (velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED+(axis(ctrlSprint, [NONE])*SPRINT_MULT))))); //add kickback on-top of the normal velocity based movement
+        if(canMove) velocity.y = ((velocity.y = (velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED+(axis(ctrlSprint, [NONE])*SPRINT_MULT)))));    //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
         Main.targetCamGameZoom = (Main.targetCamGameZoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
         Main.camGame.zoom = Main.targetCamGameZoom + Main.camGameZoomIncrement;
 
-        if (Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
+        if (canOpenInventory && Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
     }
     inline function axis(pos:Array<FlxKey>, neg:Array<FlxKey>):Float return (FlxG.keys.anyPressed(pos) ? 1 : 0) - (FlxG.keys.anyPressed(neg) ? 1 : 0);
 }

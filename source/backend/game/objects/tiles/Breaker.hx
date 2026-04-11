@@ -6,18 +6,21 @@ class Breaker extends SpecialTile {
     public function new(x:Int,y:Int, tiles:Array<Array<Tile>>) {
         super(x,y, tiles);
         tileName = "Breaker";
-        Music.playLooping(false, "ProtocolValidation", "BreakerLoop", "introloop", "hitcutscene");
-        loopedMusicObject = Music.activeMusicObjects.get('BreakerLoop');
-        loopedMusicObject.pitch = 0.85;
         options = [
-            Language.getTranslatedKey("game.specialtile.generic.option.inspect", null)=>()->{
-                HUDSubstate.instance.openSubState(new InspectPopup("test", "test 2x", Paths.image('tiles', 'breaker'), true, FlxPoint.weak(16, 16)));
+            Language.getTranslatedKey("game.specialtile.generic.options.inspect", null)=>()->{
+                HUDSubstate.instance.openSubState(new InspectPopup(Language.getTranslatedKey('game.specialtile.breaker.title', null), Language.getTranslatedKey('game.specialtile.breaker.message', null), Paths.image('tiles', 'breaker'), true, FlxPoint.weak(16, 16)));
             },
             Language.getTranslatedKey("game.specialtile.breaker.interact", null)=>()->{
                 FlxG.sound.play('${Paths.soundPath}/breakerpull.${#if(html5)'mp3'#else'ogg'#end}');
                 animation.play('pull');
             }
         ];
+
+
+        Music.playLooping(false, "ProtocolValidation", "BreakerLoop", "introloop", "hitcutscene");
+        loopedMusicObject = Music.activeMusicObjects.get('BreakerLoop');
+        loopedMusicObject.pitch = 0.85;
+
 
         loadGraphic(Paths.image('tiles', 'breaker'), true, GameMap.TILE_SIZE, GameMap.TILE_SIZE);
         animation.add("default", [0], 0, true);

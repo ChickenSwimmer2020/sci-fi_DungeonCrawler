@@ -39,12 +39,12 @@ class Main extends openfl.display.Sprite {
         "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
         "moveLEFT" => [FlxKey.LEFT, A],
 
-        "zoomIN" => [PLUS, NONE],
-        "zoomOUT" => [MINUS, NONE],
+        "zoomIN" => [PLUS, FlxKey.NONE], //so, apparently PotionType.NONE replaced FlxKey.NONE?????
+        "zoomOUT" => [MINUS, FlxKey.NONE],
         "pause" => [ESCAPE, BACKSPACE],
-        "inventory" => [I, NONE],
+        "inventory" => [I, FlxKey.NONE],
         "interact" => [E, ENTER],
-        "sprint" => [SHIFT, NONE],
+        "sprint" => [SHIFT, FlxKey.NONE],
     ];
     public static var curHeldItem:Null<Item>=null;
     public static var heldItemGraphic:Null<FlxSprite>=null;
@@ -92,13 +92,13 @@ class Main extends openfl.display.Sprite {
     }
     public static final ErrorType:Map<String, Array<String>>=[
         "TEST"=>["window title", "message box"],
-        "IOERROR"=>["error.nullio", "error.nullio.message"],
-        "RENDERFAILURE"=>["error.renderfailure", "error.renderfailure.message"],
-        "SAVENOTCACHED"=>["error.cachefault", "error.cachefault.message"],
-        "MISSINGLANG"=>["error.languagemissing", "error.languagemissing.mesage"],
+        "IOERROR"=>["error.nullio.title", "error.nullio.message"],
+        "RENDERFAILURE"=>["error.renderfailure.title", "error.renderfailure.message"],
+        "SAVENOTCACHED"=>["error.cachefault.title", "error.cachefault.message"],
+        "MISSINGLANG"=>["error.languagemissing.title", "error.languagemissing.message"],
         //"MISSINGMAP"=>["error.mapnotfound", "error.mapnotfound.message"], //!CUT CONTENT (removed in 0.02)
-        "NULLITEM"=>["error.nullitem", "error.nullitem.message"],
-        "MAPNULL"=>["error.mapnotfound", "error.mapnotfound.message"] //LOL imma just reuse this cut error message
+        "NULLITEM"=>["error.nullitem.title", "error.nullitem.message"],
+        "MAPNULL"=>["error.mapnotfound.title", "error.mapnotfound.message"] //LOL imma just reuse this cut error message
     ];
     //hehe we can store static varibles here to be accessed EVERYWHERE.
     public static var foundMaps:Array<String> = []; //we can store all the currently found maps from the game files and mods (if implemented.)
@@ -226,19 +226,19 @@ class Main extends openfl.display.Sprite {
         showError("MISSINGLANG", lang, EN_US);
     }
     public static function showError(input:String,?missingObject:Dynamic=null, ?forceLanguage:Lang=null) {
-        if(forceLanguage!=null)curLanguage=forceLanguage; //since we dont have language input on Language.getTranslatedKey anymore.
+        @:bypassAccessor if(forceLanguage!=null)curLanguage=forceLanguage; //since we dont have language input on Language.getTranslatedKey anymore.
         var type:Array<String> = ErrorType.get(input);
-        var Message:String=Language.getTranslatedErrorMessage(missingObject, type[1]);
+        var Message:String=Language.getTranslatedKey(type[1], null, ["{OBJ}"=>missingObject]);
         var Title:String=Language.getTranslatedKey(type[0], null);
         var close:Bool=false;
         var gotomenu:Bool=false;
         if(Message.indexOf('[SHUTDOWN]')!=-1){
             close=true;
-            Message.graft('[SHUTDOWN]');
+            Message = Message.remove('[SHUTDOWN]');
         }
         if(Message.indexOf('[MENU]')!=-1) {
             gotomenu=true;
-            Message.graft('[SHUTDOWN]');
+            Message = Message.remove('[MENU]');
         }
 
         
@@ -250,7 +250,7 @@ class Main extends openfl.display.Sprite {
                 Sys.exit(1);
             #end
         }
-        if(gotomenu) FlxG.switchState(MainMenuState.new);
+        if(gotomenu) FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
     }
     
     public static var saveFile:FlxSave = new FlxSave();
@@ -297,8 +297,8 @@ class Main extends openfl.display.Sprite {
             FILE=lastLoadedSaveName;
             saveFile.flush();
         }else FILE=Flags.DEFAULT_SAVE;
-        musicPostfix = Main.saveFile.data.musicPF??"D"; //default to default if the musicPF is null.
-        Application.current.window.title = Language.applicationTitles.get(Main.curLanguage);
+        musicPostfix = saveFile.data.musicPF??"D"; //default to default if the musicPF is null.
+        Application.current.window.title = Language.languageInformation.get(curLanguage).get("application_title");
         FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
             case EN_US: "Nokia Cellphone FC Small";
             case JP: "assets/ui/fonts/k8x12L.ttf";

@@ -2,7 +2,7 @@ package;
 
 class Flags {
 
-
+    public static final DEFAULT_JSON_RECURSION_CHECKS:Int = 20;
     public static final CONDUCTOR_BPM_CHECK_INTERVAL:Int=1;
 
     //intro loop twice, then tense loop twice, then super-tense loop twice

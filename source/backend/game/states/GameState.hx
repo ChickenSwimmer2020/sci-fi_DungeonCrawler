@@ -13,8 +13,8 @@ class GameState extends FlxState {
     }
     public static function beginCountdown() {
         timeLeftUntilSecuritySystemActive = Flags.SECURITY_SECONDSTILLACTIVATION;
-        Functions.wait(0.1, (_)->{
-            timeLeftUntilSecuritySystemActive-=0.1;
+        Functions.wait(0.01, (_)->{
+            timeLeftUntilSecuritySystemActive-=0.01; //logic freezes, TODO: fix
             trace(timeLeftUntilSecuritySystemActive);
             switch(timeLeftUntilSecuritySystemActive) {
                 case 197: Music.playLoopingMusic("ProtocolValidation", "looptense1min", "looptense30s"); //about half-way through.

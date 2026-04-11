@@ -13,10 +13,10 @@ class OptionsMenuSubstate extends FlxUISubState{
         super();
 
         tabs=[
-			{name: "tab_general", label: Language.getTranslatedKey("menu.options.tab.general", null)},
-			{name: "tab_graphics", label: FlxG.random.bool(14)?Language.getTranslatedKey("menu.options.tab.graphicsEG", null):Language.getTranslatedKey("menu.options.tab.graphics", null)},
-			{name: "tab_controls", label: Language.getTranslatedKey("menu.options.tab.controls", null)},
-			{name: "tab_difficulty", label: Language.getTranslatedKey("menu.options.tab.difficulty", null)},
+			{name: "tab_general", label: Language.getTranslatedKey("menu.settings.tabs.general", null)},
+			{name: "tab_graphics", label: FlxG.random.bool(14)?Language.getTranslatedKey("menu.settings.tabs.graphicsEG", null):Language.getTranslatedKey("menu.settings.tabs.graphics", null)},
+			{name: "tab_controls", label: Language.getTranslatedKey("menu.settings.tabs.controls", null)},
+			{name: "tab_difficulty", label: Language.getTranslatedKey("menu.settings.tabs.difficulty", null)},
 		];
 
 		// Make the tab menu itself:
@@ -88,7 +88,7 @@ class OptionsMenuSubstate extends FlxUISubState{
 
         if(ControlObjects.length==0) {
             var pulsingErrorText:FlxText = new FlxText(0, 0, 0, "", 12, true);
-            pulsingErrorText.text = Language.getTranslatedKey("menu.options.controls.nocontrols", pulsingErrorText);
+            pulsingErrorText.text = Language.getTranslatedKey("menu.settings.controls.nocontrols", pulsingErrorText);
             pulsingErrorText.alignment=CENTER;
             pulsingErrorText.applyMarkup(pulsingErrorText.text, [
                 new FlxTextFormatMarkerPair(new FlxTextFormat(0xFF0000, false, false, null, false), "**"),
@@ -104,7 +104,7 @@ class OptionsMenuSubstate extends FlxUISubState{
 
 
 
-        saveButton=new FlxUIButton(420, 380, Language.getTranslatedKey("menu.options.tab.save.flush", saveButton), ()->{
+        saveButton=new FlxUIButton(420, 380, Language.getTranslatedKey("menu.settings.tabs.save.flush", saveButton), ()->{
             var controlsUpload:Array<{c:String, keys:Array<FlxKey>}>=[];
             for(i in 0...total_Controls) {
                 #if(debug&&(windows||hl)) Main.LOG('generating control scheme object...'); #end
@@ -141,7 +141,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         deleteButton.label.alignment=RIGHT;
         deleteButton.labelOffsets = [FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 1), FlxPoint.weak(-5, 0)];
 
-        openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage", null), Language.getTranslatedKey("warning.unfinishedlanguage.message", null), [
+        openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage.title", null), Language.getTranslatedKey("warning.unfinishedlanguage.message", null), [
             {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
         ]));
     }
@@ -188,14 +188,14 @@ class OptionsMenuSubstate extends FlxUISubState{
             }
         #end
         var languageLabel:FlxUIText=new FlxUIText(5, 5, 0, "", 12, true);
-        languageLabel.text = Language.getTranslatedKey("menu.options.general.language", languageLabel);
+        languageLabel.text = Language.getTranslatedKey("menu.settings.general.language", languageLabel);
         labels.push(languageLabel);
         general.add(languageLabel);
 
         languageDropdown=new FlxUIDropDownMenu(5, 30, languages, (_)->{
             Main.curLanguage=_; //Lang in Language is a string, so this should work.
             Main.saveFile.data.language=Main.curLanguage;
-            Application.current.window.title = Language.applicationTitles.get(Main.curLanguage); //change application title to match with the new language setting.
+            Application.current.window.title = Language.languageInformation.get(Main.curLanguage).get('application_title'); //change application title to match with the new language setting.
             Main.saveFile.flush(); //upload new default language to save file.
             #if(debug&&(windows||hl)) Main.LOG('attempting to index language $_ and change game target LANG file'); #end
             FlxAssets.FONT_DEFAULT=switch(Main.curLanguage){ //automatically switch the default font depending on language setting.
@@ -207,8 +207,8 @@ class OptionsMenuSubstate extends FlxUISubState{
                 for(i in 0...tab_menu._tabs.length){
                     var tab:FlxUIButton=cast(tab_menu.getTab(null, i));
                     tab.label.text = [
-                        Language.getTranslatedKey("menu.options.tab.general", null),FlxG.random.bool(14)?Language.getTranslatedKey("menu.options.tab.graphicsEG", null):Language.getTranslatedKey("menu.options.tab.graphics", null),
-                        Language.getTranslatedKey("menu.options.tab.controls", null), Language.getTranslatedKey("menu.options.tab.difficulty", null )
+                        Language.getTranslatedKey("menu.settings.tabs.general", null),FlxG.random.bool(14)?Language.getTranslatedKey("menu.settings.tabs.graphicsEG", null):Language.getTranslatedKey("menu.settings.tabs.graphics", null),
+                        Language.getTranslatedKey("menu.settings.tabs.controls", null), Language.getTranslatedKey("menu.settings.tabs.difficulty", null )
                     ][i];
 
                     tab.label.font = FlxAssets.FONT_DEFAULT;
@@ -219,7 +219,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     }
                 }
             }
-            if(Language.WIPLanguages.contains(_)) openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage", null), Language.getTranslatedKey("warning.unfinishedlanguage.message", null), [
+            if(Language.languageInformation.get("WIPLanguages").contains(_)) openSubState(new WarningPopup(Language.getTranslatedKey("warning.unfinishedlanguage", null), Language.getTranslatedKey("warning.unfinishedlanguage.message", null), [
                 {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
             ]));
         });
@@ -237,7 +237,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         general.add(languageDropdown);
 
         var audioLabel:FlxUIText = new FlxUIText(125, 5, 0, "", 12, true);
-        audioLabel.text = Language.getTranslatedKey("menu.options.general.audiotrack", audioLabel);
+        audioLabel.text = Language.getTranslatedKey("menu.settings.general.audiotrack", audioLabel);
         labels.push(audioLabel);
         general.add(audioLabel);
         audioTrackDropdown=new FlxUIDropDownMenu(125, 30, [
@@ -255,7 +255,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         });
         general.add(audioTrackDropdown);
 
-        autoPauseCheck=new FlxUICheckBox(245, 5, null, null, Language.getTranslatedKey("menu.options.general.autopause", autoPauseCheck), 100, null, ()->{
+        autoPauseCheck=new FlxUICheckBox(245, 5, null, null, Language.getTranslatedKey("menu.settings.general.autopause", autoPauseCheck), 100, null, ()->{
             Main.saveFile.data.autoPause=autoPauseCheck.checked;
             Main.saveFile.flush(); //automatically save the update
             FlxG.autoPause = autoPauseCheck.checked; //immediately update the auto-pause setting without needing to restart the game.

@@ -7,49 +7,47 @@ enum abstract Lang(String) from String to String {
 }
 
 class Language {
-    public static var activeLanguageObject:Map<String, Dynamic> = [
-
+    public static final languageInformation:Map<String,Dynamic>=[
+        "EN_US"=>[
+            "application_title"=>"Sublevel Atlas-Zero",
+            "label"=>"English (US)"
+        ],
+        "JP"=>[
+            "application_title"=>"「サブレベル・アトラス・ゼロ」",
+            "label"=>"にほんご"
+        ],
+        "WIPLanguages"=>[
+            "JP"
+        ]
     ];
-    public static final applicationTitles:Map<String,String>=[
-        "EN_US"=>"Sublevel Atlas-Zero",
-        "JP"=>"「サブレベル・アトラス・ゼロ」",
+    private static final disabledKeys:Array<String>=[
+        "",
+        "weapon.null"
     ];
-    public static final WIPLanguages:Array<String>=[
-        "JP"
-    ];
-    private static final languageNames:Map<String, String>=[
-        "EN_US"=>"English (US)",
-        "JP"=>"にほんご"
-    ];
+    public static var activeLanguageObject:Map<String, Dynamic> = [];
     public static function getLanguageLable(key:String):String{ //return the key, if its null just return the input.
-        if(languageNames.get(key)!=null) return languageNames.get(key);
+        if(languageInformation.get(Main.curLanguage).get("label")!=null) return languageInformation.get(Main.curLanguage).get("label");
         else return key;
 
         return null;
     }
     public static function getTranslatedKey(key:String, object:Null<Dynamic>, ?overrides:Map<String,String>):String {
+        if(disabledKeys.indexOf(key)!=-1)return ""; //ignore disabled keys.
         if(#if (html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
             var lang:Dynamic=Json.parse(#if (html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
             var targetString:String = "";
             if(object!=null && activeLanguageObject.get(key)==null){
                 activeLanguageObject.set(key, object);
             }
-            if(Reflect.hasField(lang, key)) targetString = Reflect.field(lang, key);
-            else return key; //just return the base string ID if there is no entry. prevents issues.
-            if(overrides!=null){
+            targetString = Json.checkRecursive(lang, key)??key;
+            if(targetString==key){
+                trace('could not locate language key for $key in ${getLanguageLable(Main.curLanguage)}\ncalled from ${haxe.CallStack.toString(haxe.CallStack.callStack())}');
+                return key; //causes crashes if this isnt here??
+            }else if(overrides!=null){
                 for(key => replacer in overrides) targetString = targetString.replace(key, replacer);
                 return targetString;
             }else return targetString;
-        }else Main.showLanguageError(Main.curLanguage);
-        return null;
-    }
-    public static function getTranslatedErrorMessage(?missingObject:Dynamic, key:String):String {
-        if(#if (html5) Assets.getText(Paths.lang(Main.curLanguage))!=null #else FileSystem.exists(Paths.lang(Main.curLanguage))#end) {
-            var lang:Dynamic=Json.parse(#if (html5) Assets.getText(Paths.lang(Main.curLanguage)) #else File.getContent(Paths.lang(Main.curLanguage))#end);
-            if(Reflect.hasField(lang, key)){
-                var error:String=Reflect.field(lang, key);
-                return error.replace('{OBJ}', missingObject);
-            }else return key; //just return the base string ID if there is no entry. prevents issues.
+
         }else Main.showLanguageError(Main.curLanguage);
         return null;
     }

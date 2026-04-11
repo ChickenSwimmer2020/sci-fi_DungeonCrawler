@@ -38,7 +38,7 @@ class PauseMenu extends FlxSubState {
                 Language.getTranslatedKey("pause.settings", buttons[i]),
                 "",
                 Language.getTranslatedKey("pause.exit", buttons[i]),
-                Language.getTranslatedKey("pause.exitnosave", buttons[i]),
+                Language.getTranslatedKey("pause.exitnosave.title", buttons[i]),
                 Language.getTranslatedKey("pause.debug.exittestingstate", buttons[i])
             ][i], [
                 ()->{
@@ -57,22 +57,22 @@ class PauseMenu extends FlxSubState {
                 ()->{},
                 ()->{
                     //TODO: save progress.
-                    FlxG.switchState(MainMenuState.new);
+                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
                 },
                 ()->{
                     openSubState(new WarningPopup(Language.getTranslatedKey("pause.exitnosave.popup.title", null), Language.getTranslatedKey("pause.exitnosave.popup.message", null), [
-                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit.unsafe", null), f:()->{
-                            FlxG.switchState(MainMenuState.new);
+                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
+                            FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
                         }, c:true},
                         {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
                             //TODO: save progress.
-                            FlxG.switchState(MainMenuState.new);
+                            FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
                         }, c:true},
                         {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
                     ]));
                 },
                 ()->{
-                    FlxG.switchState(MainMenuState.new);
+                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
                 }
             ][i]);
             button.camera = pauseCamera;
