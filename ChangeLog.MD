@@ -2,6 +2,40 @@
 
 ## Prototype Update 0.03.7 (Dynamic Music)
 
+> yeah alright, fine. ill do this TWO commits after i was supposed ta.
+
+* Created MINIGUN weapon type.
+* Weapon names now use real weapon names.
+* Added SubLayers.
+* Added placeholder breaker pull sound.
+* Updated Flags.
+* `Functions.wait` now supports infinite looping.
+* Dynamic music.
+* Added `soundPath` to Paths.
+* `SoundTray` was fixed.
+* `GameMap` creates a minigun now in testing mode.
+* mousePosition no longer crashes game due to null access.
+* MainMenuState now properly stops music before playing menu theme.
+* Tiles now load through animations because solars pc is better and faster.
+* Added Prototype logo.
+* COMPLETELY reformated the Language system (JAPANESE IS **NOT** UPDATED YET).
+* Added `build.bat` to the autobuild system to install and setup dependencies automatically.
+* Set version numbers to project.xml FINALLY.
+* Added `DEFAULT_JSON_RECURSION_CHECKS` to Flags. (probably unused lol)
+* `Import` was updated.
+* `Main.showError` calls ([MENU], [SHUTDOWN]) now function properly.
+* Language information was consolodated into one map.
+* Player can now have the ability to open the inventory and move removed.
+* Fixed a bunch of language calls to work with the new system.
+* Added message to GameState reminding to fix logic freeze.
+* `HUDSubstate` can now open `GameDebugger` in debug builds for in-game debugging.
+* Debuggers now properly re-open the debug chooser on `MainMenuState`.
+* Added new Recursive JSON Parser.
+* Fixed InspectPopup text positioning.
+* `ScrollableArea` now supports horizontal scrolling.
+* Added `ErrorDebugger` for debugging application popup errors.
+* Added `GameDebugger` for in-game debugging. (HEAVY WIP)
+* Added WIP Popup for creating `Pickup` objects for `GameDebugger`.
 * ProtocalValidation was changed to ProtocolValidation (typo lol.)
 
 ## Prototype Update 0.03.6 (Breaker and placeholder enemy)
