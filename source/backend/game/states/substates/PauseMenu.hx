@@ -1,23 +1,21 @@
 package backend.game.states.substates;
 
+import backend.extensions.ExtendedCamera;
+
 class PauseMenu extends FlxSubState {
-    var pauseCamera:FlxCamera;
+    var pauseCamera:ExtendedCamera;
     var menuBG:FlxSprite;
     var buttons:Array<FlxButton> = [];
     public function new() {
         super();
-
-        if(FlxG.sound.music.playing) FlxG.sound.music.fadeOut(1.5, FlxG.sound.music.volume-0.75);
-        for(key => object in Music.activeMusicObjects) {
-            if(object.playing){
-                object.fadeOut(1.5, object.volume-0.75); //gives us 0.25
-            }
-        }
+        //"pause" the player.
+        if(Player.instance!=null) Player.instance.canFireWeapon=Player.instance.canMove=Player.instance.canOpenInventory=false;
         
-        FlxG.state.persistentUpdate = false;
-        pauseCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
+        Music.doPauseFade();
+        pauseCamera = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
         pauseCamera.bgColor = 0x00000000;
-        FlxG.cameras.add(pauseCamera, false);
+        Main.addCameraToGame(pauseCamera, "pauseCamera");
+        
 
         menuBG = new FlxSprite(FlxG.width-100, FlxG.height).makeGraphic(100, 200, 0x00FF0000);
         add(menuBG);
@@ -60,18 +58,24 @@ class PauseMenu extends FlxSubState {
                     FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
                 },
                 ()->{
-                    openSubState(new WarningPopup(Language.getTranslatedKey("pause.exitnosave.popup.title", null), Language.getTranslatedKey("pause.exitnosave.popup.message", null), [
-                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
-                            FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
-                        }, c:true},
-                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
-                            //TODO: save progress.
-                            FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
-                        }, c:true},
-                        {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
-                    ]));
+                    var popup:Popup = new Popup(
+                        Language.getTranslatedKey("pause.exitnosave.popup.title", null),
+                        Language.getTranslatedKey("pause.exitnosave.popup.message", null),
+                        [
+                            {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
+                                FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                            }, c:true},
+                            {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
+                                //TODO: save progress.
+                                FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                            }, c:true},
+                            {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
+                        ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                    );
+                    openSubState(popup);
                 },
                 ()->{
+                    GameState.inGame=false;
                     FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
                 }
             ][i]);
@@ -88,26 +92,19 @@ class PauseMenu extends FlxSubState {
     }
 
     override public function destroy() {
+        if(Player.instance!=null) Player.instance.canFireWeapon=Player.instance.canMove=Player.instance.canOpenInventory=true;
         FlxG.cameras.remove(pauseCamera);
         super.destroy();
-        FlxG.state.persistentUpdate = true;
     }
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-            if(FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE])){
-                if(FlxG.sound.music.playing) FlxG.sound.music.fadeIn(1.5, FlxG.sound.music.volume, 1);
-                for(key => object in Music.activeMusicObjects) {
-                    if(object.playing){
-                        object.fadeIn(1.5, object.volume, 1);
-                    }
-                }
-                FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
+        if(FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE])){
+            Music.undoPauseFade();
+            FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
                 close();
             }});
-            for(i in 0...buttons.length) {
-                FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
-            }
+            for(i in 0...buttons.length) FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
         }
     }
 }

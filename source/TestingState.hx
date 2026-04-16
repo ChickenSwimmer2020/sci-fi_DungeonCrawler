@@ -11,7 +11,7 @@ class TestingState extends GameState {
             if(LoadingFromSave!=true){
                 Save.DEBUGSAVE('fucker'); //generate save BEFORE generating map. since maps are stored inthe save file they were being overridden. whoopsies!
                 Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
-                MapGenerator.generateMap(100, 100);
+                MapGenerator.generateMap(100, 100, 0);
                 add(MapGenerator.createMap('PLACEHOLDER'));
             }else{
                 #if(debug&&(windows||hl)) Main.LOG('is this even working?'); #end

@@ -48,11 +48,11 @@ class MapGenerator {
             }
         }else map[y][x]=tile;
     }
-    public static function generateMap(width:Int, height:Int) {  
+    public static function generateMap(width:Int, height:Int, depth:Int) {  
         #if(debug&&(windows||hl)) Main.LOG('attempting to generate map with width $width and height $height'); #end
         var outputTiles:Array<Array<TilePointer>> = [];
         var toMapFile:MapFile = {
-            name: "PLACEHOLDER",
+            name: 'depth_$depth',
             width: width,
             height: height,
             tiles: []

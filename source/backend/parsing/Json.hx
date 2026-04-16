@@ -1,6 +1,6 @@
 package backend.parsing;
 
-class Json extends haxe.Json {
+class Json {
     public static inline function parse(text:String):Dynamic return haxe.Json.parse(text);
 
     static var attempts:Int = Flags.DEFAULT_JSON_RECURSION_CHECKS;

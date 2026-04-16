@@ -45,7 +45,28 @@
             }
         },
         "debugger":{
-            "label": "Debug Menu"
+            "label": "Debug Menu",
+            "create": {
+                "pickup": {
+                    "title": "Create New Pickup",
+                    "button": "Insert"
+                },
+                "hint": {
+                    "pickupname": "Pickup name",
+                    "pickuptype": "Pickup Type",
+                    "pickuppotiontype": "Pickup Potion Type",
+                    "pickupguntype": "Pickup Gun Type",
+                    "pickupispotion": "Is Potion? (self-explanitory)",
+                    "pickupdurability": "Pickup Durability",
+                    "pickupweapontype": "Pickup Weapon Type",
+                    "pickupmagictype": "Pickup Magic Type",
+                    "pickupconsumabletype": "Pickup Consumable Type",
+                    "insert": "Insert your pickup to GameMap"
+                }
+            }
+        },
+        "death": {
+            "consolemessage": "Unit index at \"[SAVEFILE]\" unresponsive.                \nUnable to reconnect.            \nUnit systems shutdown registered, Awaiting input.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWould you like to re-deploy?[Y/N]"
         }
     },
     "menu": {
@@ -66,11 +87,14 @@
                 "autopause": "Auto-Pause"
             },
             "controls": {
-                "nocontrols": "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**"
+                "nocontrols": "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**",
+                "reassigncontrol": "Press a key to reassign [CONTROL][[INDEX]]",
+                "reassigncontrolexitmsg": "* Hold Shift and press BackSpace/Escape to exit",
+                "exitreassignment": "Cancel"
             },
             "clear": {
                 "button": "Clear Settings",
-                "message": "You are about to global settings.\nThis cannot be undone.\nYour Saves, language preference, and last Loaded Save will remain intact.\nDo you wish to continue?"
+                "message": "You are about to clear global settings.\nThis cannot be undone.\nYour Saves, language preference, and last Loaded Save will remain intact.\nDo you wish to continue?"
             }
         },
         "save": {

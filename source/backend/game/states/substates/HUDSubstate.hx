@@ -103,7 +103,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
     public var interactable:Bool=true;
 
     private var slot:FlxSprite;
-    private var object:Null<FlxSprite>;
+    public var object:Null<FlxSprite>;
 
     public function new(x:Float,y:Float, ?item:Item) {
         super(x, y);
@@ -408,6 +408,7 @@ class HUDSubstate extends FlxSubState {
             if(fullOpen){
                 if(slots[i].visible==false || slots[i].interactable==false){
                     slots[i].visible=slots[i].active=slots[i].alive=slots[i].interactable=true;
+                    if(!slots[i].hasItem && slots[i].object!=null) slots[i].object.visible=false; //forgot null safety lol.
                 }
             }else{
                 if(i>MAX_SLOTS-1)slots[i].visible=slots[i].active=slots[i].alive=false;

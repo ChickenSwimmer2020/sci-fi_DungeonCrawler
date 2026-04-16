@@ -1,59 +1,46 @@
 package debugging.ui;
 
 import backend.game.Player;
-
-class CreatePopup extends FlxSubState {
-    private var background:FlxUI9SliceSprite;
-    private var background2:FlxUI9SliceSprite;
-    private var header:FlxText;
-    private var group:FlxSpriteGroup;
-    private var popupCamera:FlxCamera;
-
+#if debug
+class CreatePopup extends Popup {
     var textInput:FlxUIInputText;
+    var typeDropdown:FlxUIDropDownMenu;
+    var potionDropdown:FlxUIDropDownMenu;
+    var gunTypeDropdown:FlxUIDropDownMenu;
+    var isPotion:FlxUICheckBox;
+    var durabilityThingy:FlxUINumericStepper;
+    var weaponTypeDropdown:FlxUIDropDownMenu;
+    var magicTypeDropdown:FlxUIDropDownMenu;
+    var consumableTypeDropdown:FlxUIDropDownMenu;
+    var createButton:FlxButton;
     var scrolling:ScrollableArea;
+    var hintText:FlxText;
     public function new() {
-        super();
+        super(Language.getTranslatedKey("game.debugger.create.pickup.title", null), "", [], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0), true);
+        body.visible=body.active=false; //no body text, because everything is getting moved around n shtuff.
+        for(butt in butts) butt.visible=butt.active=false; //also no buttons, because we need to manually make the button.
+        header.alignment=RIGHT;
         Player.instance.canMove=Player.instance.canOpenInventory=false;
-        popupCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
-        popupCamera.bgColor=0x00000000; //darkens stuff behind it :3
-        FlxG.cameras.add(popupCamera, false);
 
-        group=new FlxSpriteGroup(0, 0);
         var blurDarkenSprite:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width+200, FlxG.height+200, 0xFF000000);
         blurDarkenSprite.alpha=0.75;
         add(blurDarkenSprite);
-        blurDarkenSprite.camera = popupCamera;
-        add(group);
-
-        background=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, FlxG.width/4, FlxG.height/4));
-        background2=new FlxUI9SliceSprite(5, 15, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, FlxG.width/4-10, FlxG.height/4-30));
-        header = new FlxText(2, 0, background.width, Language.getTranslatedKey('game.debugger.create.pickup.title', null), 12); //8
-        header.setBorderStyle(OUTLINE, 0xFF000000, 1, 1);
-        header.alignment=RIGHT;
-
-        group.add(background);
-        group.add(background2);
-        group.add(header);
-
- 
 
 
-
-
-
-        group.screenCenter();
-        group.camera = popupCamera;
-        blurDarkenSprite.alpha = 0.75;
+        hintText=new FlxText(5, background2.y+background2.height, 0, "HINT", 8, true);
+        hintText.color = 0xFF000000;
+        group.add(hintText);
 
         scrolling = new ScrollableArea(background2.x+5, background2.y+5, background2.width.floor()-10, background2.height.floor()-10, 1, false);
-        FlxG.cameras.add(scrolling, false);
+        Main.addCameraToGame(scrolling, "createpopupscrollablearea");
 
-        textInput = new FlxUIInputText(0, 0, scrolling.width, "testitem", 8);
+        textInput = new FlxUIInputText(0, 0, scrolling.width-120, "testitem", 12);
         add(textInput);
         textInput.scrollFactor.set(1, 1);
         textInput.camera = scrolling;
+        textInput.fieldHeight = 20;
 
-        var typeDropdown:FlxUIDropDownMenu = new FlxUIDropDownMenu(0, textInput.y+textInput.height, [
+        typeDropdown = new FlxUIDropDownMenu(scrolling.width-120, 0, [
             new StrNameLabel("ITEM", "ITEM"),
             new StrNameLabel("CONSUMABLE", "CONSUMABLE"),
             new StrNameLabel("MEELEE", "MEELEE"),
@@ -65,40 +52,77 @@ class CreatePopup extends FlxSubState {
         typeDropdown.scrollFactor.set(1, 1);
         typeDropdown.camera = scrolling;
 
-        var gunTypeDropdown:FlxUIDropDownMenu = new FlxUIDropDownMenu(typeDropdown.x+typeDropdown.width, textInput.y+textInput.height, [
-            new StrNameLabel("LASER", "LASER"),
-            new StrNameLabel("EXPLOSIVE", "EXPLOSIVE"),
-            new StrNameLabel("BALLISTIC", "BALLISTIC"),
-            new StrNameLabel("PLASMA", "PLASMA"),
-            new StrNameLabel("OTHER", "OTHER")
-        ]);
-        add(gunTypeDropdown);
-        gunTypeDropdown.scrollFactor.set(1, 1);
-        gunTypeDropdown.camera = scrolling;
-
-        var potionDropdown:FlxUIDropDownMenu = new FlxUIDropDownMenu(0, gunTypeDropdown.y+textInput.height, [
+        potionDropdown = new FlxUIDropDownMenu(0, 20, [
             new StrNameLabel("HEALTH", "HEALTH"),
             new StrNameLabel("NONE", "NONE"),
         ]);
-        add(potionDropdown);
+        insert(members.indexOf(typeDropdown)-1, potionDropdown);
         potionDropdown.scrollFactor.set(1, 1);
         potionDropdown.camera = scrolling;
 
+        gunTypeDropdown = new FlxUIDropDownMenu(0, 40, [
+            new StrNameLabel("LASER", "LASER"),
+            new StrNameLabel("EXPLOSIVE", "EXPLOSIVE"),
+            new StrNameLabel("BALLISTIC", "BALLISTIC"),
+            new StrNameLabel("PLASMA", "PLASMA")
+        ]);
+        insert(members.indexOf(potionDropdown)-1, gunTypeDropdown);
+        gunTypeDropdown.scrollFactor.set(1, 1);
+        gunTypeDropdown.camera = scrolling;
 
-        var isPotion:FlxUICheckBox=new FlxUICheckBox(potionDropdown.x+potionDropdown.width, potionDropdown.y, null, null, "is Potion", 100, null, ()->{}); 
-        add(isPotion);
+
+
+
+        isPotion=new FlxUICheckBox(potionDropdown.x+potionDropdown.width, 20, null, null, "is Potion", 100, null, ()->{}); 
+        insert(members.indexOf(gunTypeDropdown)-1, isPotion);
         isPotion.scrollFactor.set(1, 1);
         isPotion.camera = scrolling;
-        
 
 
-        var durabilityThingy:FlxUINumericStepper = new FlxUINumericStepper(gunTypeDropdown.x+gunTypeDropdown.width, gunTypeDropdown.y, 1, 100, 0, 100, 0, 1);
-        add(durabilityThingy);
+        durabilityThingy = new FlxUINumericStepper(0, 20, 1, 100, 0, 100, 0, 1);
+        insert(members.indexOf(typeDropdown)-1, durabilityThingy);
         durabilityThingy.scrollFactor.set(1, 1);
         durabilityThingy.camera = scrolling;
+        durabilityThingy.x=scrolling.width-durabilityThingy.width;
 
+        weaponTypeDropdown = new FlxUIDropDownMenu(scrolling.width-120, 40, [
+            new StrNameLabel("GUN","GUN"),
+            new StrNameLabel("STAFF","STAFF"),
+            new StrNameLabel("WAND","WAND"),
+            new StrNameLabel("SWORD","SWORD"),
+            new StrNameLabel("DAGGER","DAGGER"),
+            new StrNameLabel("LONGSWORD","LONGSWORD")
+        ]);
+        insert(members.indexOf(typeDropdown)-2, weaponTypeDropdown);
+        weaponTypeDropdown.scrollFactor.set(1, 1);
+        weaponTypeDropdown.camera = scrolling;
 
-        var createButton:FlxButton = new FlxButton(0, 0, Language.getTranslatedKey("game.debugger.create.pickup.create", null), ()->{
+        magicTypeDropdown = new FlxUIDropDownMenu(0, 60, [
+            new StrNameLabel("FIRE","FIRE"),
+            new StrNameLabel("WATER","WATER"),
+            new StrNameLabel("AIR","AIR"),
+            new StrNameLabel("DARK","DARK"),
+            new StrNameLabel("EARTH","EARTH"),
+            new StrNameLabel("ARCANE","ARCANE"),
+            new StrNameLabel("OTHER","OTHER")
+        ]);
+        insert(members.indexOf(gunTypeDropdown)-2, magicTypeDropdown);
+        magicTypeDropdown.scrollFactor.set(1, 1);
+        magicTypeDropdown.camera = scrolling;
+
+        consumableTypeDropdown = new FlxUIDropDownMenu(scrolling.width-120, 60, [
+            new StrNameLabel("CRUMB","CRUMB"),
+            new StrNameLabel("SNACK","SNACK"),
+            new StrNameLabel("MEAL","MEAL"),
+            new StrNameLabel("SHOT","SHOT"),
+            new StrNameLabel("GLASS","GLASS"),
+            new StrNameLabel("BOTTLE","BOTTLE")
+        ]);
+        insert(members.indexOf(weaponTypeDropdown)-2, consumableTypeDropdown);
+        consumableTypeDropdown.scrollFactor.set(1, 1);
+        consumableTypeDropdown.camera = scrolling;
+
+        createButton = new FlxButton(0, 0, Language.getTranslatedKey("game.debugger.create.pickup.button", null), ()->{
             GameMap.instance.add(new Pickup(GameMap.instance.plr.x, GameMap.instance.plr.y, {
                 type: ItemType.fromString(typeDropdown.selectedLabel),
                 item: textInput.text,
@@ -107,10 +131,9 @@ class CreatePopup extends FlxSubState {
                 gunType: gunTypeDropdown.selectedLabel,
                 potionType: potionDropdown.selectedLabel,
                 isPotion: isPotion.checked,
-                
-                MagicType: FIRE,
-                weaponType: GUN,
-                consumableType: CRUMB,
+                MagicType: magicTypeDropdown.selectedLabel,
+                weaponType: weaponTypeDropdown.selectedLabel,
+                consumableType: consumableTypeDropdown.selectedLabel,
             }));
 
 
@@ -120,15 +143,43 @@ class CreatePopup extends FlxSubState {
         var cancelButton:FlxUIButton=new FlxUIButton(80, 0, "x", ()->{
             close();
         }, false);
-        cancelButton.loadGraphic(Paths.image('ui/menu', "button_delete"), true, 20, 20);
+        cancelButton.loadGraphic(Paths.image('ui/menu', "button_square"), true, 20, 20);
         cancelButton.updateHitbox();
         cancelButton.autoCenterLabel();
         group.add(createButton);
         group.add(cancelButton);
     }
 
+    private var hoveredKey:String = null;
     override public function update(elapsed:Float) {
         super.update(elapsed);
+        final hints:Array<{obj:FlxObject, key:String}> = [
+            {obj: textInput,                    key: 'game.debugger.create.hint.pickupname'},
+            {obj: typeDropdown.header,          key: 'game.debugger.create.hint.pickuptype'},
+            {obj: potionDropdown.header,        key: 'game.debugger.create.hint.pickuppotiontype'},
+            {obj: gunTypeDropdown.header,       key: 'game.debugger.create.hint.pickupguntype'},
+            {obj: isPotion,                     key: 'game.debugger.create.hint.pickupispotion'},
+            {obj: durabilityThingy,             key: 'game.debugger.create.hint.pickupdurability'},
+            {obj: weaponTypeDropdown.header,    key: 'game.debugger.create.hint.pickupweapontype'},
+            {obj: magicTypeDropdown.header,     key: 'game.debugger.create.hint.pickupmagictype'},
+            {obj: consumableTypeDropdown.header,key: 'game.debugger.create.hint.pickupconsumabletype'},
+            {obj: createButton,                 key: 'game.debugger.create.hint.insert'},
+        ];
+
+        for (hint in hints) {
+            if (FlxG.mouse.overlaps(hint.obj, hint.obj!=createButton?scrolling:FlxG.camera)) {
+                hoveredKey = hint.key;
+                break;
+            }
+        }
+
+        if (hoveredKey != null) {
+            hintText.visible = true;
+            var translated = Language.getTranslatedKey(hoveredKey, null);
+            if (hintText.text != translated) hintText.text = translated;
+        } else {
+            hintText.visible = false;
+        }
 
         if(FlxG.mouse.justPressed){
             if(FlxG.mouse.overlaps(textInput, scrolling)){
@@ -140,9 +191,8 @@ class CreatePopup extends FlxSubState {
     }
 
     override public function destroy() {
-        FlxG.cameras.remove(popupCamera);
-        popupCamera=null;
         Player.instance.canMove=Player.instance.canOpenInventory=true;
         super.destroy();
     }
 }
+#end

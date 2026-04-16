@@ -178,6 +178,10 @@ final class Functions {
     public static inline function MSCSToMS(M:Int, S:Int, CS:Int):Float return (M*60*1000)+(S*1000)+(CS*10);
 }
 final class Additions{
+    private static final fileExtensionsList:Array<String>=[ //TODO: find automatic way to do this.
+        ".png", ".json", ".xml", #if(html5)".mp3",#else".ogg",#end ".weapon",
+        ".lang", ".ttf"
+    ];
     //for math
     /**
      * return positive version of negative input number
@@ -227,8 +231,35 @@ final class Additions{
      * @return String
      */
     public static inline function toString(n:Float):String return '$n';
+    /**
+     * get a percentage of a value.
+     * @param number number to get percentage from
+     * @param percentage what percentage we want.
+     * @return Float return (percentage / 100) * number
+     */
+    public static inline function getPercentage(number:Float, percentage:Float):Float return (percentage/100)*number;
+
 
     //for strings
+    /**
+     * check if a string contains any string within an array of strings.
+     * @param s string to check
+     * @param any array of strings to compare too
+     * @return Bool if the string contains anything from `any`
+     */
+    public static function containsAny(s:String, any:Array<String>):Bool {
+        for(k in any) if(s.indexOf(k)!=-1) return true;
+        return false;
+    }
+    /**
+     * compares if a string is a datafile (intended for use with File.hx to find the recursive file we want.)
+     * @param s string to check
+     * @return Bool if the path is a datafile.
+     */
+    public static inline function isDataFile(s:String):Bool {
+        if(s.containsAny(fileExtensionsList)) return true;
+        return false;
+    }
     /**
      * insert function for when StringTools wants to be a bitch
      * @param s left half
@@ -290,6 +321,12 @@ final class Additions{
     }
 
     //arrays
+    public static function combine(a:Array<Dynamic>, b:Array<Dynamic>):Array<Dynamic> {
+        var returnArray:Array<Dynamic>=[];
+        for(item in a) returnArray.push(item);
+        for(item in b) returnArray.push(item);
+        return returnArray;
+    }
     /**
      * Specifically made for the inventory system as im implementing item movement between slots in a very basic way now.
      * @param a inventory array (must be Array<OneOfTwo<String, Item>>)

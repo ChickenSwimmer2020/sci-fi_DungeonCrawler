@@ -1,6 +1,10 @@
 package backend.ui;
 
-class ScrollableArea extends FlxCamera {
+import flixel.FlxBasic;
+import backend.extensions.ExtendedCamera;
+
+class ScrollableArea extends ExtendedCamera {
+    public var trackedObjects:Array<FlxBasic>=[];
     public var scrollIndex:FlxPoint=FlxPoint.weak(0, 0);
     public var scrollable:Bool=true;
     public var sidewaysScrollingAllowed:Bool=false;
@@ -13,11 +17,22 @@ class ScrollableArea extends FlxCamera {
         FlxG.state.add(detectionObject);
         if(ch) detectionObject.camera = Main.camHUD;
     }
+    public function add(basic:FlxBasic):FlxBasic {
+        basic.camera=this;
+        trackedObjects.push(basic);
+        return basic;
+    }
     override public function update(elapsed:Float) {
         super.update(elapsed);
+        for(object in trackedObjects) {
+            if(object!=null) {
+                object.active=(visible&&active);
+            }
+        }
 
         if(scrollable){
-            if(FlxG.mouse.overlaps(detectionObject)) { //cant use FlxG.overlaps(this) because this is not an object.
+            //forgot to make it only work if the camera is visible and active >w<
+            if(FlxG.mouse.overlaps(detectionObject) && (visible&&active)) { //cant use FlxG.overlaps(this) because this is not an object.
                 FlxG.watch.addQuick('scrollIndex', scrollIndex);
 
                 if(FlxG.keys.pressed.SHIFT) {

@@ -1,12 +1,32 @@
 package;
 
 class Flags {
+    public static final ERROR_MESSAGES:Map<String, Array<String>>=[
+        "TEST"=>["window title", "message box"],
+        "IOERROR"=>["error.nullio.title", "error.nullio.message"],
+        "RENDERFAILURE"=>["error.renderfailure.title", "error.renderfailure.message"],
+        "SAVENOTCACHED"=>["error.cachefault.title", "error.cachefault.message"],
+        "MISSINGLANG"=>["error.languagemissing.title", "error.languagemissing.message"],
+        //"MISSINGMAP"=>["error.mapnotfound", "error.mapnotfound.message"], //!CUT CONTENT (removed in 0.02)
+        "NULLITEM"=>["error.nullitem.title", "error.nullitem.message"],
+        "MAPNULL"=>["error.mapnotfound.title", "error.mapnotfound.message"] //LOL imma just reuse this cut error message
+    ];
+    public static final DEFAULT_LANGUAGE:Lang = EN_US;
+    public static final DEFAULT_CONTROLS:Map<String,Array<FlxKey>>=[
+        "moveUP" => [UP, W],
+        "moveDOWN" => [DOWN, S],
+        "moveRIGHT" => [FlxKey.RIGHT, D], //Thanks FlxTextAlign! (Dont remove the `FlxKey.` as it will try to use FlxTextAlign instead of FlxKey.) :/
+        "moveLEFT" => [FlxKey.LEFT, A],
 
+        "zoomIN" => [PLUS, FlxKey.NONE], //so, apparently PotionType.NONE replaced FlxKey.NONE?????
+        "zoomOUT" => [MINUS, FlxKey.NONE],
+        "pause" => [ESCAPE, BACKSPACE],
+        "inventory" => [I, FlxKey.NONE],
+        "interact" => [E, ENTER],
+        "sprint" => [SHIFT, FlxKey.NONE],
+    ];
     public static final DEFAULT_JSON_RECURSION_CHECKS:Int = 20;
     public static final CONDUCTOR_BPM_CHECK_INTERVAL:Int=1;
-
-    //intro loop twice, then tense loop twice, then super-tense loop twice
-    public static final SECURITY_SECONDSTILLACTIVATION:Float = 263.28;
     public static final FALLBACK_WEAPON:WeaponData = {
         animations: [],
         damage: [],

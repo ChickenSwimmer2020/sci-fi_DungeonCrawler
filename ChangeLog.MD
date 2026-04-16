@@ -1,5 +1,36 @@
 # ChangeLog
 
+## Prototype Update 0.03.8 (Autobuild and UI)
+
+> im lazy af, i cant be fucked into finishing this right now
+>
+> just go and actually look at the changelogs in github itself.
+
+* AutoBuild system was reformatted slightly to allow for linux building and automatic HAXE installation.
+* Added new graphics for UI.
+* Added new keys to EN_US.
+* Began adding death screen.
+* Redid reassign buttons for Controls.
+* Added new clicking sound for text.
+* Attempted to make discord close properly, but failed.
+
+> ADDITIONS
+
+* Additions
+* * `getPercentage`
+* * `containsAny`
+* * `isDataFile`
+* * `combine`
+
+* Conductor
+* * No longer crashes when starting on non-debug builds
+* * `onCameraBop`
+
+* Added `ExtendedCamera`
+* Gamemap Big update.
+* Pickup updated
+* Breaker plays sound properly
+
 ## Prototype Update 0.03.7 (Dynamic Music)
 
 > yeah alright, fine. ill do this ~~TWO~~ *THREE* commits after i was supposed ta.

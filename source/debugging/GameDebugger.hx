@@ -30,13 +30,13 @@ class GameDebugger extends FlxSubState {
         //player>
         //map>
         
-        backgroundOne = new FlxUI9SliceSprite(FlxG.width-100, FlxG.height-90, FlxUIAssets.IMG_CHROME, new Rectangle(0, 0, 100, 90));
-        backgroundTwo = new FlxUI9SliceSprite(FlxG.width-95, FlxG.height-75, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, 90, 70));
+        backgroundOne = new FlxUI9SliceSprite(FlxG.width-100, FlxG.height-90, Paths.image('ui', 'chrome'), new Rectangle(0, 0, 100, 90), [5,5,8,8]);
+        backgroundTwo = new FlxUI9SliceSprite(FlxG.width-95, FlxG.height-75, Paths.image('ui', "chrome_inset"), new Rectangle(0, 0, 90, 70), [5,5,8,8]);
         text = new FlxUIText(backgroundOne.x, backgroundOne.y, backgroundOne.width, Language.getTranslatedKey("game.debugger.label", text), 8, true);
         text.alignment=CENTER;
 
         internalArea = new ScrollableArea(backgroundTwo.x, backgroundTwo.y, backgroundTwo.width.floor(), backgroundTwo.height.floor(), 1, true);
-        FlxG.cameras.add(internalArea, false);
+        Main.addCameraToGame(internalArea, "gamedebuggerScrollableArea");
 
 
 
@@ -51,7 +51,7 @@ class GameDebugger extends FlxSubState {
                 func();
             });
             add(button);
-            button.camera=internalArea;
+            internalArea.add(button);
             button.scrollFactor.set(1, 1);
             i++;
         }

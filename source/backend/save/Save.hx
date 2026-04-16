@@ -16,6 +16,38 @@ typedef SaveFile = {
     var maps:Array<MapFile>; //store every map in the user save file so that we dont have to do a bunch of extra stuff to regenerate them.
 }
 class Save {
+    /**
+     * create a new save file, returns true if save was created properly, otherwise false.
+     * @param name save file name (appears in load menu, be careful!)
+     * @return Bool if the save was created correctly.
+     */
+    public static function createNewFile(name:String, ?data:SaveFile):Bool {
+        if((Main.saveFile.data.saves:Map<String,SaveFile>).get(name)!=null) {
+            trace('a save with $name already exsits, showing overwrite dialog');
+            trace('TODO: put overwrite dialog here.');
+            return false;
+        }else{
+            var up:SaveFile = data??{
+                meta:{
+                    name: name,
+                    playtime:{H: 0,M: 0,s: 0},
+                    difficulty: "MISSING DIFFICULTY!!",
+                    depth: 0,
+                    level: 0
+                },
+                health: 420,
+                xp: 421,
+                stamina: 555,
+                position: {x:0, y:0},
+                inventory: [],
+                maps: []
+            };
+            (Main.saveFile.data.saves:Map<String, SaveFile>).set(name, up);
+        }
+        generateSaveFile();
+        return (Main.saveFile.data.saves:Map<String,SaveFile>).get(name)!=null;
+    }
+
     public static function writeFieldToSave(file:String, varible:String="", value:Dynamic):Bool {
         if(saveExists(file)){
             var sve:SaveFile = (Main.saveFile.data.saves:Map<String,SaveFile>).get(file);
@@ -71,7 +103,7 @@ class Save {
     public static inline function writeSaveFile():Bool return generateSaveFile();
     public static inline function generateSaveFile():Bool return Main.saveFile.flush(); //File.saveContent('${Paths.savePath}/$name.sav', Json.stringify(save, null, "    "));
 
-    private static function loadControls():Map<String, Array<FlxKey>> {
+    public static function loadControls():Map<String, Array<FlxKey>> {
         var control:Map<String, Array<FlxKey>> = [];
         if (Main.saveFile.data.controls == null) {
             trace('uh oh');
@@ -97,6 +129,7 @@ class Save {
             }
             
             control.set(Main.saveFile.data.controls[ctrl].c, arr);
+            trace(control);
         }
         return control;
     }

@@ -2,12 +2,13 @@ package debugging;
 
 #if(debug)
 class ErrorDebugger extends FlxState {
+    var missingObjectInput:FlxInputText;
     public function new() {
         super();
         var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.genericexit", null, ["[EXITKEY]"=>"BACKSPACE"]), 24, true);
         add(text);
 
-        var missingObjectInput:FlxInputText=new FlxInputText(0, 0, 80, "debug", 8);
+        missingObjectInput=new FlxInputText(0, 0, 80, "debug", 8);
         add(missingObjectInput);
         var buttons:Array<FlxButton>=[];
 
@@ -40,7 +41,7 @@ class ErrorDebugger extends FlxState {
     override public function update(elapsed:Float){
         super.update(elapsed);
 
-        if(FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(()->new MainMenuState(true));
+        if(!missingObjectInput.hasFocus && FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(()->new MainMenuState(true));
     }
 }
 #end
