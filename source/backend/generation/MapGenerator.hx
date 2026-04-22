@@ -80,7 +80,16 @@ class MapGenerator {
         //force override tile 0, 0 with the breaker for testing.
 
         toMapFile.tiles = outputTiles;
-        if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null)(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=([]:Array<MapFile>);
+
+        if(Main.saveFile.data.saves!=null) {
+            if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE)==null) {
+                Main.showError("SAVENOTCACHED", Main.FILE);
+                return;
+            }else if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null) {
+                (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=[];
+                Main.saveFile.flush(); //flush and then try to update.
+            }
+        }
         (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
         Main.saveFile.flush(); //should probably do this im realizing. maybe i should add a setter or something to automatically do this for me.
     }

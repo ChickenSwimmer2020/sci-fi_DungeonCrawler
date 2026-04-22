@@ -1,6 +1,12 @@
 package;
-
+import openfl.filesystem.File as OpenFLFile;
 class Flags {
+    #if debug
+        public static var CC_MADECUTSCENE:Bool=false; //allows create new popup to be closed if you accidently click it.
+        public static var CC_THEREISAPOPUPOPENDONOTUSECUTSCENECONTROLS:Bool=false;
+        public static final CC_DEFAULTLOADPATH:String = #if(html5)"assets/cutscenes/"#else'${OpenFLFile.applicationDirectory.nativePath}/assets/cutscenes/'#end;
+    #end
+    public static final SLS_WARNING_THRESHOLD:Int=120; //this is in seconds. (120=2 minutes)
     public static final ERROR_MESSAGES:Map<String, Array<String>>=[
         "TEST"=>["window title", "message box"],
         "IOERROR"=>["error.nullio.title", "error.nullio.message"],

@@ -14,7 +14,7 @@ class Popup extends FlxSubState {
 
     public var popupCam:ExtendedCamera;
 
-    public function new(title:String, b:String, buttons:Array<{l:String,?f:Null<Void->Void>,c:Bool}>, ?itemPreview:Bool=false, object:#if(html5)BitmapData#else String#end, objectIsAnimated:Bool=false, frameSize:FlxPoint, ?skipIntroTween:Bool=false) {
+    public function new(title:String, b:String, buttons:Array<{l:String,?f:Null<Void->Void>,c:Bool}>, ?itemPreview:Bool=false, object:#if(html5)BitmapData#else String#end, objectIsAnimated:Bool=false, frameSize:FlxPoint, ?skipIntroTween:Bool=false, colorable:Bool=false) {
         super();
         if(buttons.length>4){
             throw Error.Custom("Value outside of bounds. (4 buttons max!)");
@@ -32,9 +32,9 @@ class Popup extends FlxSubState {
         blurDarkenSprite.scrollFactor.set();
         addT(group);
 
-        background=new FlxUI9SliceSprite(0, 0, itemPreview?Paths.image('ui', 'chrome_inspect'):Paths.image('ui', 'chrome_light'), new Rectangle(0, 0, FlxG.width/4, FlxG.height/4), [5,5,8,8]);
-        background2=new FlxUI9SliceSprite(5, 15, itemPreview?FlxUIAssets.IMG_BOX:Paths.image('ui', "chrome_inset"), new Rectangle(0, 0, FlxG.width/4-10, FlxG.height/4-30), [5,5,8,8]);
-        if(itemPreview) background2.color = 0xFFFFCA;
+        background=new FlxUI9SliceSprite(0, 0, itemPreview?Paths.image('ui', colorable?'chrome_inspect_C':'chrome_inspect'):Paths.image('ui', colorable?'chrome_light_C':'chrome_light'), new Rectangle(0, 0, FlxG.width/4, FlxG.height/4), [5,5,8,8]);
+        background2=new FlxUI9SliceSprite(5, 15, itemPreview?FlxUIAssets.IMG_BOX:Paths.image('ui', colorable?"chrome_inset_C":"chrome_inset"), new Rectangle(0, 0, FlxG.width/4-10, FlxG.height/4-30), [5,5,8,8]);
+        if(itemPreview && !colorable) background2.color = 0xFFFFCA;
 
 
 
@@ -49,7 +49,7 @@ class Popup extends FlxSubState {
             Main.InspectPopupVisible = true;
             body.color=0xFF000000;
 
-            background3=new FlxUI9SliceSprite(5, 20, Paths.image('ui', "chrome_inset"), new Rectangle(0, 0, 100, 100), [5,5,8,8]);
+            background3=new FlxUI9SliceSprite(5, 20, Paths.image('ui', colorable?"chrome_inset_C":"chrome_inset"), new Rectangle(0, 0, 100, 100), [5,5,8,8]);
             background3.x = background2.x+background2.width-(background3.width+5);
 
             var objectPreview:FlxSprite = new FlxSprite(background3.x, background3.y);

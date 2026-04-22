@@ -26,11 +26,10 @@ class GameState extends FlxState {
         if(!generatedCameras) generateCameras();
 
         if(LoadingFromSave!=true){
-
-
-            Save.createNewFile("", null);
-            MapGenerator.generateMap(100, 100, 0);
-            add(MapGenerator.createMap('depth_0'));
+            Save.createNewFile("fucker", null, ()->{
+                MapGenerator.generateMap(100, 100, 0);
+                add(MapGenerator.createMap('depth_0'));
+            });
             //showIntroCutscene();
 
             //TODO: non loading logic. (FOR NEW GAME SYSTEM)

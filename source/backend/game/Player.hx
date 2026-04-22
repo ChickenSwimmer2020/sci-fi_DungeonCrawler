@@ -6,17 +6,54 @@ class Player extends FlxSprite {
     public static var onDeath:Void->Void;
     public static var onPlayerSave:Void->Void;
     public static var instance:Player;
-    public static var health:Float = 100;
-    public static var stamina:Float = 100;
-    public static var xp:Float = 0;
+
+    public var health:Float = 100;
+    public var stamina:Float = 100;
+    public var xp:Float = 0;
+    public var level:Int=0;
+    public var name:String="NONAME(ERROR)";
+    public var difficulty:String="MISSING DIFFICULTY!!(ERROR)";
+    public var depth:Int=0;
+
     public static var overrideCameraZoom:Bool=false;
 
     public var canMove:Bool=true;
     public var canOpenInventory:Bool=true;
     public var canFireWeapon:Bool=true;
 
+    public static var elapsedTimeSeconds:Float=0;
+    public static var updateSaveTime:Bool=true;
     //SLS (Seconds since Last Save)
-    public static var SLS:Int=0;
+    public static var SLS(default, set):Int=0;
+    public static var onSave:Void->Void; //just in-case;
+    public static function set_SLS(value:Int):Int {
+        SLS=value;
+        if(onSave!=null) onSave();
+        return SLS;
+    }
+
+    public function SAVED() {
+        SLS=0;
+        var curSaveFile:SaveFile = Save.readSaveFile(Main.FILE);
+        curSaveFile.position = {x:this.x,y:this.y};
+        curSaveFile.health = this.health;
+        curSaveFile.stamina = this.stamina;
+        curSaveFile.xp = this.xp;
+        curSaveFile.inventory=this.inventory.inventory;
+        curSaveFile.meta = {
+            name: this.name,
+            playtime:{
+                H: ((elapsedTimeSeconds/60)/60).floor(),
+                M: (elapsedTimeSeconds/60).floor(),
+                s: elapsedTimeSeconds.floor()
+            },
+            difficulty: instance.difficulty,
+            depth: instance.depth,
+            level: instance.level
+        };
+        Save.writeSaveFile(); //flush to the save file (EG, actually save stuff.)
+        if(onPlayerSave!=null) onPlayerSave();
+    }
 
     public var curHotbarSlot(default, set):Int=0;
     public function set_curHotbarSlot(value:Int):Int {
@@ -81,6 +118,11 @@ class Player extends FlxSprite {
         ctrlZoomOut = Main.controls.get('zoomOUT');
         ctrlInv = Main.controls.get('inventory');
         ctrlSprint = Main.controls.get('sprint');
+
+        Functions.wait(1, (_)->{ //infinitely go up one second for everything.
+            elapsedTimeSeconds++;
+            if(updateSaveTime) SLS++;
+        }, 0);
     }
     #if (debug)
         function addWatchObjects() {
@@ -102,6 +144,7 @@ class Player extends FlxSprite {
     var weaponTextTextTarget:String="THIS IS PLACEHOLDER TEXT. THIS SHOULD NEVER BE SEEN LOL";
     override public function update(elapsed:Float) {
         super.update(elapsed);
+
         if(isWeapon){
             if(weaponTextTextTarget!='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}')
                 weaponTextTextTarget='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}';
@@ -138,7 +181,7 @@ class Player extends FlxSprite {
             );
             weapon.visible=weapon.active=false;
         }else{
-            isWeapon=((inventory.selectedItem.type==RANGED||inventory.selectedItem.type==MEELEE)||inventory.selectedItem.type==MAGIC);
+            isWeapon=((inventory.selectedItem?.type==RANGED||inventory.selectedItem?.type==MEELEE)||inventory.selectedItem?.type==MAGIC);
             weapon.active=weapon.visible=isWeapon;
             if(canFireWeapon){
                 if(((weapon.frMode==RAIL||(weapon.frMode==FULLAUTO||weapon.frMode==MINIGUN))?FlxG.mouse.pressed:FlxG.mouse.justPressed) && (weapon.visible && weapon.active)) weapon.onLeftClick();

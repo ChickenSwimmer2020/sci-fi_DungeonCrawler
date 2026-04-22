@@ -123,11 +123,14 @@ import backend.game.objects.tiles.Breaker;
 import backend.ai.BaseEnemy;
 import backend.ui.ScrollableArea;
 import backend.game.objects.tiles.SpecialTile;
+import debugging.CutSceneCreator.KFDocument;
+import debugging.CutSceneCreator.KFCutscene; //this actually isnt used for just debugging, AS ITS THE ACTUAL CUTSCENE TOO!!
 #if (debug)
     import debugging.SaveDebugger;
     import debugging.MapDebugger;
     import debugging.AlphabetDebugger;
     import debugging.ErrorDebugger;
+    import debugging.CutSceneCreator;
 #end
 import backend.Discord;
 

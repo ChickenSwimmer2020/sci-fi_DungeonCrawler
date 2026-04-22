@@ -90,6 +90,20 @@ class Music {
             ],
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 109
+        },
+        "PowerCells"=>{
+            path: '${Paths.paths.get('music')}/PowerCells-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "PowerCells",
+            name: "PowerCells",
+            artist: "ChickenSwimmer2020",
+            sections: [
+                "start"=>Functions.MSCSToMS(0,0,0),
+                "loop"=>Functions.MSCSToMS(0,9,60),
+                "goodloop"=>Functions.MSCSToMS(0,28,80),
+                "end"=>Functions.MSCSToMS(1,7,20)
+            ],
+            versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
+            BPM: 100
         }
     ];
     /**
@@ -216,6 +230,7 @@ class Music {
         );
         trace(activeMusicObjects);
     }
+    private static var lastMusicVolume:Float=0.0;
     /**
      * play an audio file once, starting from startSection, and ending at endSection. also allows for an onFinish callback. (USES FlxG.sound.music!)
      * @param song name of song to play
@@ -225,6 +240,7 @@ class Music {
      * @param onFinish what to do when song is finished.
      */
     public static function playOnceMusic(song:String, startSection:OneOfTwo<String,Float>, endSection:OneOfTwo<String,Float>=null, onFinish:Void->Void) {
+        lastMusicVolume=FlxG.sound.music.volume;
         var songInfo:MusicInfo = musicInfos.get(song);
         if(songInfo==null) return;
         startedChecker=false;
@@ -234,6 +250,7 @@ class Music {
         FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection);
         FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection);
         FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??null);
+        FlxG.sound.music.volume = lastMusicVolume; //so dynamic music doesnt bug in the pause menu.
     }
     /**
      * play looping music (uses FlxG.sound.music)
@@ -255,12 +272,16 @@ class Music {
             FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection);
         //}
     }
-    public static function deathFadeOut() {
+    public static function deathFadeOut(?time:Float=1.1231) {
         overrideSpecialTileAudioVolume=true;
         stopLoops();
-        FlxG.sound.music.fadeOut(1.1231, 0, (_)->{
+        FlxG.sound.music.fadeOut(time, 0, (_)->{
             stopMusic();
         });   
+    }
+    public static function deathFadeIn(?time:Float=1.1231) { //ONLY CALL THIS IF FlxG.sound.music IS PLAYING, OTHERWISE NULL ACCESS
+        overrideSpecialTileAudioVolume=false;
+        FlxG.sound.music.fadeIn(time, 0, 1);
     }
     /**
      * get a loopback section from the main thing, just a helper function.
@@ -300,9 +321,13 @@ class Music {
      */
     public static function stopLoops(soft:Bool=true) {
         if(soft){
-            for(object in activeMusicObjects){
-                object.volume=0;
-                object.pause();
+            for(name=>object in activeMusicObjects){
+                if(object!=null){
+                    object.volume=0;
+                    object.pause();
+                }else{
+                    trace('audio Object "$name" tried to stop, but was null! (should be destroyed)');
+                }
             }
         }else stopLoopsUnsafe();
     }

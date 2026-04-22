@@ -15,11 +15,10 @@ class OptionsMenuSubstate extends FlxUISubState{
         super();
 
         tabs=[
-			{name: "tab_general", label: Language.getTranslatedKey("menu.settings.tabs.general", null)},
-			{name: "tab_graphics", label: FlxG.random.bool(14)?Language.getTranslatedKey("menu.settings.tabs.graphicsEG", null):Language.getTranslatedKey("menu.settings.tabs.graphics", null)},
-			{name: "tab_controls", label: Language.getTranslatedKey("menu.settings.tabs.controls", null)},
-			{name: "tab_difficulty", label: Language.getTranslatedKey("menu.settings.tabs.difficulty", null)},
-		];
+            {name: "tab_general", label: Language.getTranslatedKey("menu.settings.tabs.general", null)},
+            {name: "tab_graphics", label: FlxG.random.bool(14)?Language.getTranslatedKey("menu.settings.tabs.graphicsEG", null):Language.getTranslatedKey("menu.settings.tabs.graphics", null)},
+            {name: "tab_controls", label: Language.getTranslatedKey("menu.settings.tabs.controls", null)}
+        ];
 
 		// Make the tab menu itself:
 		tab_menu = new FlxUITabMenu(new FlxUI9SliceSprite(0, 0, Paths.image('ui', 'chrome'), new Rectangle(0, 0, 500, 380), [5,5,8,8]), tabs, true);
@@ -49,25 +48,21 @@ class OptionsMenuSubstate extends FlxUISubState{
         //quickly init the groups and everything
         general=new FlxUI(null, tab_menu, null);
         graphics=new FlxUI(null, tab_menu, null);
-        difficulty=new FlxUI(null, tab_menu, null);
         controls=new FlxUI(null, tab_menu, null);
         controls.name = "tab_controls";
         general.name = "tab_general";
         graphics.name = "tab_graphics";
-        difficulty.name = "tab_difficulty";
 
 
         createGeneralUI();
         createGraphicsUI();
         createControlsUI();
-        createDifficultyUI();
-        
+
 
 
         tab_menu.addGroup(general);
         tab_menu.addGroup(graphics);
-        tab_menu.addGroup(controls);
-        tab_menu.addGroup(difficulty);
+        tab_menu.addGroup(controls); //dont even ADD difficulty if we're in gamestate.
         add(tab_menu);
 
         trace(neededX);
@@ -91,14 +86,6 @@ class OptionsMenuSubstate extends FlxUISubState{
         add(deleteButton);
         deleteButton.label.alignment=RIGHT;
         deleteButton.labelOffsets = [FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 1), FlxPoint.weak(-5, 0)];
-
-        if(GameState.inGame) {
-            tab_menu.getTab("tab_difficulty").status = DISABLED; //disable the difficulty options in-game.
-        }
-    }
-
-    private function createDifficultyUI() {
-
     }
 
     /**CONTROLS SETTINGS OBJECTS AND FUNCTION**/
@@ -136,6 +123,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     onControlsSave();
                 };
             }
+            assigner.updateControlsRequest=()->onControlsSave();
             ControlObjects.push(assigner);
             total_Controls++;
             index++;
@@ -295,12 +283,6 @@ class OptionsMenuSubstate extends FlxUISubState{
 
     override public function update(elapsed:Float){
         super.update(elapsed);
-        if(GameState.inGame && tab_menu.getTab("tab_difficulty").status!=DISABLED) { //FORCE disable the difficulty options if in-game.
-            tab_menu.getTab("tab_difficulty").status = DISABLED; //disable the difficulty options in-game.
-        }else{
-            if(tab_menu.getTab("tab_difficulty").status==DISABLED) tab_menu.getTab("tab_difficulty").status = NORMAL; //little fix in-case it breaks.
-        }
-
         ControlsScroll.visible = tab_menu.selected_tab==0;
 
         if(FlxG.keys.justPressed.ESCAPE) close();
@@ -334,9 +316,12 @@ class OptionsMenuSubstate extends FlxUISubState{
 
 private final class ControlsAssignmentObject extends FlxTypedSpriteContainer<Dynamic> {
     public var controlSubsateRequest:(ControlsAssignmentObject, Int)->Void;
+    public var updateControlsRequest:Void->Void;
     private static final OFFSET_SPACING:Float=8;
     public var reassignButton:FlxUIButton;
+    public var clearButton:FlxUIButton;
     public var reassignButton1:FlxUIButton;
+    public var clearButton1:FlxUIButton;
     public var text:FlxText;
     public var input0:FlxInputText;
     public var input1:FlxInputText;
@@ -351,7 +336,7 @@ private final class ControlsAssignmentObject extends FlxTypedSpriteContainer<Dyn
         input1 = new FlxInputText((input0.x+input0.width)+OFFSET_SPACING, 0, 160, inputText1, 12);
         input0.selectable=input1.selectable=false;
 
-        reassignButton=new FlxUIButton(input0.x+input0.width-20, input0.y, "", ()->{
+        reassignButton=new FlxUIButton(input0.x+input0.width-40, input0.y, "", ()->{
             controlSubsateRequest(this, 1);
         }, false);
         reassignButton.loadGraphic(Paths.image('ui/menu', "button_reassign"), true, 20, 20);
@@ -359,7 +344,16 @@ private final class ControlsAssignmentObject extends FlxTypedSpriteContainer<Dyn
         reassignButton.autoCenterLabel();
         reassignButton.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_reassign")), 0, 0, false);
 
-        reassignButton1=new FlxUIButton(input1.x+input1.width-20, input1.y, "", ()->{
+        clearButton=new FlxUIButton(input0.x+input0.width-20, input0.y, "", ()->{
+            input0.text = "NONE"; //reset the key
+            updateControlsRequest();
+        }, false);
+        clearButton.loadGraphic(Paths.image('ui/menu', "button_reassign"), true, 20, 20);
+        clearButton.updateHitbox();
+        clearButton.autoCenterLabel();
+        clearButton.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_delete")), 0, 0, false);
+
+        reassignButton1=new FlxUIButton(input1.x+input1.width-40, input1.y, "", ()->{
             controlSubsateRequest(this, 2);
         }, false);
         reassignButton1.loadGraphic(Paths.image('ui/menu', "button_reassign"), true, 20, 20);
@@ -367,9 +361,20 @@ private final class ControlsAssignmentObject extends FlxTypedSpriteContainer<Dyn
         reassignButton1.autoCenterLabel();
         reassignButton1.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_reassign")), 0, 0, false);
 
+        clearButton1=new FlxUIButton(input1.x+input1.width-20, input1.y, "", ()->{
+            input1.text = "NONE";
+            updateControlsRequest();
+        }, false);
+        clearButton1.loadGraphic(Paths.image('ui/menu', "button_reassign"), true, 20, 20);
+        clearButton1.updateHitbox();
+        clearButton1.autoCenterLabel();
+        clearButton1.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_delete")), 0, 0, false);
+
         add(text);
         add(input0);
         add(input1);
+        add(clearButton);
+        add(clearButton1);
         add(reassignButton);
         add(reassignButton1);
     }
@@ -393,29 +398,22 @@ private final class ControlsAssinmentKeyPressSubState extends Popup {
         text.alignment=CENTER;
         addT(text);
 
-
-        var cancelButton:FlxButton = new FlxButton(text.x, text.y+text.height, Language.getTranslatedKey('menu.settings.controls.exitreassignment', null), ()->close());
-        addT(cancelButton);
-
-        var text2:FlxText = new FlxText(cancelButton.x+cancelButton.width, cancelButton.y, 0, Language.getTranslatedKey("menu.settings.controls.reassigncontrolexitmsg", null), 8);
+        var text2:FlxText = new FlxText(text.x, text.y+text.height, 0, Language.getTranslatedKey("menu.settings.controls.reassigncontrolexitmsg", null), 8);
         text2.alignment=LEFT;
         addT(text2);
     }
 
     override public function update(elapsed:Float) {
         super.update(elapsed); 
+        if(FlxG.mouse.justPressed || (FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle)) close();
         
         var key:FlxKey = Functions.FlxKeyFromInt(FlxG.keys.firstJustPressed());
-        if(FlxG.keys.pressed.SHIFT && (key=="ESCAPE" || key=="BACKSPACE")){
-            close(); //dont do anything else because well, we're exiting
-        }else{
-            switch(key){
-                case NONE: return; //nothing is pressed.
-                default:{
-                    onReassignment(key);
-                    //TODO: prevent assining the same key to both inputs of a control.
-                    close(); //close the substate but run the code on reassignment lol.
-                }
+        switch(key){
+            case NONE: return; //nothing is pressed.
+            default:{
+                onReassignment(key);
+                //TODO: prevent assining the same key to both inputs of a control.
+                close(); //close the substate but run the code on reassignment lol.
             }
         }
     }

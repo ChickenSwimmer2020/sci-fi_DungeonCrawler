@@ -41,9 +41,11 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 death_screenStaticShader = new ScreenShake(); //this shader has both a static and shake mode lol.
                 death_screenStaticShader.staticMode.value=[true];
 
-                for(filter in [death_screenShakeShader, death_screenStaticShader]) {
-                    for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
-                        cam.filters.push(new ShaderFilter(filter));
+                if(Main.saveFile.data.shaders){
+                    for(filter in [death_screenShakeShader, death_screenStaticShader]) {
+                        for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
+                            cam.filters.push(new ShaderFilter(filter));
+                        }
                     }
                 }
 
@@ -76,12 +78,12 @@ class GameMap extends FlxTypedGroup<Dynamic> {
             //add(testEnemy);
             //testEnemy.camera=Main.camGame;
 
-            add(generateObjectViaTile({
-                type: "",
-                collides: true,
-                special: true,
-                specialType: BREAKER
-            }, Math.floor((playerSpawnPoint.x/TILE_SIZE) + 1), Math.floor((playerSpawnPoint.y/TILE_SIZE))));
+            //add(generateObjectViaTile({ //also broken :/
+            //    type: "",
+            //    collides: true,
+            //    special: true,
+            //    specialType: BREAKER
+            //}, Math.floor((playerSpawnPoint.x/TILE_SIZE) + 1), Math.floor((playerSpawnPoint.y/TILE_SIZE))));
             
             add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y-50, {type: RANGED,item: "pistol",damage: []}));
             add(new Pickup(playerSpawnPoint.x+50, playerSpawnPoint.y-50, {type: RANGED,item: "railgun",damage: []}));

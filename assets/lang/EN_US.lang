@@ -89,7 +89,7 @@
             "controls": {
                 "nocontrols": "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**",
                 "reassigncontrol": "Press a key to reassign [CONTROL][[INDEX]]",
-                "reassigncontrolexitmsg": "* Hold Shift and press BackSpace/Escape to exit",
+                "reassigncontrolexitmsg": "Click anywhere to cancel.",
                 "exitreassignment": "Cancel"
             },
             "clear": {
@@ -157,6 +157,65 @@
                 "lang": "Missing Language",
                 "item": "Null Pickup",
                 "map": "Missing Map"
+            }
+        },
+        "cutscenemaker": {
+            "title": "Cutscene",
+            "preview": {
+                "hint": "preview running  —  ESC to stop",
+                "stop": "■ STOP"
+            },
+            "typepicker": {
+                "title": "choose action type"
+            },
+            "filedialog": {
+                "save": "Save to path:",
+                "load": "Load from path:",
+                "cancel": "Cancel",
+                "ok": "OK",
+                "HTML5_hint": "file I/O not available on HTML5.\ncopy XML below to save, or paste XML and press load:",
+                "HTML5_loadpaste": "Load from paste",
+                "HTML5_done": "Done"
+            },
+            "properties": {
+                "header": "Properties: [NODE_TYPE]"
+            },
+            "nodelist": {
+                "header": "Nodes ([NUM])"
+            },
+            "toolbar": {
+                "add": "Add",
+                "addchild": "Add Child",
+                "delete": "Del [DEL]",
+                "preview": "> Preview",
+                "fulltest": ">> Full Test",
+                "load": "Load",
+                "save": "Save [C+S]",
+                "saveas": "Save As",
+                "undo": "Undo [C+Z]",
+                "back": "< Back"
+            },
+            "statusbar": {
+                "init": "Ready",
+                "default": "Cutscene Editor  |  CTRL+S save  |  CTRL+Z undo  |  ESC stop preview",
+                "selected": "Selected: <NODE>",
+                "undo": "Undo",
+                "added": "Added: <NODE>",
+                "deleted": "Deleted node.",
+                "preview": "preview running  |  ESC or STOP to end",
+                "fulltest": "full test running  |  ESC or STOP to end",
+                "previewstopped": "Preview Stopped",
+                "saved": "Saved to <PATH>",
+                "loaded": "Loaded: <PATH>",
+                "HTML5_pastesuccess": "loaded from paste"
+            },
+            "error": {
+                "title": "Error",
+                "dismiss": "Dismiss",
+                "xmlbuild": "XML build error:\n<ERROR>",
+                "parse": "Cutscene parse error:\n<ERROR>",
+                "save": "Save error:\n<ERROR>",
+                "load": "Load error:\n<ERROR>"
             }
         }
     },

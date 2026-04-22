@@ -10,6 +10,7 @@ class Paths {
         "weapon"=>"assets/items/weapons",
         "music"=>"assets/audio/music",
         "sfx"=>"assets/audio/sfx",
+        "cutscene"=>"assets/cutscenes",
         #if(debug)"debug"=>"assets/debug"#end
     ];
 

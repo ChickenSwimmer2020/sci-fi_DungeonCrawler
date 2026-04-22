@@ -12,14 +12,10 @@ class MainMenuState extends FlxState {
         
         final onButtonClicked:Array<Void->Void>=[
             ()->{
-                #if(debug&&(windows||hl)) Main.LOG('new game'); #end
-                #if debug
-                    Save.DEBUGSAVE('test');
-                    Save.DEBUGSAVE('test1');
-                    Save.DEBUGSAVE('test2');
-                    Save.DEBUGSAVE('test3');
-                    Save.DEBUGSAVE('test4');
-                #end
+                Music.deathFadeOut(1); //so, funnily enough, we can use this lol.
+                FlxG.camera.fade(0xFF000000, 1, false, ()->{
+                    FlxG.switchState(GameIntroState.new);
+                });
             },
             ()->{openSubState(new LoadGameSubstate());},
             ()->{openSubState(new OptionsMenuSubstate());},
@@ -77,6 +73,9 @@ class DebuggerChooser extends FlxSubState {
         },
         Language.getTranslatedKey("debugger.error.title", null)=>()->{
             FlxG.switchState(ErrorDebugger.new);
+        },
+        Language.getTranslatedKey("debugger.cutscenemaker.title", null)=>()->{
+            FlxG.switchState(CutSceneCreator.new);
         }
     ];
     public function new() {

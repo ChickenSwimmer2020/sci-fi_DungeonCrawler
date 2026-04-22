@@ -30,13 +30,12 @@ class PauseMenu extends FlxSubState {
         FlxTween.tween(menuBG, {y: FlxG.height-200}, 0.25, {ease:FlxEase.expoInOut});
 
 
-        for(i in 0...(#if(debug)Main.loadedTestedState?6:5#else 5#end)) {
+        for(i in 0...(#if(debug)Main.loadedTestedState?5:4#else 4#end)) {
             var button:FlxButton = new FlxButton(FlxG.width-85, FlxG.height, [
                 Language.getTranslatedKey("pause.resume", buttons[i]),
                 Language.getTranslatedKey("pause.settings", buttons[i]),
                 "",
                 Language.getTranslatedKey("pause.exit", buttons[i]),
-                Language.getTranslatedKey("pause.exitnosave.title", buttons[i]),
                 Language.getTranslatedKey("pause.debug.exittestingstate", buttons[i])
             ][i], [
                 ()->{
@@ -54,25 +53,27 @@ class PauseMenu extends FlxSubState {
                 },
                 ()->{},
                 ()->{
-                    //TODO: save progress.
-                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
-                },
-                ()->{
-                    var popup:Popup = new Popup(
-                        Language.getTranslatedKey("pause.exitnosave.popup.title", null),
-                        Language.getTranslatedKey("pause.exitnosave.popup.message", null),
-                        [
-                            {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
-                                FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
-                            }, c:true},
-                            {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
-                                //TODO: save progress.
-                                FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
-                            }, c:true},
-                            {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
-                        ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
-                    );
-                    openSubState(popup);
+                    trace(Player.SLS);
+                    if(Player.SLS > Flags.SLS_WARNING_THRESHOLD) {
+                        GameState.inGame=false;
+                        FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                    }else{
+                        var popup:Popup = new Popup(
+                            Language.getTranslatedKey("pause.exitnosave.popup.title", null),
+                            Language.getTranslatedKey("pause.exitnosave.popup.message", null),
+                            [
+                                {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
+                                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                                }, c:true},
+                                {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
+                                    Player.instance.SAVED(); //save the player stuff hopefully.
+                                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                                }, c:true},
+                                {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
+                            ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                        );
+                        openSubState(popup);
+                    }
                 },
                 ()->{
                     GameState.inGame=false;

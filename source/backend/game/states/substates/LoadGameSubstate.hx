@@ -25,14 +25,20 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         loadButton.updateHitbox();
         loadButton.autoCenterLabel();
         deleteButton=new FlxUIButton(BG.width-105, BG.height-25, "", ()->{
-            requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
-                {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
-                {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
-                    onSaveDestroyed(text.text.split('-')[0].trim());
-                    (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
-                    trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
-                }, c:true}
-            ]);
+            if(FlxG.keys.pressed.SHIFT){ //just straight up delete the save if you hold shift.
+                onSaveDestroyed(text.text.split('-')[0].trim());
+                (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
+                trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
+            }else{
+                requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
+                    {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
+                    {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
+                        onSaveDestroyed(text.text.split('-')[0].trim());
+                        (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
+                        trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
+                    }, c:true}
+                ]);
+            }
         }, false);
         deleteButton.loadGraphic(Paths.image('ui/menu', "button_square"), true, 20, 20);
         deleteButton.updateHitbox();
@@ -63,6 +69,12 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         healthBar.value = save.health;
         staminaBar.value = save.stamina;
         xpBar.value = save.xp;
+    }
+
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
+        if(FlxG.keys.pressed.SHIFT) deleteButton.color=0xFFFF0000;
+        else deleteButton.color=0xFFFFFFFF;
     }
 }
 
@@ -96,9 +108,9 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
         Main.addCameraToGame(scrollCam, "loadGameScroller");
     
 
-        for(key => save in (Main.saveFile.data.saves:Map<String,SaveFile>)??([]:Map<String,SaveFile>)) {
-            if(save?.meta?.name == key){
-                #if(debug&&(windows||hl)) Main.LOG('valid save file $key, loading...'); #end
+        for(save in (Main.saveFile.data.saves:Map<String,SaveFile>)??([]:Map<String,SaveFile>)) {
+            if(Save.isValid(save)) {
+                #if(debug&&(windows||hl)) Main.LOG('valid save file, ${save?.meta?.name} loading...'); #end
                 var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
                 add(box);
                 saveBoxes.push(box);
@@ -118,6 +130,8 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
                     );
                     openSubState(popup);
                 }
+            }else{
+                trace('attempted to load invalid save "${save?.meta?.name}". skipping...'); //this shouldnt happen but just in case.
             }
         }
         

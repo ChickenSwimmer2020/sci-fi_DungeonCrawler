@@ -239,7 +239,6 @@ final class Additions{
      */
     public static inline function getPercentage(number:Float, percentage:Float):Float return (percentage/100)*number;
 
-
     //for strings
     /**
      * check if a string contains any string within an array of strings.
