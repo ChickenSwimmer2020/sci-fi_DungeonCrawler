@@ -1,6 +1,10 @@
 package backend.game.states;
 
+import backend.extensions.ExtendedCamera;
+
 class GameState extends FlxState {
+    public static var inGame:Bool=false; //for disabling changing difficulty settings in-game.
+
     public static var generatedCameras:Bool=false;
     public static var securitySystemActivated:Bool=false;
     public static var timeLeftUntilSecuritySystemActive:Float=0;
@@ -12,26 +16,22 @@ class GameState extends FlxState {
         return pulledBreaker;
     }
     public static function beginCountdown() {
-        timeLeftUntilSecuritySystemActive = Flags.SECURITY_SECONDSTILLACTIVATION;
-        Functions.wait(0.1, (_)->{
-            timeLeftUntilSecuritySystemActive-=0.1;
-            trace(timeLeftUntilSecuritySystemActive);
-            switch(timeLeftUntilSecuritySystemActive) {
-                case 197: Music.playLoopingMusic("ProtocolValidation", "looptense1min", "looptense30s"); //about half-way through.
-                case 132: Music.playLoopingMusic("ProtocolValidation", "looptense30s", "looptense15s");
-                case 66: Music.playLoopingMusic("ProtocolValidation", "looptense15s", "end");
-                case 0: FlxG.sound.music.stop();
-                    Music.playOnce("ProtocolValidation", "escapeEnd", "end", null, ()->{
-                        Music.flushAudio();
-                    });
-            }
-        }, Flags.SECURITY_SECONDSTILLACTIVATION.floor());
+        FlxG.sound.music.volume=1;//??
+        Music.playOnceMusic("ProtocalValidation", "", null, ()->{
+            FlxG.sound.music.stop();
+        });
     }
     public function new(LoadingFromSave:Bool=false) {
         super();
         if(!generatedCameras) generateCameras();
 
         if(LoadingFromSave!=true){
+            Save.createNewFile("fucker", null, ()->{
+                MapGenerator.generateMap(100, 100, 0);
+                add(MapGenerator.createMap('depth_0'));
+            });
+            //showIntroCutscene();
+
             //TODO: non loading logic. (FOR NEW GAME SYSTEM)
             //Save.DEBUGSAVE('fucker'); //generate save BEFORE generating map. since maps are stored inthe save file they were being overridden. whoopsies!
             //Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
@@ -48,17 +48,20 @@ class GameState extends FlxState {
     }
 
     public static function generateCameras() {
-        Main.camGame = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
+        Main.camGame = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
         Main.camGame.bgColor=0x00FFFFFF;
-        FlxG.cameras.add(Main.camGame, false);
+        Main.camGame.filters=[];
+        Main.addCameraToGame(Main.camGame, "game");
 
-        Main.camHUD = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
+        Main.camHUD = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
         Main.camHUD.bgColor=0x00FFFFFF;
-        FlxG.cameras.add(Main.camHUD, false);
+        Main.camHUD.filters=[];
+        Main.addCameraToGame(Main.camHUD, "hud");
 
-        Main.camOther = new FlxCamera(0, 0, FlxG.width, FlxG.height, 1);
+        Main.camOther = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
         Main.camOther.bgColor=0x00FFFFFF;
-        FlxG.cameras.add(Main.camOther, false);
+        Main.camOther.filters=[];
+        Main.addCameraToGame(Main.camOther, "other");
         generatedCameras=true;
     }
 }

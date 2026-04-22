@@ -44,7 +44,7 @@ class Music {
      */
     public static final musicInfos:Map<String, MusicInfo>=[
         "CellCompilation"=>{
-            path: '${Paths.musicPath}/CellCompilation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: '${Paths.paths.get('music')}/CellCompilation-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "CellCompilation",
             name: "Cell Compilation",
             artist: "ChickenSwimmer2020",
@@ -55,7 +55,7 @@ class Music {
             BPM: 185
         },
         "ProtocolValidation"=>{
-            path: '${Paths.musicPath}/ProtocolValidation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: '${Paths.paths.get('music')}/ProtocolValidation-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "ProtocolValidation",
             name: "Protocol Validation",
             artist: "ChickenSwimmer2020",
@@ -72,7 +72,7 @@ class Music {
             BPM: 175
         },
         "SubLayers"=>{
-            path: '${Paths.musicPath}/SubLayers-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: '${Paths.paths.get('music')}/SubLayers-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "SubLayers",
             name: "SubLayers",
             artist: "ChickenSwimmer2020",
@@ -90,6 +90,20 @@ class Music {
             ],
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 109
+        },
+        "PowerCells"=>{
+            path: '${Paths.paths.get('music')}/PowerCells-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "PowerCells",
+            name: "PowerCells",
+            artist: "ChickenSwimmer2020",
+            sections: [
+                "start"=>Functions.MSCSToMS(0,0,0),
+                "loop"=>Functions.MSCSToMS(0,9,60),
+                "goodloop"=>Functions.MSCSToMS(0,28,80),
+                "end"=>Functions.MSCSToMS(1,7,20)
+            ],
+            versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
+            BPM: 100
         }
     ];
     /**
@@ -112,8 +126,8 @@ class Music {
                 truePostFix = songInfo.versionInfo.AvailableVersions[0]; //the first one is always the newest.
             }
         }
-        trace('returned path from ResolvePostfix: ${Paths.musicPath}/$name-$truePostFix.${#if(sys)'ogg'#else'mp3'#end}');
-        return '${Paths.musicPath}/$name-$truePostFix.${#if(sys)'ogg'#else'mp3'#end}';
+        trace('returned path from ResolvePostfix: ${Paths.paths.get('music')}/$name-$truePostFix.${#if(sys)'ogg'#else'mp3'#end}');
+        return '${Paths.paths.get('music')}/$name-$truePostFix.${#if(sys)'ogg'#else'mp3'#end}';
     }
     /**
      * active playing music file of FlxG.sound.music.
@@ -216,6 +230,7 @@ class Music {
         );
         trace(activeMusicObjects);
     }
+    private static var lastMusicVolume:Float=0.0;
     /**
      * play an audio file once, starting from startSection, and ending at endSection. also allows for an onFinish callback. (USES FlxG.sound.music!)
      * @param song name of song to play
@@ -225,6 +240,7 @@ class Music {
      * @param onFinish what to do when song is finished.
      */
     public static function playOnceMusic(song:String, startSection:OneOfTwo<String,Float>, endSection:OneOfTwo<String,Float>=null, onFinish:Void->Void) {
+        lastMusicVolume=FlxG.sound.music.volume;
         var songInfo:MusicInfo = musicInfos.get(song);
         if(songInfo==null) return;
         startedChecker=false;
@@ -234,6 +250,7 @@ class Music {
         FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection);
         FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection);
         FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??null);
+        FlxG.sound.music.volume = lastMusicVolume; //so dynamic music doesnt bug in the pause menu.
     }
     /**
      * play looping music (uses FlxG.sound.music)
@@ -254,6 +271,17 @@ class Music {
             FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection);
             FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection);
         //}
+    }
+    public static function deathFadeOut(?time:Float=1.1231) {
+        overrideSpecialTileAudioVolume=true;
+        stopLoops();
+        FlxG.sound.music.fadeOut(time, 0, (_)->{
+            stopMusic();
+        });   
+    }
+    public static function deathFadeIn(?time:Float=1.1231) { //ONLY CALL THIS IF FlxG.sound.music IS PLAYING, OTHERWISE NULL ACCESS
+        overrideSpecialTileAudioVolume=false;
+        FlxG.sound.music.fadeIn(time, 0, 1);
     }
     /**
      * get a loopback section from the main thing, just a helper function.
@@ -291,11 +319,19 @@ class Music {
     /**
      * stop and destroy all looping objects in `activeMusicObjects`
      */
-    public static function stopLoops() {
-        for(name=>object in activeMusicObjects) {
-            removeLooping(name);
-        }
+    public static function stopLoops(soft:Bool=true) {
+        if(soft){
+            for(name=>object in activeMusicObjects){
+                if(object!=null){
+                    object.volume=0;
+                    object.pause();
+                }else{
+                    trace('audio Object "$name" tried to stop, but was null! (should be destroyed)');
+                }
+            }
+        }else stopLoopsUnsafe();
     }
+    public static inline function stopLoopsUnsafe() for(name=>object in activeMusicObjects) removeLooping(name);
     /**
      * stop all currently playing audio, and force play a new song if requested.
      */
@@ -312,6 +348,36 @@ class Music {
      */
     public static function stopMusic() {
         FlxG.sound.music.stop();
+    }
+
+    public static var overrideSpecialTileAudioVolume:Bool=false;
+    public static var musicVolumePreFade:Float=0;
+    public static var musicVolumesPreFade:Map<String,Float>=[];
+    public static function doPauseFade() {
+        overrideSpecialTileAudioVolume=true;
+        if(FlxG.sound.music.playing) {
+            musicVolumePreFade = FlxG.sound.music.volume;
+            FlxG.sound.music.fadeOut(1.5, musicVolumePreFade.getPercentage(25));
+        }
+        for(key => object in Music.activeMusicObjects) {
+            if(object.playing){
+                musicVolumesPreFade.set(key, object.volume);
+                object.fadeOut(1.5, object.volume.getPercentage(25));
+            }
+        }
+    }
+    public static function undoPauseFade() {
+        if(FlxG.sound.music.playing) {
+            FlxG.sound.music.fadeIn(1.5, FlxG.sound.music.volume, musicVolumePreFade);
+            musicVolumePreFade=0.0; //reset.
+        }
+        for(key => object in Music.activeMusicObjects) {
+            if(object.playing){
+                object.fadeIn(1.5, object.volume, musicVolumesPreFade.get(key));
+                musicVolumesPreFade.remove(key);
+            }
+        }
+        overrideSpecialTileAudioVolume=false;
     }
 }
 

@@ -6,18 +6,28 @@ class Breaker extends SpecialTile {
     public function new(x:Int,y:Int, tiles:Array<Array<Tile>>) {
         super(x,y, tiles);
         tileName = "Breaker";
-        Music.playLooping(false, "ProtocolValidation", "BreakerLoop", "introloop", "hitcutscene");
-        loopedMusicObject = Music.activeMusicObjects.get('BreakerLoop');
-        loopedMusicObject.pitch = 0.85;
         options = [
-            Language.getTranslatedKey("game.specialtile.generic.option.inspect", null)=>()->{
-                HUDSubstate.instance.openSubState(new InspectPopup("test", "test 2x", Paths.image('tiles', 'breaker'), true, FlxPoint.weak(16, 16)));
+            Language.getTranslatedKey("game.specialtile.generic.options.inspect", null)=>()->{
+                var popup:Popup = new Popup(
+                    Language.getTranslatedKey('game.specialtile.breaker.title', null),
+                    Language.getTranslatedKey('game.specialtile.breaker.message', null),
+                    [
+                        {l: Language.getTranslatedKey('game.inspect.popup.close', null), c: true}
+                    ], true, Paths.image('tiles', 'breaker'), true, FlxPoint.weak(16, 16)
+                );
+                HUDSubstate.instance.openSubState(popup);
             },
             Language.getTranslatedKey("game.specialtile.breaker.interact", null)=>()->{
-                FlxG.sound.play('${Paths.soundPath}/breakerpull.${#if(html5)'mp3'#else'ogg'#end}');
+                FlxG.sound.play('${Paths.paths.get('sfx')}/breakerpull.${#if(html5)'mp3'#else'ogg'#end}');
                 animation.play('pull');
             }
         ];
+
+
+        Music.playLooping(false, "ProtocolValidation", "BreakerLoop", "introloop", "hitcutscene");
+        loopedMusicObject = Music.activeMusicObjects.get('BreakerLoop');
+        loopedMusicObject.pitch = 0.85;
+
 
         loadGraphic(Paths.image('tiles', 'breaker'), true, GameMap.TILE_SIZE, GameMap.TILE_SIZE);
         animation.add("default", [0], 0, true);
@@ -49,11 +59,10 @@ class Breaker extends SpecialTile {
                     FlxG.sound.music.volume = 1;
                     loopedMusicObject.kill();
                     FlxG.sound.music.kill();
-                    Music.playOnce("ProtocolValidation", "HitCutscene", "hitcutscene", "mainloop", ()->{
-                        Music.playLoopingMusic("ProtocolValidation", "mainloop", "looptense1min");
+                    Music.playOnce("ProtocolValidation", "HitCutscene", "hitcutscene", "mainloop", ()->{ //TODO: fix, broken for some reason.
+                        GameState.beginCountdown();
                         Conductor.targetAudioObject = FlxG.sound.music;
                         Conductor.cameraBopRate = 2;
-                        GameState.beginCountdown();
                     });
 
                     Conductor.targetAudioObject = Music.activeMusicObjects.get('HitCutscene');
@@ -82,10 +91,12 @@ class Breaker extends SpecialTile {
             FlxG.watch.addQuick("Target Volume:", ((FlxMath.distanceToPoint(this, GameMap.instance.plr?.getGraphicMidpoint()).clampf(0, 100))/100).toPositive());
         #end
 
-        if(playerWithinRange && !GameState.pulledBreaker) {
-            FlxG.sound.music.volume = ((FlxMath.distanceToPoint(GameMap.instance.plr, getGraphicMidpoint()).clampf(0, 100))/100).toPositive()-0.33;
-            loopedMusicObject.volume = 1-((FlxMath.distanceToPoint(GameMap.instance.plr, getGraphicMidpoint()).clampf(0, 100))/100).toPositive()+0.33;
-        }else FlxG.sound.music.volume=1.0;
+        if(!Music.overrideSpecialTileAudioVolume){
+            if(playerWithinRange && !GameState.pulledBreaker) {
+                FlxG.sound.music.volume = ((FlxMath.distanceToPoint(GameMap.instance.plr, getGraphicMidpoint()).clampf(0, 100))/100).toPositive()-0.33;
+                loopedMusicObject.volume = 1-((FlxMath.distanceToPoint(GameMap.instance.plr, getGraphicMidpoint()).clampf(0, 100))/100).toPositive()+0.33;
+            }else FlxG.sound.music.volume=1.0;
+        }
     }
 
     override public function destroy() {

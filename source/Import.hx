@@ -53,7 +53,6 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUIRadioGroup;
 
 //haxe (never changes)
-import haxe.Json;
 import haxe.io.Error;
 
 //js
@@ -66,7 +65,7 @@ import haxe.io.Error;
 //sys (does change depending on platform.)
 #if sys
     import sys.FileSystem;
-    import sys.io.File;
+    import backend.parsing.File; //extends sys.io.File, but gives me my custom functions & shit.
     import sys.thread.Mutex;
     import sys.thread.Thread;
 #end
@@ -99,8 +98,10 @@ import lime.app.Application;
 import backend.game.states.GameState;
 import backend.save.Save;
 import backend.Paths;
+import backend.parsing.Json; //dont use *, we cant include File since thats a sys thing.
 import backend.generation.MapGenerator;
 import backend.game.states.substates.OptionsMenuSubstate;
+import backend.extensions.ExtendedCamera;
 import backend.Language;
 import backend.game.states.substates.HUDSubstate;
 import states.MainMenuState;
@@ -115,18 +116,21 @@ import backend.Conductor;
 import backend.SoundTray;
 import backend.Music;
 import states.IntroState;
-import backend.ui.WarningPopup;
+import backend.ui.Popup;
 import backend.game.states.substates.LoadGameSubstate;
 import backend.shaders.ScreenShake;
 import backend.game.objects.tiles.Breaker;
 import backend.ai.BaseEnemy;
 import backend.ui.ScrollableArea;
-import backend.ui.InspectPopup;
 import backend.game.objects.tiles.SpecialTile;
+import debugging.CutSceneCreator.KFDocument;
+import debugging.CutSceneCreator.KFCutscene; //this actually isnt used for just debugging, AS ITS THE ACTUAL CUTSCENE TOO!!
 #if (debug)
     import debugging.SaveDebugger;
     import debugging.MapDebugger;
     import debugging.AlphabetDebugger;
+    import debugging.ErrorDebugger;
+    import debugging.CutSceneCreator;
 #end
 import backend.Discord;
 

@@ -8,14 +8,53 @@ typedef SaveFile = {
         depth:Int,
         level:Int
     };
-    var health:Int;
-    var stamina:Int;
-    var xp:Int;
+    var health:Float;
+    var stamina:Float;
+    var xp:Float;
     var position:{x:Float, y:Float};
-    var inventory:Array<Array<Item>>; //Items are a typedef, we can save these here!
+    var inventory:Array<OneOfTwo<String, Item>>; //Items are a typedef, we can save these here!
     var maps:Array<MapFile>; //store every map in the user save file so that we dont have to do a bunch of extra stuff to regenerate them.
 }
 class Save {
+    /**
+     * create a new save file, returns true if save was created properly, otherwise false.
+     * @param name save file name (appears in load menu, be careful!)
+     * @return Bool if the save was created correctly.
+     */
+    public static function createNewFile(nme:String, ?data:SaveFile=null, onFinished:Void->Void):Bool {
+        trace('$nme was input, this shuoldnt be empty.');
+        if((Main.saveFile.data.saves:Map<String,SaveFile>).get(nme)!=null) {
+            trace('a save with $nme already exsits, showing overwrite dialog');
+            trace('TODO: put overwrite dialog here.');
+            return false;
+        }else{
+            var up:SaveFile = data??{
+                meta:{
+                    name: nme,
+                    playtime:{H: 0,M: 0,s: 0},
+                    difficulty: "MISSING DIFFICULTY!!",
+                    depth: 0,
+                    level: 0
+                },
+                health: 420,
+                xp: 421,
+                stamina: 555,
+                position: {x:0, y:0},
+                inventory: [],
+                maps: []
+            };
+            (Main.saveFile.data.saves:Map<String, SaveFile>).set(nme, up);
+        }
+        Main.FILE = nme; //SHOULD HAVE DONE THIS.
+        generateSaveFile();
+        onFinished();
+        return (Main.saveFile.data.saves:Map<String,SaveFile>).get(nme)!=null;
+    }
+
+    public static function isValid(save:SaveFile):Bool {
+        return save != null && save.meta != null && (save.meta.name!=null&&save.meta.name!="");
+    }
+
     public static function writeFieldToSave(file:String, varible:String="", value:Dynamic):Bool {
         if(saveExists(file)){
             var sve:SaveFile = (Main.saveFile.data.saves:Map<String,SaveFile>).get(file);
@@ -71,7 +110,7 @@ class Save {
     public static inline function writeSaveFile():Bool return generateSaveFile();
     public static inline function generateSaveFile():Bool return Main.saveFile.flush(); //File.saveContent('${Paths.savePath}/$name.sav', Json.stringify(save, null, "    "));
 
-    private static function loadControls():Map<String, Array<FlxKey>> {
+    public static function loadControls():Map<String, Array<FlxKey>> {
         var control:Map<String, Array<FlxKey>> = [];
         if (Main.saveFile.data.controls == null) {
             trace('uh oh');
@@ -97,6 +136,7 @@ class Save {
             }
             
             control.set(Main.saveFile.data.controls[ctrl].c, arr);
+            trace(control);
         }
         return control;
     }
@@ -125,8 +165,8 @@ class Save {
                 stamina: 555,
                 position: {x:0, y:0},
                 inventory: ([
-                    [{type: RANGED,weaponType: GUN,gunType: BALLISTIC,item: "pistol",durability: 100.0,damage: [],charges: 100.0,}]
-                ]:Array<Array<Item>>),
+                    {type: RANGED,weaponType: GUN,gunType: BALLISTIC,item: "pistol",durability: 100.0,damage: [],charges: 100.0}
+                ]:Array<OneOfTwo<String, Item>>),
                 maps: ([]:Array<MapFile>)
             };
             (Main.saveFile.data.saves:Map<String, SaveFile>).set(name, up); //why does this keep crashing on html5 specifically??

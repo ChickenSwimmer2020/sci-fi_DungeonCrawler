@@ -2,6 +2,7 @@ package backend;
 
 #if sys //this is a SYS feature only, because it uses sockets n shit.
     class Discord {
+        var CLOSE:Bool=false;
         var pipe:sys.io.FileOutput;
         var pipeIn:sys.io.FileInput;
         var thread:Thread;
@@ -16,16 +17,31 @@ package backend;
             thread = Thread.create(() -> {
                 try {
                     var path = "\\\\.\\pipe\\discord-ipc-0";
-                    pipe = sys.io.File.append(path, true); // binary mode
-                    pipeIn = sys.io.File.read(path, true);  // keep this for reading
+
+                    // Try connecting with a timeout loop
+                    var attempts = 0;
+                    var maxAttempts = 20; // 2 seconds total
+                    while (attempts < maxAttempts) {
+                        if (CLOSE) return; // bail early if game is closing
+                        try {
+                            pipe = sys.io.File.append(path, true);
+                            pipeIn = sys.io.File.read(path, true);
+                            break; // success
+                        } catch(_) {
+                            attempts++;
+                            Sys.sleep(0.1);
+                        }
+                    }
+
+                    if (CLOSE) return;
+                    if (pipe == null || pipeIn == null) {
+                        #if debug Main.LOG('discord: could not connect after $maxAttempts attempts'); #end
+                        return;
+                    }
+
                     connected = true;
-                    #if(debug&&(windows||hl)) Main.LOG('discord connected'); #end
-
-                    _send(0, haxe.Json.stringify({v: 1, client_id: clientId}));
-                    var response = _read();
-                    #if(debug&&(windows||hl)) Main.LOG('handshake: $response'); #end
-
                     while (connected) {
+                        if(CLOSE) return;
                         mutex.acquire();
                         var toSend = pendingSend.copy();
                         pendingSend = [];
@@ -111,7 +127,9 @@ package backend;
 
         public function close():Void {
             if (!connected) return;
+            CLOSE=true;
             connected = false;
+            
             
             try {
                 // send close opcode so discord cleans up properly

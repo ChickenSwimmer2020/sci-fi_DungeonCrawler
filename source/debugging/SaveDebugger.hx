@@ -9,7 +9,7 @@ class SaveDebugger extends FlxUIState{
     public function new() {
         super();
         Save.findSaves(); //just because its smart to do this everytime we load the state.
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.save.exit", null), 24, true);
+        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.genericexit", null, ["[EXITKEY]"=>"BACKSPACE"]), 24, true);
         add(text);
 
         // Define the tabs:
@@ -71,10 +71,7 @@ class SaveDebugger extends FlxUIState{
         super.update(elapsed);
         READING_textInputOther.visible = READING_textInputOther.active = (tabs_radio_1.selectedId=="OTHER"||tabs_radio_1.selectedId=="INVENTORY");
 
-        if(!READING_textInputOther.hasFocus && FlxG.keys.justPressed.BACKSPACE) {
-            FlxG.switchState(MainMenuState.new);
-            openSubState(new DebuggerChooser());
-        }
+        if(!READING_textInputOther.hasFocus && FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(()->new MainMenuState(true));
     }
 }
 #end

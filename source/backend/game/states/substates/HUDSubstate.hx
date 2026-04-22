@@ -1,5 +1,7 @@
 package backend.game.states.substates;
 
+import debugging.GameDebugger;
+
 enum abstract ItemType(String) from String to String {
     var ITEM="ITEM";
     var CONSUMABLE="CONSUMABLE";
@@ -7,13 +9,25 @@ enum abstract ItemType(String) from String to String {
     var RANGED="RANGED";
     var MAGIC="MAGIC";
     var NULL="NULL";
+
+    public static function fromString(input:String):ItemType {
+        switch(input) {
+            case "ITEM": return ItemType.ITEM;
+            case "CONSUMABLE": return ItemType.CONSUMABLE;
+            case "MEELEE": return ItemType.MEELEE;
+            case "RANGED": return ItemType.RANGED;
+            case "MAGIC": return ItemType.MAGIC;
+            default: return ItemType.NULL;
+        }
+    }
 }
 enum abstract PotionType(String) from String to String {
     var HEALTH="HEALTH";
-    
+    var NONE="NONE";
     public static function getPotionEffect(type:String) {
         switch(type) {
             case HEALTH: trace('used health potion');
+            case NONE: //donothing.
             default: trace("test");
         }
     }
@@ -64,7 +78,7 @@ enum abstract WeaponType(String) from String to String{
     var NULL="NULL";
 }
 typedef Item = {
-    var type:ItemType;
+    var type:OneOfTwo<ItemType,PotionType>;
     @:optional var weaponType:WeaponType;
     @:optional var gunType:GunType;
     @:optional var MagicType:MagicType;
@@ -89,7 +103,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
     public var interactable:Bool=true;
 
     private var slot:FlxSprite;
-    private var object:Null<FlxSprite>;
+    public var object:Null<FlxSprite>;
 
     public function new(x:Float,y:Float, ?item:Item) {
         super(x, y);
@@ -330,7 +344,7 @@ class HUDSubstate extends FlxSubState {
             index++;
         }
 
-        PotionType.getPotionEffect(PotionType.HEALTH);
+        //PotionType.getPotionEffect(PotionType.HEALTH);
 
         weaponText=new FlxText(0+(InventorySlot.SIZE*index), 0, 0, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
         add(weaponText);
@@ -379,7 +393,7 @@ class HUDSubstate extends FlxSubState {
         }
         @:privateAccess weaponText.visible=Player.instance.isWeapon;
         selectedItem=slots[Player.instance.curHotbarSlot]?.curItem??{
-            type: NULL,
+            type: NONE, //stupid. (because i swapped to OneOfTwo for potiontype AND itemtype, ItemType.NULL no longer works.)
             weaponType: NULL,
             gunType: NULL,
             item: "",
@@ -394,6 +408,7 @@ class HUDSubstate extends FlxSubState {
             if(fullOpen){
                 if(slots[i].visible==false || slots[i].interactable==false){
                     slots[i].visible=slots[i].active=slots[i].alive=slots[i].interactable=true;
+                    if(!slots[i].hasItem && slots[i].object!=null) slots[i].object.visible=false; //forgot null safety lol.
                 }
             }else{
                 if(i>MAX_SLOTS-1)slots[i].visible=slots[i].active=slots[i].alive=false;

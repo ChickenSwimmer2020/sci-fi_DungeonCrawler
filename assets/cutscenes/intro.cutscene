@@ -1,0 +1,81 @@
+<CutScene name="intro" fps="60">
+    <trace message="intro Cutscene started, lets hope nothing goes wrong."/>
+    <objects>
+        <Sprite name="sky" x="0" y="-720" image_dir="cutscenes/images/intro" image="skyBG" animated="false" frameWidth="1280" frameHeight="1440"/>
+        <Sprite name="cityBG3" x="0" y="0" image_dir="cutscenes/images/intro" image="cityFar" animated="false" frameWidth="1290" frameHeight="720"/>
+        <Sprite name="cityBG2" x="0" y="0" image_dir="cutscenes/images/intro" image="cityBack" animated="false" frameWidth="2560" frameHeight="720"/>
+        <Sprite name="cityBG" x="0" y="0"  image_dir="cutscenes/images/intro" image="cityFront" animated="false" frameWidth="3840" frameHeight="720"/>
+        <Sprite name="comet" x="800" y="200" image_dir="cutscenes/images/intro" image="comet" alpha="0" animated="false" frameWidth="64" frameHeight="32"/>
+        <Text name="text" x="0" y="0" text="game.cutscene.intro.section1" alpha="0" size="24" width="0" alignment="left"/>
+    </objects>
+
+    <frames>
+        <frame n="0">
+            <Tween obj="sky" prop="y" to="0" duration="217" ease="expoInOut"/>
+
+            <!--city-->
+            <Tween obj="cityBG3" prop="x" to="-10" duration="217" ease="linear"/>
+            <Tween obj="cityBG3" prop="y" to="720" duration="217" ease="expoInOut"/>
+
+            <Tween obj="cityBG2" prop="x" to="-2560" duration="217" ease="linear"/>
+            <Tween obj="cityBG2" prop="y" to="720" duration="217" ease="expoInOut"/>
+
+            <Tween obj="cityBG" prop="x" to="-3840" duration="217" ease="linear"/>
+            <Tween obj="cityBG" prop="y" to="720" duration="217" ease="expoInOut"/>
+        </frame>
+        <frame n="217">
+            <data obj="text" alpha="1"/>
+        </frame>
+        <frame n="269">
+            <data obj="comet" x="800" y="200" angle="-48" alpha="1"/>
+            <Tween obj="comet" prop="x" to="400" duration="28" ease="expoInOut"/>
+            <Tween obj="comet" prop="y" to="500" duration="28" ease="expoInOut"/>
+
+            <Tween obj="comet" prop="scale.x" to="1.2" duration="14" ease="expoIn"/>
+            <Tween obj="comet" prop="scale.y" to="1.2" duration="14" ease="expoIn"/>
+        </frame>
+        <frame n="283">
+            <Tween obj="comet" prop="scale.x" to="1.2" duration="14" ease="expoOut"/>
+            <Tween obj="comet" prop="scale.y" to="1.2" duration="14" ease="expoOut"/>
+            <Tween obj="comet" prop="alpha" to="0" duration="14" ease="expoOut"/>
+        </frame>
+    </frames>
+</CutScene>
+
+
+<!--<Cutscene>
+
+    
+    <Tween type="Y" pointer="cityBG3" y="720" time="9.06" ease="expoInOUt" tweentype="NONE" startDelay="0"/>
+    <Tween type="Y" pointer="cityBG2" y="720" time="9.06" ease="expoInOUt" tweentype="NONE" startDelay="0"/>
+    <Tween type="Y" pointer="cityBG" y="720" time="9.06" ease="expoInOUt" tweentype="NONE" startDelay="0">
+        <Text name="text" x="0" y="0" text="game.cutscene.intro.section1" size="24" width="0" alignment="left"/>
+
+        <timer time="2">
+            <Sprite name="comet" x="800" y="200" image_dir="cutscenes/images/intro" image="comet" animated="false" frameSizeX="64" frameSizeY="32"/>
+            <set pointer="comet" property="angle" value="-48"/>
+
+            <Tween type="Y" pointer="comet" y="500" time="0.4628" ease="expoInOut" tweentype="NONE" startDelay="0"/>
+            <Tween type="X" pointer="comet" x="400" time="0.4628" ease="expoInOut" tweentype="NONE" startDelay="0"/>
+            <Tween type="Scale" pointer="comet" scaleX="1.2" scaleY="1.2" time="0.2314" ease="expoIn" tweentype="NONE" startDelay="0">
+                <Tween type="Scale" pointer="comet" scaleX="0.8" scaleY="0.8" time="0.2314" ease="expoOut" tweentype="NONE" startDelay="0"/>
+                <Tween type="Alpha" pointer="comet" alpha="0" time="0.2314" ease="expoOut" tweentype="NONE" startDelay="0"/>
+            </Tween>
+        </timer>
+    </Tween>
+
+
+    <Sprite name="test" x="0" y="0" image_dir="fx" image="Bullet_impact" animated="false" frameSizeX="32" frameSizeY="16"/>
+
+    <Text name="text" x="0" y="0" text="Hello, World!" size="16" width="200" alignment="left"/>
+    <set pointer="text" property="alpha" value="0"/>
+    <Tween type="Alpha" pointer="text" alpha="1" time="1.0" ease="linear" tweentype="NONE" startDelay="0.5">
+        <set pointer="text" property="text" value="this is a test of the set action"/>
+    </Tween>
+
+    <Tween type="Y" pointer="test" y="200" time="1.3" ease="expoOut" tweentype="NONE" startDelay="0.5">
+        <timer time="2">
+            <trace message="This is a test trace."/>
+        </timer>
+    </Tween>
+</Cutscene>-->

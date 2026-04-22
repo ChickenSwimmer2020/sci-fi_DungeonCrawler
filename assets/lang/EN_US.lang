@@ -1,96 +1,256 @@
 {
-    "TODO": "THIS",
-
-    "warning.unfinishedlanguage": "!UNFINISHED LANGUAGE!",
-    "warning.unfinishedlanguage.continue": "Okay",
-    "warning.unfinishedlanguage.message": "The language file selected's translation is INCOMPLETE\nIt will be updated in the future.\n\nPLEASE RESTART THE GAME FOR THIS TO TAKE EFFECT PROPERLY.",
-
-    "pause.resume": "Resume",
-    "pause.settings": "Settings",
-    "pause.exit": "Exit",
-    "pause.exitnosave": "Exit (No Save)",
-    "pause.debug.exittestingstate": "Exit Testing",
-
-    "pause.exitnosave.popup.title": "Caution!",
-    "pause.exitnosave.popup.message": "If you exit now, your progress WONT be saved!\nDo you want to continue?",
-    "pause.exitnosave.popup.options.exit.unsafe": "Exit",
-    "pause.exitnosave.popup.options.exit": "Save",
-    "pause.exitnosave.popup.options.cancel": "Cancel",
-
-    "game.specialtile.generic.option.inspect": "Inspect",
-    "game.specialtile.breaker.interact": "Pull",
-    "game.inspect.popup.close": "Close",
-    
-
-    "menu.options.tab.controls": "Controls",
-    "menu.options.tab.save.flush": "Save",
-    "menu.options.tab.difficulty": "Difficulty",
-    "menu.options.tab.general": "General",
-    "menu.options.tab.graphics": "Graphics",
-    "menu.options.tab.graphicsEG": "Grapchis",
-    "menu.options.general.language": "Language",
-    "menu.options.general.audiotrack": "Audio version",
-    "menu.options.general.autopause": "Auto-Pause",
-    "menu.options.controls.nocontrols": "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**",
-
-    "menu.new_game": "New Game",
-    "menu.load_game": "Load Game",
-    "menu.config": "Settings",
-    "menu.art": "Gallery",
-    "menu.awards": "Achivements",
-    "menu.quit": "Quit",
-    "menu.debug.debugger": "Debugger",
-
-    "menu.save.loadsave": "Load Save",
-    "menu.save.delete.popup.message": "\"SVE\" is about to be deleted!\nTHIS ACTION IS IRREVERSABLE!!\n\n\nWould you like to continue?",
-    "menu.save.delete.popup.title": "Warning!",
-    "menu.save.delete.popup.options.cancel": "Cancel",
-    "menu.save.delete.popup.options.delete": "Delete",
-    "menu.settings.clear.button": "Clear Settings",
-    "menu.settings.clear.message": "You are about to global settings.\nThis cannot be undone.\nYour Saves, language preference, and last Loaded Save will remain intact.\nDo you wish to continue?",
-    
-    "debugger.alphabet": "Alphabet Debugger",
-    "debugger.alphabet.exit": "Press BACKSPACE to exit",
-    "debugger.alphabet.allsymbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ \n abcdefghijklmnopqrstuvwxyz \n 0123456789 \n ~!@#$%^&*()_+{}|:\"<>? \n `-=[]\\;',./",
-
-    "debugger.map": "Map Debugger",
-    "debugger.map.generate": "Generate",
-    "debugger.map.generatemenu": "Generation",
-    "debugger.map.exit": "Press BACKSPACE to exit",
-    "debugger.testing": "Testing State",
-
-
-    "debugger.save": "Save Debugger",
-    "debugger.save.exit": "Press BACKSPACE to exit",
-    "debugger.save.readmenu": "Read",
-    "debugger.save.radio.health": "Health",
-    "debugger.save.radio.stamina": "Stamina",
-    "debugger.save.radio.experience": "Experience",
-    "debugger.save.radio.inventory": "Inventory",
-    "debugger.save.radio.custom": "Custom",
-    "debugger.save.parse": "Parse",
-    "debugger.save.returned": "Returned Value:",
-    "debugger.save.nosaves": "NO SAVES",
-    
-
-
-    "weapon.pistol": "Glock 17",
-    "weapon.shotgun": "Spaz-12",
-    "weapon.rifle": "M16AR",
-    "weapon.burstgun": "BurstGun",
-    "weapon.railgun": "Rail Gun",
-    "weapon.minigun": "M134",
-
-    "error.nullitem": "Null Item Exception",
-    "error.nullitem.message": "An Pickup attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL.",
-    "error.renderfailure": "Engine Render Failure",
-    "error.renderfailure.message": "A graphic({OBJ}) could not be loaded.\n\nTHIS ERROR IS NOT FATAL.",
-    "error.nullio": "Null I/O Exception",
-    "error.nullio.message": "The object {OBJ} couldnt be loaded.",
-    "error.cachefault": "Save Cache Fault",
-    "error.cachefault.message": "The save file {OBJ} could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game.",
-    "error.languagemissing": "Language Fault",
-    "error.languagemissing.mesage": "The language file for {OBJ} could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]",
-    "error.mapnotfound": "Map read Failure",
-    "error.mapnotfound.message": "The map file {OBJ} could not be loaded. This error is not fatal"
+    "warning": {
+        "unfinishedlanguage":{
+            "title": "!UNFINISHED LANGUAGE!",
+            "continue": "Okay",
+            "message": "The language file selected's translation is INCOMPLETE\nIt will be updated in the future.\n\nPLEASE RESTART THE GAME FOR THIS TO TAKE EFFECT PROPERLY."
+        }
+    },
+    "pause": {
+        "resume": "Resume",
+        "settings": "Settings",
+        "exit": "Exit",
+        "exitnosave":{
+            "title": "Exit (No Save)",
+            "popup": {
+                "title": "Caution!",
+                "message": "If you exit now, your progress WONT be saved!\nDo you want to continue?",
+                "options": {
+                    "exitunsafe": "Exit",
+                    "exit": "Save",
+                    "cancel": "Cancel"
+                }
+            }
+        },
+        "debug": {
+            "exittestingstate": "Exit Testing"
+        }
+    },
+    "game": {
+        "specialtile":{
+            "generic": {
+                "options": {
+                    "inspect": "Inspect"
+                }
+            },
+            "breaker": {
+                "interact": "Pull",
+                "title": "Breaker Box",
+                "message": "\"An old breaker box...\"\n\"I wonder what it powers?\"\n\n\n\n\n\n\nRestores power and allow decent.\nMay activate long forgotten defences..."
+            }
+        },
+        "inspect": {
+            "popup": {
+                "close": "Close"
+            }
+        },
+        "debugger":{
+            "label": "Debug Menu",
+            "create": {
+                "pickup": {
+                    "title": "Create New Pickup",
+                    "button": "Insert"
+                },
+                "hint": {
+                    "pickupname": "Pickup name",
+                    "pickuptype": "Pickup Type",
+                    "pickuppotiontype": "Pickup Potion Type",
+                    "pickupguntype": "Pickup Gun Type",
+                    "pickupispotion": "Is Potion? (self-explanitory)",
+                    "pickupdurability": "Pickup Durability",
+                    "pickupweapontype": "Pickup Weapon Type",
+                    "pickupmagictype": "Pickup Magic Type",
+                    "pickupconsumabletype": "Pickup Consumable Type",
+                    "insert": "Insert your pickup to GameMap"
+                }
+            }
+        },
+        "death": {
+            "consolemessage": "Unit index at \"[SAVEFILE]\" unresponsive.                \nUnable to reconnect.            \nUnit systems shutdown registered, Awaiting input.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWould you like to re-deploy?[Y/N]"
+        }
+    },
+    "menu": {
+        "settings": {
+            "tabs": {
+                "controls": "Controls",
+                "save": {
+                    "flush": "Save"
+                },
+                "difficulty": "Difficulty",
+                "general": "General",
+                "graphics": "Graphics",
+                "graphicsEG": "Grapchis"
+            },
+            "general": {
+                "language": "Language",
+                "audiotrack": "Audio Version",
+                "autopause": "Auto-Pause"
+            },
+            "controls": {
+                "nocontrols": "NO CONTROLS FOUND\n**[THIS IS A BAD THING, AND SHOULD &NEVER& HAPPEN]**",
+                "reassigncontrol": "Press a key to reassign [CONTROL][[INDEX]]",
+                "reassigncontrolexitmsg": "Click anywhere to cancel.",
+                "exitreassignment": "Cancel"
+            },
+            "clear": {
+                "button": "Clear Settings",
+                "message": "You are about to clear global settings.\nThis cannot be undone.\nYour Saves, language preference, and last Loaded Save will remain intact.\nDo you wish to continue?"
+            }
+        },
+        "save": {
+            "loadsave": "Load Save",
+            "delete": {
+                "popup": {
+                    "message": "\"SVE\" is about to be deleted!\nTHIS ACTION IS IRREVERSABLE!!\n\n\nWould you like to continue?",
+                    "title": "Warning!",
+                    "options": {
+                        "cancel": "Cancel",
+                        "delete": "Delete"
+                    }
+                }
+            }
+        },
+        "newgame": "New Game",
+        "loadgame": "Load Game",
+        "config": "Settings",
+        "art": "Gallery",
+        "awards": "Awards",
+        "quit": "Quit",
+        "debug": {
+            "debugger": "Debugger"
+        }
+    },
+    "debugger": {
+        "title":"Debugger System",
+        "genericexit": "Press [EXITKEY] to exit",
+        "testing": "Testing State",
+        "alphabet": {
+            "title": "Font",
+            "allsymbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ \n abcdefghijklmnopqrstuvwxyz \n 0123456789 \n ~!@#$%^&*()_+{}|:\"<>? \n `-=[]\\;',./"
+        },
+        "map": {
+            "title": "Map",
+            "generate": "Generate",
+            "generatemenu": "Generation"
+        },
+        "save": {
+            "title": "Save",
+            "readmenu": "Read",
+            "parse": "Parse",
+            "returned": "Returned Value",
+            "nosaves": "NO SAVES",
+            "radio": {
+                "health": "Health",
+                "stamina": "Stamina",
+                "experience": "Experience",
+                "inventory": "Inventory",
+                "custom": "Custom"
+            }
+        },
+        "error": {
+            "title": "Error",
+            "labels": {
+                "test": "Test",
+                "io": "Generic Error",
+                "render": "Missing Graphic",
+                "cache": "Missing Save",
+                "lang": "Missing Language",
+                "item": "Null Pickup",
+                "map": "Missing Map"
+            }
+        },
+        "cutscenemaker": {
+            "title": "Cutscene",
+            "preview": {
+                "hint": "preview running  —  ESC to stop",
+                "stop": "■ STOP"
+            },
+            "typepicker": {
+                "title": "choose action type"
+            },
+            "filedialog": {
+                "save": "Save to path:",
+                "load": "Load from path:",
+                "cancel": "Cancel",
+                "ok": "OK",
+                "HTML5_hint": "file I/O not available on HTML5.\ncopy XML below to save, or paste XML and press load:",
+                "HTML5_loadpaste": "Load from paste",
+                "HTML5_done": "Done"
+            },
+            "properties": {
+                "header": "Properties: [NODE_TYPE]"
+            },
+            "nodelist": {
+                "header": "Nodes ([NUM])"
+            },
+            "toolbar": {
+                "add": "Add",
+                "addchild": "Add Child",
+                "delete": "Del [DEL]",
+                "preview": "> Preview",
+                "fulltest": ">> Full Test",
+                "load": "Load",
+                "save": "Save [C+S]",
+                "saveas": "Save As",
+                "undo": "Undo [C+Z]",
+                "back": "< Back"
+            },
+            "statusbar": {
+                "init": "Ready",
+                "default": "Cutscene Editor  |  CTRL+S save  |  CTRL+Z undo  |  ESC stop preview",
+                "selected": "Selected: <NODE>",
+                "undo": "Undo",
+                "added": "Added: <NODE>",
+                "deleted": "Deleted node.",
+                "preview": "preview running  |  ESC or STOP to end",
+                "fulltest": "full test running  |  ESC or STOP to end",
+                "previewstopped": "Preview Stopped",
+                "saved": "Saved to <PATH>",
+                "loaded": "Loaded: <PATH>",
+                "HTML5_pastesuccess": "loaded from paste"
+            },
+            "error": {
+                "title": "Error",
+                "dismiss": "Dismiss",
+                "xmlbuild": "XML build error:\n<ERROR>",
+                "parse": "Cutscene parse error:\n<ERROR>",
+                "save": "Save error:\n<ERROR>",
+                "load": "Load error:\n<ERROR>"
+            }
+        }
+    },
+    "weapon": {
+        "pistol": "Glock 17",
+        "shotgun": "Spaz-12",
+        "rifle": "M16AR",
+        "burstgun": "BurstGun",
+        "railgun": "Rail Gun",
+        "minigun": "M134"
+    },
+    "error": {
+        "nullitem": {
+            "title": "Null Item Exception",
+            "message": "An Pickup \"{OBJ}\" attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL."
+        },
+        "renderfailure": {
+            "title": "Engine Render Failure",
+            "message": "A graphic \"{OBJ}\" could not be loaded.\n\nTHIS ERROR IS NOT FATAL."
+        },
+        "nullio": {
+            "title": "Null I/O Exception",
+            "message": "The object \"{OBJ}\" couldnt be loaded."
+        },
+        "cachefault": {
+            "title": "Save Cache Fault",
+            "message": "The save file \"{OBJ}\" could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game."
+        },
+        "languagemissing": {
+            "title": "Language Fault",
+            "message": "The language file for \"{OBJ}\" could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]"
+        },
+        "mapnotfound": {
+            "title": "Map read Failure",
+            "message": "The map file \"{OBJ}\" could not be loaded. This error is not fatal and you will be returned to the main menu.\nYour save is corrupted, please delete it.[MENU]"
+        }
+    }
 }

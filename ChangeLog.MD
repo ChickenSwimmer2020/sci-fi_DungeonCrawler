@@ -1,7 +1,72 @@
 # ChangeLog
 
+## Prototype Update 0.03.8 (Autobuild and UI)
+
+> im lazy af, i cant be fucked into finishing this right now
+>
+> just go and actually look at the changelogs in github itself.
+
+* AutoBuild system was reformatted slightly to allow for linux building and automatic HAXE installation.
+* Added new graphics for UI.
+* Added new keys to EN_US.
+* Began adding death screen.
+* Redid reassign buttons for Controls.
+* Added new clicking sound for text.
+* Attempted to make discord close properly, but failed.
+
+> ADDITIONS
+
+* Additions
+* * `getPercentage`
+* * `containsAny`
+* * `isDataFile`
+* * `combine`
+
+* Conductor
+* * No longer crashes when starting on non-debug builds
+* * `onCameraBop`
+
+* Added `ExtendedCamera`
+* Gamemap Big update.
+* Pickup updated
+* Breaker plays sound properly
+
 ## Prototype Update 0.03.7 (Dynamic Music)
 
+> yeah alright, fine. ill do this ~~TWO~~ *THREE* commits after i was supposed ta.
+
+* Created MINIGUN weapon type.
+* Weapon names now use real weapon names.
+* Added SubLayers.
+* Added placeholder breaker pull sound.
+* Updated Flags.
+* `Functions.wait` now supports infinite looping.
+* Dynamic music.
+* Added `soundPath` to Paths.
+* `SoundTray` was fixed.
+* `GameMap` creates a minigun now in testing mode.
+* mousePosition no longer crashes game due to null access.
+* MainMenuState now properly stops music before playing menu theme.
+* Tiles now load through animations because solars pc is better and faster.
+* Added Prototype logo.
+* COMPLETELY reformated the Language system (JAPANESE IS **NOT** UPDATED YET).
+* Added `build.bat` to the autobuild system to install and setup dependencies automatically.
+* Set version numbers to project.xml FINALLY.
+* Added `DEFAULT_JSON_RECURSION_CHECKS` to Flags. (probably unused lol)
+* `Import` was updated.
+* `Main.showError` calls ([MENU], [SHUTDOWN]) now function properly.
+* Language information was consolodated into one map.
+* Player can now have the ability to open the inventory and move removed.
+* Fixed a bunch of language calls to work with the new system.
+* Added message to GameState reminding to fix logic freeze.
+* `HUDSubstate` can now open `GameDebugger` in debug builds for in-game debugging.
+* Debuggers now properly re-open the debug chooser on `MainMenuState`.
+* Added new Recursive JSON Parser.
+* Fixed InspectPopup text positioning.
+* `ScrollableArea` now supports horizontal scrolling.
+* Added `ErrorDebugger` for debugging application popup errors.
+* Added `GameDebugger` for in-game debugging. (HEAVY WIP)
+* Added WIP Popup for creating `Pickup` objects for `GameDebugger`.
 * ProtocalValidation was changed to ProtocolValidation (typo lol.)
 
 ## Prototype Update 0.03.6 (Breaker and placeholder enemy)

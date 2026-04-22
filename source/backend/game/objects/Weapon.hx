@@ -167,20 +167,30 @@ class Weapon extends FlxSprite{
                     railFireShader=new RailFire();
                     railFireShader.intensity.value=[0.01];
                     railFireShader.speed.value=[120.0];
-                    if(Main.camGame.filters==null)Main.camGame.filters=[];
-                    if(Main.camHUD.filters==null)Main.camHUD.filters=[];
-                    if(Main.camOther.filters==null)Main.camOther.filters=[];
-                    Main.camGame.filters.push(new ShaderFilter(railFireShader));
-                    Main.camHUD.filters.push(new ShaderFilter(railFireShader));
-                    Main.camOther.filters.push(new ShaderFilter(railFireShader));
+                    if(Main.saveFile.data.shaders){
+                        for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
+                            cam.filters??[];
+                            for(shader in [railFireShader]) {
+                                cam.filters.push(new ShaderFilter(shader));
+                            }
+                        }
+                    }
                     //HARD-CODED.
                     charges.set("railgun", charges.get(name)-10); //railgun has higher max ammo, but it drains faster to compensate.
                     fire(power/100);
                     power=0;
                     fireTimers.set("railgun", Functions.wait(shoot_time, (_)->{
-                        Main.camGame.filters.remove(Main.camGame.filters[0]);
-                        Main.camHUD.filters.remove(Main.camHUD.filters[0]);
-                        Main.camOther.filters.remove(Main.camOther.filters[0]);
+                        if(Main.saveFile.data.shaders){
+                            for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
+                                for(filter in cam.filters) {
+                                    trace(filter.getClassName(true));
+                                    //if(filter.getClassName(true));
+                                }
+                            }
+                            //Main.camGame.filters.remove(Main.camGame.filters[0]);
+                            //Main.camHUD.filters.remove(Main.camHUD.filters[0]);
+                            //Main.camOther.filters.remove(Main.camOther.filters[0]);
+                        }
                         railFireShader=null;
                         fireTimers.remove("railgun");
                     }));

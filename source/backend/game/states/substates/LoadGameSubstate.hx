@@ -14,8 +14,8 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
     public function new(x:Float,y:Float,cam:FlxCamera) {
         super(x,y);
 
-        BG=new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME_LIGHT, new Rectangle(0, 0, 380, 100));
-        CUTOUT=new FlxUI9SliceSprite(5, 5, FlxUIAssets.IMG_CHROME_INSET, new Rectangle(0, 0, 90, 90));
+        BG=new FlxUI9SliceSprite(0, 0, Paths.image('ui', 'chrome_light'), new Rectangle(0, 0, 380, 100), [5,5,8,8]);
+        CUTOUT=new FlxUI9SliceSprite(5, 5, Paths.image('ui', 'chrome_inset'), new Rectangle(0, 0, 90, 90), [5,5,8,8]);
         text=new FlxUIText(100, 5, BG.width-105, '{NAME} - {DIFFICULTY}\n{H}:{M}:{S} || {DEPTH}\n{LEVEL}', 14, true);
         loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave", loadButton), ()->{
             Main.FILE=text.text.split('-')[0].trim(); //should work?
@@ -25,16 +25,22 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         loadButton.updateHitbox();
         loadButton.autoCenterLabel();
         deleteButton=new FlxUIButton(BG.width-105, BG.height-25, "", ()->{
-            requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
-                {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
-                {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
-                    onSaveDestroyed(text.text.split('-')[0].trim());
-                    (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
-                    trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
-                }, c:true}
-            ]);
+            if(FlxG.keys.pressed.SHIFT){ //just straight up delete the save if you hold shift.
+                onSaveDestroyed(text.text.split('-')[0].trim());
+                (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
+                trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
+            }else{
+                requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
+                    {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
+                    {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
+                        onSaveDestroyed(text.text.split('-')[0].trim());
+                        (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
+                        trace('attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())} (this should be null.)');
+                    }, c:true}
+                ]);
+            }
         }, false);
-        deleteButton.loadGraphic(Paths.image('ui/menu', "button_delete"), true, 20, 20);
+        deleteButton.loadGraphic(Paths.image('ui/menu', "button_square"), true, 20, 20);
         deleteButton.updateHitbox();
         deleteButton.autoCenterLabel();
         deleteButton.addIcon(new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_delete")), 0, 0, true);
@@ -64,6 +70,12 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         staminaBar.value = save.stamina;
         xpBar.value = save.xp;
     }
+
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
+        if(FlxG.keys.pressed.SHIFT) deleteButton.color=0xFFFF0000;
+        else deleteButton.color=0xFFFFFFFF;
+    }
 }
 
 class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna get save resetting working now.
@@ -81,7 +93,7 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
         super();
         Save.findSaves();
 
-        BG = new FlxUI9SliceSprite(0, 0, FlxUIAssets.IMG_CHROME, new Rectangle(0, 0, 400, 600));
+        BG = new FlxUI9SliceSprite(0, 0, Paths.image('ui', 'chrome'), new Rectangle(0, 0, 400, 600), [5,5,8,8]);
         add(BG);
         BG.screenCenter();
 
@@ -89,16 +101,16 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
 
 
 
-        SBG = new FlxUI9SliceSprite(BG.x+5,BG.y+5,FlxUIAssets.IMG_CHROME_INSET,new Rectangle(0, 0, 390, 590));
+        SBG = new FlxUI9SliceSprite(BG.x+5,BG.y+5,Paths.image('ui', "chrome_inset"),new Rectangle(0, 0, 390, 590), [5,5,8,8]);
         add(SBG);
 
         scrollCam=new ScrollableArea(SBG.x, SBG.y, Math.floor(SBG.width), Math.floor(SBG.height), 1);
-        FlxG.cameras.add(scrollCam, false);
+        Main.addCameraToGame(scrollCam, "loadGameScroller");
     
 
-        for(key => save in (Main.saveFile.data.saves:Map<String,SaveFile>)??([]:Map<String,SaveFile>)) {
-            if(save?.meta?.name == key){
-                #if(debug&&(windows||hl)) Main.LOG('valid save file $key, loading...'); #end
+        for(save in (Main.saveFile.data.saves:Map<String,SaveFile>)??([]:Map<String,SaveFile>)) {
+            if(Save.isValid(save)) {
+                #if(debug&&(windows||hl)) Main.LOG('valid save file, ${save?.meta?.name} loading...'); #end
                 var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
                 add(box);
                 saveBoxes.push(box);
@@ -113,8 +125,13 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
                     }
                 };
                 box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
-                    openSubState(new WarningPopup(title, message, buttons));
+                    var popup:Popup = new Popup(
+                        title, message, buttons, false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                    );
+                    openSubState(popup);
                 }
+            }else{
+                trace('attempted to load invalid save "${save?.meta?.name}". skipping...'); //this shouldnt happen but just in case.
             }
         }
         

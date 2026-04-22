@@ -7,11 +7,11 @@
 
     <section if="windows">
         <set name="version_prefix" value="PROTOTYE: " /> <!--boom, fixed.-->
-        <meta version="0.03.6"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
+        <meta version="0.03.8"/> <!--i have to do the prototype PreFix seperately because windows compiler = stupid.-->
     </section>
     
     <section unless="windows">
-        <meta version="PROTOTYPE: 0.03.6"/>
+        <meta version="PROTOTYPE: 0.03.8"/>
     </section>
 
     <!--apple can eat the corn out of my shit.-->
@@ -27,11 +27,11 @@ PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
         <window allow-high-dpi="true" hardware="true" vsync="true" width="1280" height="720"/> <!--default window params-->
     </section>
 
-    <haxelib name="flixel"/>
-    <haxelib name="flixel-ui"/>
-    <haxelib name="flixel-addons"/>
-    <haxelib name="openfl"/>
-    <haxelib name="hxcpp"/>
+    <haxelib name="flixel" version="6.1.2"/>
+    <haxelib name="flixel-ui" version="2.6.4"/>
+    <haxelib name="flixel-addons" version="3.3.2"/>
+    <haxelib name="openfl" version="9.5.0"/> <!--DONT UPDATE, IT FUCKS WITH THE RENDERING AND BREAKS SHIT-->
+    <haxelib name="hxcpp" version="4.3.2"/>
 
     <source path="source" />
     <source path="source/debug" if="debug"/>

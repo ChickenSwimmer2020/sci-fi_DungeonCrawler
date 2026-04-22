@@ -48,11 +48,11 @@ class MapGenerator {
             }
         }else map[y][x]=tile;
     }
-    public static function generateMap(width:Int, height:Int) {  
+    public static function generateMap(width:Int, height:Int, depth:Int) {  
         #if(debug&&(windows||hl)) Main.LOG('attempting to generate map with width $width and height $height'); #end
         var outputTiles:Array<Array<TilePointer>> = [];
         var toMapFile:MapFile = {
-            name: "PLACEHOLDER",
+            name: 'depth_$depth',
             width: width,
             height: height,
             tiles: []
@@ -80,7 +80,16 @@ class MapGenerator {
         //force override tile 0, 0 with the breaker for testing.
 
         toMapFile.tiles = outputTiles;
-        if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null)(Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=([]:Array<MapFile>);
+
+        if(Main.saveFile.data.saves!=null) {
+            if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE)==null) {
+                Main.showError("SAVENOTCACHED", Main.FILE);
+                return;
+            }else if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null) {
+                (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=[];
+                Main.saveFile.flush(); //flush and then try to update.
+            }
+        }
         (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
         Main.saveFile.flush(); //should probably do this im realizing. maybe i should add a setter or something to automatically do this for me.
     }

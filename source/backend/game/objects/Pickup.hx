@@ -54,11 +54,14 @@ class Pickup extends FlxSprite {
                     destroy();
                     interactionPopup(false);
                 }else{
-                    var popup:WarningPopup = new WarningPopup(Language.getTranslatedKey("inventory.full", null), Language.getTranslatedKey("inventory.full.message", null), [{
-                        l: Language.getTranslatedKey("inventory.full.ok", null),
-                        c: true
-                    }]);
-                    FlxG.state.openSubState(popup);
+                    var popup:Popup = new Popup(    
+                        Language.getTranslatedKey("inventory.full.title", null),
+                        Language.getTranslatedKey("inventory.full.message", null),
+                        [
+                            {l: Language.getTranslatedKey("inventory.full.ok", null), c: true}
+                        ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                    );
+                    Player.instance.inventory.openSubState(popup);
                     #if(debug&&(windows||hl)) Main.LOG('TODO: logic for showing the text telling you that your inventory is full'); #end
                 }
             }
@@ -70,7 +73,7 @@ class Pickup extends FlxSprite {
     private function sendToInventory(item:Item) {
         var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
         var it:Item = item;
-        if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
+        if(Paths.exists(Paths.paths.get('weapon'), item.item, 'weapon'))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
         if(inv[inv.getFirstEmpty()]!=null && ((inv[inv.getFirstEmpty()] is String) && inv[inv.getFirstEmpty()]=="EMPTY")){
             inv[inv.getFirstEmpty()] = it;
         }
@@ -79,7 +82,7 @@ class Pickup extends FlxSprite {
     public static function ExternalsendToInventory(item:Item) {
         var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
         var it:Item = item;
-        if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
+        if(Paths.exists(Paths.paths.get('weapon'), item.item, 'weapon'))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
         if(inv[inv.getFirstEmpty()]!=null && ((inv[inv.getFirstEmpty()] is String) && inv[inv.getFirstEmpty()]=="EMPTY")){
             inv[inv.getFirstEmpty()] = it;
         }
