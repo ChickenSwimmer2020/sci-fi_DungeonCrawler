@@ -38,9 +38,12 @@ class GameState extends FlxState {
             //MapGenerator.generateMap(100, 100);
             //add(MapGenerator.createMap('PLACEHOLDER'));
         }else{ //now properly loads the map at DEPTH that the player was at.
-            var saveFile:SaveFile = Save.readSaveFile(Main.FILE); //just realized i can do this lol.
-            var map:GameMap = Save.getMapFromSaveFile(Main.FILE, saveFile.maps[saveFile.meta.depth].name);
-            add(map);
+            //var saveFile:SaveFile = Save.readSaveFile(Main.FILE); //just realized i can do this lol.
+            //var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "depth_0"/*saveFile.maps[saveFile.meta.depth].name*/);
+            //add(map);
+
+            MapGenerator.generateMap(100, 100, 0);
+            add(MapGenerator.createMap('depth_0')); //fuck it we ball !THIS IS FOR TESTING!
 
             Music.stopMusic();
             DynamicMusic.playDynamicMusic('SubLayers', "default", "piano");

@@ -130,6 +130,7 @@ import debugging.CutSceneCreator.KFCutscene; //this actually isnt used for just 
     import debugging.MapDebugger;
     import debugging.AlphabetDebugger;
     import debugging.ErrorDebugger;
+    import debugging.UIDebugger;
     import debugging.CutSceneCreator;
 #end
 import backend.Discord;

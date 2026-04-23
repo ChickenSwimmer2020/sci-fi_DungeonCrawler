@@ -10,6 +10,8 @@ class GameIntroState extends FlxState {
         Music.deathFadeIn(1.24);
         FlxG.camera.fade(0xFF000000, 1.24, true);
         
-        openSubState(new KFCutscene(KFDocument.fromXml(Xml.parse(File.getContent('${Paths.paths.get('cutscene')}/intro.cutscene')))).play()); //TODO: support on HTML5
+        #if !html5
+            openSubState(new KFCutscene(KFDocument.fromXml(Xml.parse(File.getContent('${Paths.paths.get('cutscene')}/intro.cutscene')))).play()); //TODO: support on HTML5
+        #end
     }
 }

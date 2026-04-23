@@ -76,6 +76,9 @@ class DebuggerChooser extends FlxSubState {
         },
         Language.getTranslatedKey("debugger.cutscenemaker.title", null)=>()->{
             FlxG.switchState(CutSceneCreator.new);
+        },
+        Language.getTranslatedKey("debugger.ui.title", null)=>()->{
+            FlxG.switchState(UIDebugger.new);
         }
     ];
     public function new() {

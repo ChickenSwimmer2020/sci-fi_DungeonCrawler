@@ -1,5 +1,5 @@
 package;
-import openfl.filesystem.File as OpenFLFile;
+#if(!html5) import openfl.filesystem.File as OpenFLFile; #end
 class Flags {
     #if debug
         public static var CC_MADECUTSCENE:Bool=false; //allows create new popup to be closed if you accidently click it.

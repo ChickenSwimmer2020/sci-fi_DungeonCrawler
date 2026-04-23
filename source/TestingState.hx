@@ -8,7 +8,7 @@ class TestingState extends GameState {
         FlxG.watch.addQuick("main file", Main.FILE);
 
         #if (debug)
-            if(LoadingFromSave!=true){
+            if(LoadingFromSave==true){
                 Save.createNewFile("fucker", null, ()->{ //proably should migrate to this new function.
                     Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
                     MapGenerator.generateMap(100, 100, 0);
@@ -16,7 +16,7 @@ class TestingState extends GameState {
                 });
             }else{
                 #if(debug&&(windows||hl)) Main.LOG('is this even working?'); #end
-                var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "PLACEHOLDER");
+                var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "depth_0");
                 add(map);
                 Save.readSaveFile(Main.FILE);
             }

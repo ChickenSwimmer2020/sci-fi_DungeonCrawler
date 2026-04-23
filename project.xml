@@ -32,6 +32,8 @@ PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
     <haxelib name="flixel-addons" version="3.3.2"/>
     <haxelib name="openfl" version="9.5.0"/> <!--DONT UPDATE, IT FUCKS WITH THE RENDERING AND BREAKS SHIT-->
     <haxelib name="hxcpp" version="4.3.2"/>
+    <haxelib name="haxeui-core" version="1.7.0"/>
+    <haxelib name="haxeui-flixel" version="1.7.0"/>
 
     <source path="source" />
     <source path="source/debug" if="debug"/>
