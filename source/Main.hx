@@ -1,5 +1,6 @@
 package;
 
+import haxe.ui.Toolkit;
 import backend.extensions.ExtendedCamera;
 
 class Main extends openfl.display.Sprite {
@@ -20,6 +21,7 @@ class Main extends openfl.display.Sprite {
     //VARIBLES
     public function new() {
         super();
+        Toolkit.init(); //init haxe-ui, this is important i think.
         FlxSprite.defaultAntialiasing=false;
         #if html5 stage.showDefaultContextMenu = false; #end
         //i hope this works.

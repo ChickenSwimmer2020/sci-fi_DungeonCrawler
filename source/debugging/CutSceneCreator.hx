@@ -2344,7 +2344,7 @@ class KFStopOverlay extends FlxSpriteGroup {
 class KFErrorPopup extends Popup {
     public function new(editor:CutSceneCreator, error:String) {
         Flags.CC_THEREISAPOPUPOPENDONOTUSECUTSCENECONTROLS = true;
-        super("Error", error, [{l:"Dismiss",c:true,f:null}], false, "", false, FlxPoint.weak(0, 0), true, true);
+        super("Error", error, [{l:"Dismiss",c:true,f:null}], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0), true, true);
         background.color  = 0xFF3A1A1A;
         background2.color = 0xFFE24B4A;
         header.color      = 0xFFE24B4A;
@@ -2378,7 +2378,7 @@ class KFNewCutsceneDialog extends Popup {
         }}, {l:"Create",c:true,f:() -> {
             _onCreate();
             Flags.CC_THEREISAPOPUPOPENDONOTUSECUTSCENECONTROLS = false;
-        }}], false, "", false, FlxPoint.weak(0, 0), false, true);
+        }}], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0), false, true);
         background.color = header.color = 0xFF4488FF;
         background2.color = 0xFF333333;
 
