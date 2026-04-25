@@ -1,5 +1,23 @@
 package;
 
+//haxeui
+import haxe.ui.components.DropDown;
+import haxe.ui.events.UIEvent;
+import haxe.ui.containers.menus.MenuBar;
+import haxe.ui.events.MenuEvent;
+import haxe.ui.events.MouseEvent;
+import haxe.ui.containers.menus.Menu;
+import haxe.ui.components.TextField as HUITextField;
+import haxe.ui.containers.dialogs.Dialog;
+import flixel.group.FlxGroup;
+import haxe.ui.Toolkit;
+import haxe.ui.core.Screen;
+import haxe.ui.containers.VBox;
+import haxe.ui.containers.ListView;
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.TreeView;
+import haxe.ui.containers.TreeViewNode;
+
 //flixel (never changes)
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
@@ -73,8 +91,8 @@ import haxe.io.Error;
 //openfl (never changes)
 import openfl.events.UncaughtErrorEvent;
 import openfl.events.Event;
-import openfl.text.TextField;
 import openfl.geom.Matrix;
+import openfl.text.TextField;
 import openfl.display.BitmapData;
 import openfl.Lib;
 import openfl.display.Bitmap;
@@ -130,8 +148,8 @@ import debugging.CutSceneCreator.KFCutscene; //this actually isnt used for just 
     import debugging.MapDebugger;
     import debugging.AlphabetDebugger;
     import debugging.ErrorDebugger;
-    import debugging.UIDebugger;
-    import debugging.CutSceneCreator;
+    //import debugging.UIDebugger;
+    import debugging.CutsceneMaker; //import debugging.CutSceneCreator;
 #end
 import backend.Discord;
 

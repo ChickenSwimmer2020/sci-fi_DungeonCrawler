@@ -34,6 +34,7 @@ PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
     <haxelib name="hxcpp" version="4.3.2"/>
     <haxelib name="haxeui-core" version="1.7.0"/>
     <haxelib name="haxeui-flixel" version="1.7.0"/>
+    
 
     <source path="source" />
     <source path="source/debug" if="debug"/>
@@ -54,7 +55,7 @@ PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
 
     <!--platform specific enabling and disabling for performance-->
     <haxedef name="FLX_NO_TOUCH" if="windows||html5||hl"/>
-
+    <haxedef name="haxeui_flixel_no_custom_cursors" />
     <haxedef name="FLX_NO_DEBUG" unless="debug"/>
     <haxedef name="FLX_NO_HEALTH"/> <!--because im doing it myself.-->
     <haxedef name="FLX_NO_FOCUS_LOST_SCREEN"/>
