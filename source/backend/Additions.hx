@@ -79,6 +79,20 @@ final class Functions {
      * @return Milliseconds.
      */
     public static inline function MSCSToMS(M:Int, S:Int, CS:Int):Float return (M*60*1000)+(S*1000)+(CS*10);
+
+    public static function allKeysPressed(keys:Array<FlxKey>):Bool {
+        var curPressed:Array<Bool>=[];
+        for(key in keys) {
+            if(curPressed.length<keys.length) curPressed.push(false);
+            if(FlxG.keys.anyPressed([key])) curPressed[keys.indexOf(key)] = true;
+            else curPressed[keys.indexOf(key)] = false;
+        }
+        for(item in curPressed) {
+            if(item==true) continue;
+            else return false;
+        }
+        return true;
+    }
 }
 final class Additions{
     private static final fileExtensionsList:Array<String>=[ //TODO: find automatic way to do this.

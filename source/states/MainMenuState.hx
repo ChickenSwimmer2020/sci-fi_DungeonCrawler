@@ -75,11 +75,11 @@ class DebuggerChooser extends FlxSubState {
             FlxG.switchState(ErrorDebugger.new);
         },
         Language.getTranslatedKey("debugger.cutscenemaker.title", null)=>()->{
-            FlxG.switchState(CutSceneCreator.new);
+            FlxG.switchState(CutsceneMaker.new/*CutSceneCreator.new*/);
         },
-        Language.getTranslatedKey("debugger.ui.title", null)=>()->{
-            FlxG.switchState(UIDebugger.new);
-        }
+        //Language.getTranslatedKey("debugger.ui.title", null)=>()->{ //ill bring it back later.
+        //    FlxG.switchState(UIDebugger.new);
+        //}
     ];
     public function new() {
         super();
@@ -94,7 +94,7 @@ class DebuggerChooser extends FlxSubState {
 
         var i:Int=0;
         for(label => func in debuggerOptions) {
-            var button = add(new FlxButton((FlxG.width/2)-40, (FlxG.height/2-20/2-(20*Lambda.count(Main.ErrorType)))+(40*i), label, func));
+            var button = add(new FlxButton((FlxG.width/2)-40, (FlxG.height/2-20/2-(20*Lambda.count(debuggerOptions)))+(40*i), label, func));
             add(button);
             i++;
         }

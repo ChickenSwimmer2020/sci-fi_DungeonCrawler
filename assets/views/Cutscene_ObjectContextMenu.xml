@@ -1,0 +1,11 @@
+<menu id="FUCKING BITCH">
+    <menu-item id="addToGroup" text="Add object..." />
+    <menu-item id="delete" text="Delete" />
+    <!--<menu text="Item 3">
+        <menu-item text="Sub Item 3A" />
+        <menu-item text="Sub Item 3B" />
+        <menu-item text="Sub Item 3C" />
+    </menu>
+    <menu-item text="Item 4" />
+    <menu-item text="Item 5" />-->
+</menu>

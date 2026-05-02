@@ -1,0 +1,142 @@
+<vbox width="100%" height="100%"> <!--THIS. IS. A. TEST.-->
+    <menubar id="menuBar" width="100%">
+        <menu id="File" text="File">
+            <menuitem id="NewCutscene" text="New Cutscene" shortcutText="Ctrl+F+N"/>
+            <menuitem id="LoadCutscene" text="Load Cutscene" shortcutText="Ctrl+F+L"/>
+            <menuseparator />
+            <menuitem id="SaveCutscene" text="Save" shortcutText="Ctrl+S"/>
+            <menuitem id="SaveCutsceneSEPERATE" text="Save as..." shortcutText="Ctrl+Shift+S"/>
+            <menuseparator />
+            <menuitem id="QuitEditor" text="Quit" shortcutText="Ctrl+Q" />
+        </menu>
+
+        <menu text="Meta">
+            <hbox width="100%">
+                <label text="Frames Per Second" width="75%" verticalAlign="center" />
+                <textfield id="FRAMESPERSECOND" width="25%" restrictChars="0-9" validator="required" text="60" />
+            </hbox>
+
+            <hbox width="100%">
+                <label text="Total Frames" width="75%" verticalAlign="center" />
+                <textfield id="TOTALFRAMESINPUT" width="25%" restrictChars="0-9" validator="required" text="120" />
+            </hbox>
+            <menuseparator />
+            <menucheckbox text="Item 4" selected="true" />
+            <menucheckbox text="Item 5" />
+            <menucheckbox text="Item 6" selected="true" />
+            <menuseparator />
+            <menuoptionbox text="Item 7" />
+            <menuoptionbox text="Item 8" />
+            <menuoptionbox text="Item 9" selected="true" />
+            <menuseparator />
+            <menuoptionbox text="Item 10" group="somegroup" />
+            <menuoptionbox text="Item 11" group="somegroup" selected="true" />
+            <menuoptionbox text="Item 12" group="somegroup" />
+        </menu>
+
+        <menu text="OnionSkinning">
+            <menucheckbox id="OnionSkinToggle" text="Enabled" selected="true" />
+
+            <hbox width="100%">
+                <label text="Pre Frames" width="75%" verticalAlign="center" />
+                <number-stepper id="OnionSkinPreframes" pos="2" />
+            </hbox>
+
+            <hbox width="100%">
+                <label text="Post Frames" width="75%" verticalAlign="center" />
+                <number-stepper id="OnionSkinPostframes" pos="2" />
+            </hbox>
+        </menu>
+
+        <menu text="View">
+            <menucheckbox id="ToggleUIDarkMode" text="Dark Mode" selected="true" />
+        </menu>
+
+        <button id="PlayCutscene" width="10%" text="Play" />
+        <button id="TestCutscene" width="10%" text="Test" />
+
+        
+
+
+        <!--    <menuitem text="Item 2 (disabled)" disabled="true" shortcutText="Ctrl+A" />
+            <menu text="Sub Menu">
+                <menuitem text="Item 1" />
+                <menuitem text="Item 2" />
+                <menuitem text="Item 3" />
+                <menuseparator />
+                <menucheckbox text="Item 4" selected="true" />
+                <menucheckbox text="Item 5" />
+                <menucheckbox text="Item 6" selected="true" />
+                <menuseparator />
+                <menuoptionbox text="Item 7" />
+                <menuoptionbox text="Item 8" />
+                <menuoptionbox text="Item 9" selected="true" />
+                <menuseparator />
+                <menuoptionbox text="Item 10" group="somegroup" />
+                <menuoptionbox text="Item 11" group="somegroup" selected="true" />
+                <menuoptionbox text="Item 12" group="somegroup" />
+            </menu>
+            <menuitem text="Item 3" shortcutText="Ctrl+B" />
+            <menuitem text="Item 4" shortcutText="Ctrl+C" />
+            <menuseparator />
+            <menuitem text="Item 5" shortcutText="Ctrl+D" />
+        </menu>-->
+    </menubar>
+
+    <splitter direction="vertical" width="100%" height="100%" verticalAlign="center" horizontalAlign="center">
+
+        <splitter direction="horizontal" width="100%" height="70%"> <!--objects panel -->
+            <vbox height="100%" width="100%"> <!-- objects panel -->
+                <frame collapsible="true" text="Objects" width="100%" icon="assets/debug/cc_objectsPanel.png">    
+                    <button id="addNewCutsceneObject" width="100%" text="Add new..." />
+                </frame>
+
+                <hbox width="100%" height="100%"> <!--TODO: figure out why and when this crashes.-->
+                    <tree-view id="ActiveCutsceneObjects" width="100%" height="100%" styleName="full-width">
+                        <!--TODO: make this properly only show when the list is empty-->
+                        <!--<vbox horizontalAlign="center" verticalAlign="center" styleName="empty-contents-component">
+                            <progress indeterminate="true" /> TODO: replace with spinner when possible
+                            <label text="No Objects in scene!" horizontalAlign="center" verticalAlign="center" />
+                        </vbox>-->
+
+                        <!--default rendered item-->
+                        <item-renderer layout="horizontal" width="50%">
+                            <image id="icon" verticalAlign="center" />
+                            <image id="properties" verticalAlign="center" />
+                            <vbox width="100%">
+                                <label id="name" verticalAlign="center" width="50%" />
+                                <label id="path" verticalAlign="center" style="font-size:8;" width="100%" />
+                            </vbox>
+                        </item-renderer>
+
+                        <!--groups-->
+                        <item-renderer id="expandable" layout="horizontal" width="100%">
+                            <image resource="haxeui-core/styles/shared/folder-light.png" verticalAlign="center" />
+                            <label id="text" width="100%" verticalAlign="center" />
+                            <image id="properties" verticalAlign="center" />
+                            <hbox style="border-radius:3px;padding: 1px 3px;spacing:0;" width="100%" verticalAlign="center">
+                                <button id="moveUp" width="40" text="U"/>
+                                <button id="moveDown" width="40" text="D"/>
+                            </hbox>
+                        </item-renderer>
+                    </tree-view>    
+                </hbox>
+            </vbox>
+
+            <splitter id="PreviewSplitter" style="clip:true;" width="100%" height="100%"> <!-- preview -->
+                <box id="PreviewRenderArea" width="100%" height="100%" style="background-color: #000000;">
+                </box>
+            </splitter>
+        </splitter>
+
+
+
+        <!--timeline stuff goes down here-->
+        
+        <scrollview id="TimeLine" width="100%" height="100%">
+            <box width="100%" style="background-color: #FFFFAA;">
+                <label text="Timeline" verticalAlign="center" horizontalAlign="center" />
+            </box>
+        </scrollview>
+    </splitter>     
+</vbox>

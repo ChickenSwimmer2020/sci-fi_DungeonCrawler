@@ -1,0 +1,37 @@
+<dialog id="modalDialogTest" width="500" title="Please enter details">
+    <tabview id="tabs" width="100%">
+
+        <hbox id="tab_spritemode" width="100%" text="Sprite">
+            <textfield id="SPR_Name" placeholder="Object Name" validator="required" width="100%" />
+            <textfield id="SPR_Path" placeholder="Sprite Path" validator="required" width="100%" />
+            <textfield id="SPR_X" placeholder="x" validator="required" restrictChars="0-9" width="100%"/>
+            <textfield id="SPR_Y" placeholder="y" validator="required" restrictChars="0-9" width="100%"/>
+        </hbox> 
+
+        <hbox id="tab_textmode" width="100%" text="Text">
+            <textfield id="TXT_Name" placeholder="Object Name" validator="required" width="100%" />
+            <textfield id="TXT_Text" placeholder="text" validator="required" width="100%" />
+            <textfield id="TXT_X" placeholder="x" validator="required" restrictChars="0-9" width="100%"/>
+            <textfield id="TXT_Y" placeholder="y" validator="required" restrictChars="0-9" width="100%"/>
+        </hbox> 
+        
+        <vbox id="tab_groupmode" width="100%" text="Group">
+            <textfield id="GRP_Name" placeholder="Group Name" validator="required" width="100%" />
+            <hbox width="100%">
+                <dropdown id="GRP_IOT" text="Internal Object Type" width="60%">
+                    <data>
+                        <item id="SPR" text="Sprite" />
+                        <item id="TXT" text="Text" />
+                    </data>
+                </dropdown>
+                <textfield id="GRP_IO_X" placeholder="x" validator="required" restrictChars="0-9" width="20%"/>
+                <textfield id="GRP_IO_Y" placeholder="y" validator="required" restrictChars="0-9" width="20%"/>
+            </hbox>
+            <hbox width="100%">
+                <textfield id="GRP_IO_Name" placeholder="Name" validator="required" width="50%"/>
+                <textfield id="GRP_IO_TextPath" placeholder="Path" validator="required" width="50%"/>
+            </hbox>
+        </vbox>
+
+    </tabview>
+</dialog>
