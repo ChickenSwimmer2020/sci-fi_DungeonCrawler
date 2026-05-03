@@ -7,6 +7,7 @@
 * Added `MapAssembler` and `MapAssemblerLoader.loadAssembler`
 * `MapAssemblerLoader` now supports loading a `MapAssembler` from file data.
 * Added an almost full `TestMap` in `assets/maps/testmap/`
+* Optimized `FlxKeyFromInt`
 
 > PLANNED
 
