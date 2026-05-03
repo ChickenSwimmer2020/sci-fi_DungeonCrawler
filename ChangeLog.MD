@@ -1,5 +1,23 @@
 # ChangeLog
 
+## Prototype Update 0.03.9 (Starting work on maps)
+
+> Starting work on the new map system!
+
+* Added `MapAssembler` and `MapAssemblerLoader.loadAssembler`
+* `MapAssemblerLoader` now supports loading a `MapAssembler` from file data.
+* Added an almost full `TestMap` in `assets/maps/testmap/`
+
+> PLANNED
+
+* HScript(via Rulescript) for custom map generation if anything dynamic is needed in a structure
+* Schematic system for storing structures
+* * Schematic loader
+* * Schematic editor
+* New tileset system via `assets/maps/tilesets` including `.set` files with info about the tileset
+* * Map specific tilesets
+
+
 ## Prototype Update 0.03.8 (Autobuild and UI)
 
 > im lazy af, i cant be fucked into finishing this right now
