@@ -1,0 +1,84 @@
+{ // THIS FILE IS NOT THE ASSEMBLER. THE ASSEMBLER IS ASSEMBLER.MAS. THIS FILE IS FOR REFERENCING BACK TO WHEN CREATING THE MAP GENERATOR.
+  "links": {
+    "Rooms.TestRoom": "Rooms/TestRoom",
+    "Hallway": "Hallway",
+    "Rooms.BadRoom": "Rooms/BadRoom"
+  },
+  "structures": {
+    "BadRoom": {
+      "data": "[func::genStruct]Rooms.BadRoom",
+      "name": "BadRoom",
+      "spawnChance": [{ "chance": 1, "id": "Any" }],
+      "spawnConditions": [
+        {
+          "condition": "structType",
+          "isNegative": false,
+          "value": "[prop::types]room"
+        },
+        {
+          "condition": "structType",
+          "isNegative": false,
+          "value": "[prop::types]hallway"
+        },
+        { "condition": "paddingMin", "isNegative": false, "value": "1" }
+      ],
+      "structProperties": { "spawnRotation": "any" },
+      "type": "[prop::types]room"
+    },
+    "Hallway": {
+      "data": "[func::genStruct]Hallway",
+      "name": "Hallway",
+      "spawnChance": [{ "chance": 1, "id": "Any" }],
+      "spawnConditions": [
+        {
+          "condition": "structType",
+          "isNegative": false,
+          "value": "[prop::types]room"
+        },
+        { "condition": "paddingMin", "isNegative": false, "value": "1" }
+      ],
+      "structProperties": { "spawnRotation": "any" },
+      "type": "[prop::types]hallway"
+    },
+    "TestRoom": {
+      "data": "[func::genStruct]Rooms.TestRoom",
+      "name": "TestRoom",
+      "spawnChance": [
+        { "chance": 0, "id": "BadRoom" },
+        { "chance": 1, "id": "TestRoom" },
+        { "chance": 0.5, "id": "Any" }
+      ],
+      "spawnConditions": [
+        {
+          "condition": "structType",
+          "isNegative": false,
+          "value": "[prop::types]hallway"
+        },
+        {
+          "condition": "structType",
+          "isNegative": false,
+          "value": "[prop::types]room"
+        },
+        {
+          "condition": "inChain",
+          "isNegative": true,
+          "value": "[prop::structures]BadRoom"
+        },
+        {
+          "condition": "directNeighbor",
+          "isNegative": true,
+          "value": "[prop::structures]BadRoom"
+        },
+        { "condition": "paddingMin", "isNegative": false, "value": "1" },
+        {
+          "condition": "runCheck",
+          "isNegative": false,
+          "value": "checks/TestRoom.hx::check1"
+        }
+      ],
+      "structProperties": { "spawnRotation": "any" },
+      "type": "[prop::types]room"
+    }
+  },
+  "types": ["room", "hallway"]
+}

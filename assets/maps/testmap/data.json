@@ -1,0 +1,6 @@
+{
+    "name": "Test Map",
+    "authors": ["ZSolarDev"],
+    "tilesets": ["GLOBAL/placeholder.png", "GLOBAL/breaker.png"],
+    "assembler": "./assembler.mas"
+}

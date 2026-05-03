@@ -1,0 +1,92 @@
+-- Link generator identifiers with their paths.
+linkGenerators
+    Hallway = Hallway
+    Rooms.TestRoom = Rooms/TestRoom
+    Rooms.BadRoom = Rooms/BadRoom
+endLinkGenerators
+
+-- Define the structure types.
+defTypes
+    room
+    hallway
+endTypes
+
+-- Define the structures.
+defStructs
+    newStruct Hallway
+        data = [func::genStruct]Hallway
+        type = [prop::types]hallway
+        defSpawnChance
+            -- 100% chance of spawning next to any structure.
+            struct Any 1
+        endSpawnChance
+        defSpawnCondition
+            -- It can spawn next to rooms.
+            struct structType [prop::types]room
+            -- notice that theres no line that allows it to spawn next to a hallway. It can only spawn next to rooms.
+            --/
+                It needs to be at least 1 tile away from any structure to spawn.
+                This padding doesnt apply to connecting tiles on this structure.
+            /--
+            struct paddingMin 1
+        endSpawnCondition
+        defStructProps
+            -- It can spawn rotated in any direction.
+            struct spawnRotation(any)
+        endStructProps
+    endStruct
+    newStruct BadRoom
+        data = [func::genStruct]Rooms.BadRoom
+        type = [prop::types]room
+        defSpawnChance
+            -- 100% chance of spawning next to any structure.
+            struct Any 1
+        endSpawnChance
+        defSpawnCondition
+            -- It can spawn next to rooms.
+            struct structType [prop::types]room
+            -- It can spawn next to hallways.
+            struct structType [prop::types]hallway
+            -- It needs to be at least 1 tile away from any structure to spawn.
+            struct paddingMin 1
+        endSpawnCondition
+        defStructProps
+            -- It can spawn rotated in any direction.
+            struct spawnRotation(any)
+        endStructProps
+    endStruct
+    newStruct TestRoom
+        data = [func::genStruct]Rooms.TestRoom
+        type = [prop::types]room
+        defSpawnChance
+            -- 0% chance of spawning next to the BadRoom.
+            struct BadRoom 0
+            -- 100% chance of spawning next to itself.
+            struct TestRoom 1
+            -- 50% chance of spawning next to any structure.
+            struct Any 0.5
+        endSpawnChance
+        defSpawnCondition
+            -- It can spawn next to hallways.
+            struct structType [prop::types]hallway
+            -- It can spawn next to rooms.
+            struct structType [prop::types]room
+            --/
+                If it has ANY sort of connection to the BadRoom structure, even if it connects to a
+                structure which connects to a structure which connects to a structure which
+                connects to the BadRoom, it still will not spawn because you can still technically
+                get from the badroom to this structure.
+            /--
+            !struct inChain [prop::structures]BadRoom
+            -- If its directly next to the BadRoom structure, it will not spawn.
+            !struct directNeighbor [prop::structures]BadRoom
+            -- It needs to be at least 1 tile away from any structure to spawn.
+            struct paddingMin 1
+            runCheck("checks/TestRoom.hx::check1")
+        endSpawnCondition
+        defStructProps
+            -- It can spawn rotated in any direction.
+            struct spawnRotation(any)
+        endStructProps
+    endStruct
+endStructs

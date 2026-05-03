@@ -1,0 +1,1 @@
+public function generate():Schematic { return new Schematic(); }
