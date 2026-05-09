@@ -1,28 +1,39 @@
 package debugging;
 
+/**
+ *! KNOWN BUGS
+ *! Timeline has to be resized at least ONCE for scrolling to work internally: Unknown
+ *! Draggable components all reset to 0, 0 in preview when resized: Unknown
+ *! Draggable components dont update internal x, y position when moved in preview: Unknown.
+ */
+
 import haxe.ui.components.Label;
 import haxe.ui.dragdrop.DragManager;
 import haxe.ui.components.Image;
+import haxe.ui.events.UIEvent;
 import debugging.ui.cc.MainView;
 #if debug
-class CutsceneMaker extends FlxState {
+class CutsceneMaker extends FlxState {  
+    public static var instance:CutsceneMaker;
     private final keyCodes:Map<Array<FlxKey>, Void->Void>=[
-        [CONTROL, Q]=>()->FlxG.switchState(()->new MainMenuState(false))
+        [CONTROL, Q]=>()->FlxG.switchState(Debugger.new)
     ];
 
-    private var trackedObjects:Map<String, {type:Class<Dynamic>,x:Float,y:Float,name:String,path:String,isNested:Bool,grpName:String}>=[];
+    public var trackedObjects:Map<String, {?obj:Dynamic, type:Class<Dynamic>,x:Float,y:Float,name:String,path:String,isNested:Bool,grpName:String}>=[];
+    public var trackedUIObjects:Map<String, OneOfTwo<Image, Label>>=[];
     var ViewPort:MainView;
     public function new() {
         super();
+        instance = this;
         add(ViewPort = new MainView()); //lets inline this shit
         //make it so draggable sprites will automatically scale and fit to the current thingy.
         ViewPort.PreviewSplitter.registerEvent(UIEvent.RESIZE, function(e:UIEvent) { //this will allow us to both re-size objects, but also to fix scaling problems.
-            trace('SPLITTER_PREVIEW: x | y | width | height\n ${ViewPort.PreviewSplitter.x} | ${ViewPort.PreviewSplitter.y} | ${ViewPort.PreviewSplitter.width} | ${ViewPort.PreviewSplitter.height}');
+            Main.Trace(INFO, 'SPLITTER_PREVIEW: x | y | width | height\n ${ViewPort.PreviewSplitter.x} | ${ViewPort.PreviewSplitter.y} | ${ViewPort.PreviewSplitter.width} | ${ViewPort.PreviewSplitter.height}');
 
             ViewPort.PreviewRenderArea.walkComponents((_)->{
-                trace(_);
+                Main.Trace(DEBUG, _);
                 
-                //DragManager.instance.unregisterDraggable(_); //TODO: find way to update this properly.
+                //DragManager.instance.unregisterDraggable(_);
                 //DragManager.instance.registerDraggable(_, {
                 //    dragBounds: new haxe.ui.geom.Rectangle(ViewPort.PreviewRenderArea.x, ViewPort.PreviewRenderArea.y, ViewPort.PreviewRenderArea.width, ViewPort.PreviewRenderArea.height)
                 //});
@@ -43,30 +54,32 @@ class CutsceneMaker extends FlxState {
         ViewPort.onObjectCreate = (type:Class<Dynamic>,x:Float,y:Float,name:String,path:String,isNested:Bool,grpName:String)->{
             switch(type) {
                 case FlxSprite:
-                    trackedObjects.set(name, {type:type,x:x,y:y,name:name,path:path,isNested:isNested,grpName:grpName});
                     var spriteComponentImage:Image = new Image();
                     spriteComponentImage.resource=path;
                     
                     spriteComponentImage.onMouseOver = (_:MouseEvent)->{
-                        trace('moved sprite $name!!\n${spriteComponentImage.getPosition().x}|${spriteComponentImage.getPosition().y}');
+                        Main.Trace(INFO, 'moved sprite $name!!\n${spriteComponentImage.getPosition().x}|${spriteComponentImage.getPosition().y}');
                     };
                     ViewPort.PreviewRenderArea.addComponent(spriteComponentImage);
 
                     //only make it have bounds IF its less than the screensize.
                     DragManager.instance.registerDraggable(spriteComponentImage);
+                    trackedObjects.set(name, {obj:spriteComponentImage,type:type,x:x,y:y,name:name,path:path,isNested:isNested,grpName:grpName});
+                    trackedUIObjects.set(name, spriteComponentImage);
                 case FlxText:
-                    trackedObjects.set(name, {type:type,x:x,y:y,name:name,path:path,isNested:isNested,grpName:grpName});
                     var spriteComponentText:Label = new Label();
                     spriteComponentText.text=path;
                     
                     spriteComponentText.onMouseOver = (_:MouseEvent)->{
-                        trace('moved sprite $name!!\n${spriteComponentText.getPosition().x}|${spriteComponentText.getPosition().y}');
+                        Main.Trace(INFO, 'moved sprite $name!!\n${spriteComponentText.getPosition().x}|${spriteComponentText.getPosition().y}');
                     };
                     ViewPort.PreviewRenderArea.addComponent(spriteComponentText);
                     DragManager.instance.registerDraggable(spriteComponentText);
-                default: trace("unknown class, unable to add to preview.");
+                    trackedObjects.set(name, {obj:spriteComponentText,type:type,x:x,y:y,name:name,path:path,isNested:isNested,grpName:grpName});
+                    trackedUIObjects.set(name, spriteComponentText);
+                default: Main.Trace(WARN, "unknown class, unable to add to preview.");
             }
-            trace(trackedObjects);
+            Main.Trace(DEBUG, trackedObjects);
         };
     }
 

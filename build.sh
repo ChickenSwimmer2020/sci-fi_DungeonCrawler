@@ -3,7 +3,6 @@
 echo "Installing/updating dependencies, please stand by..."
 
 # Check if Haxe is installed
-#TODO: check if this actually works ig.
 if ! command -v haxe &> /dev/null; then 
     echo "Haxe is not installed."
     echo "Please wait while we attempt to install it..."

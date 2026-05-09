@@ -1,0 +1,3 @@
+<hbox width="100%" height="20"> <!--THIS. IS. A. TEST.-->
+  <label id="LayerLabel" text="Test Layer" verticalAlign="center" />
+</hbox>

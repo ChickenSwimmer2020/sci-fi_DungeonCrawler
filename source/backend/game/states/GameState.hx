@@ -5,7 +5,7 @@ import backend.extensions.ExtendedCamera;
 class GameState extends FlxState {
     public static var inGame:Bool=false; //for disabling changing difficulty settings in-game.
 
-    public static var generatedCameras:Bool=false;
+    public var generatedCameras:Bool=false;
     public static var securitySystemActivated:Bool=false;
     public static var timeLeftUntilSecuritySystemActive:Float=0;
     public static var pulledBreaker(default, set):Bool=false;
@@ -17,11 +17,14 @@ class GameState extends FlxState {
     }
     public static function beginCountdown() {
         FlxG.sound.music.volume=1;//??
-        Music.playOnceMusic("ProtocalValidation", "", null, ()->{
-            FlxG.sound.music.stop();
+        Main.Trace(DEBUG, 'sooo is this working??');
+        Music.playOnceMusic("ProtocolValidation", "mainloop", null, ()->{
+            Main.Trace(DEBUG, 'makes me wonder. are you doing things when you shouldnt be?');
+            Music.stopMusic();
+            Music.stopLoops(true);
         });
     }
-    public function new(LoadingFromSave:Bool=false) {
+    public function new(LoadingFromSave:Bool=false, loadLastAvailableSave:Bool = true, saveName:String="") {
         super();
         if(!generatedCameras) generateCameras();
 
@@ -31,26 +34,38 @@ class GameState extends FlxState {
                 add(MapGenerator.createMap('depth_0'));
             });
             //showIntroCutscene();
-
-            //TODO: non loading logic. (FOR NEW GAME SYSTEM)
-            //Save.DEBUGSAVE('fucker'); //generate save BEFORE generating map. since maps are stored inthe save file they were being overridden. whoopsies!
-            //Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
-            //MapGenerator.generateMap(100, 100);
-            //add(MapGenerator.createMap('PLACEHOLDER'));
         }else{ //now properly loads the map at DEPTH that the player was at.
-            //var saveFile:SaveFile = Save.readSaveFile(Main.FILE); //just realized i can do this lol.
-            //var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "depth_0"/*saveFile.maps[saveFile.meta.depth].name*/);
-            //add(map);
+            if(saveName == "") {
+                Main.Trace(ERROR, 'SaveFile name input is empty!! something went wrong.');
+                return;
+            }else{
+                //var saveFile:SaveFile = Save.readSaveFile(Main.FILE); //just realized i can do this lol.
+                //var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "depth_0"/*saveFile.maps[saveFile.meta.depth].name*/);
+                //add(map);
 
-            MapGenerator.generateMap(100, 100, 0);
-            add(MapGenerator.createMap('depth_0')); //fuck it we ball !THIS IS FOR TESTING!
+                //TODO: loading from saves n sthif
 
-            Music.stopMusic();
-            DynamicMusic.playDynamicMusic('SubLayers', "default", "piano");
+                MapGenerator.generateMap(100, 100, 0);
+                add(MapGenerator.createMap('depth_0')); //fuck it we ball !THIS IS FOR TESTING!
+            }
         }
+        Music.stopMusic();
+        DynamicMusic.playDynamicMusic('SubLayers', "default", "piano");
     }
 
-    public static function generateCameras() {
+    public function generateCameras() {
+        if(Main.camGame!=null){
+            Main.camGame.destroy();
+            Main.camGame = null;
+        }
+        if(Main.camHUD!=null) {
+            Main.camHUD.destroy();
+            Main.camHUD = null;
+        }
+        if(Main.camOther!=null) {
+            Main.camOther.destroy();
+            Main.camOther = null;
+        }   
         Main.camGame = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
         Main.camGame.bgColor=0x00FFFFFF;
         Main.camGame.filters=[];
@@ -66,5 +81,28 @@ class GameState extends FlxState {
         Main.camOther.filters=[];
         Main.addCameraToGame(Main.camOther, "other");
         generatedCameras=true;
+    }
+
+    public static function degenerateCameras() {
+        if(Main.camGame!=null){
+            Main.camGame.destroy();
+            Main.camGame = null;
+        }
+        if(Main.camHUD!=null) {
+            Main.camHUD.destroy();
+            Main.camHUD = null;
+        }
+        if(Main.camOther!=null) {
+            Main.camOther.destroy();
+            Main.camOther = null;
+        }
+    }
+
+    //reset all the static varibles n shit.
+    public static function reset() {
+        inGame=false;
+        securitySystemActivated=false;
+        timeLeftUntilSecuritySystemActive=0;
+        @:bypassAccessor pulledBreaker=false;
     }
 }

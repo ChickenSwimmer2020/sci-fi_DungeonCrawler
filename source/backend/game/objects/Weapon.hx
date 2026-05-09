@@ -12,6 +12,8 @@ typedef WeaponData = {
     var magicType:MagicType;
     var sprite:{n:String,a:Bool,f:{w:Int,h:Int}};
     var animations:Array<{n:String, f:Array<Int>, fr:Int, l:Bool, fl:{x:Bool,y:Bool}}>;
+    @:optional var durability:Int;
+    @:optional var mag:Int;
 };
 
 class Bullet extends FlxSprite {
@@ -19,7 +21,7 @@ class Bullet extends FlxSprite {
     public var onRemove:Void->Void;
     public var damages:Map<String,Float>=[];
     public var endTimer:FlxTimer=new FlxTimer();
-    public function new(x:Float, y:Float, dmg:Map<String,Float>) { //TODO: graphics system
+    public function new(x:Float, y:Float, dmg:Map<String,Float>) {
         super(x, y);
         makeGraphic(2, 2, 0xFFFFFF00);
         damages=dmg;
@@ -167,7 +169,7 @@ class Weapon extends FlxSprite{
                     railFireShader=new RailFire();
                     railFireShader.intensity.value=[0.01];
                     railFireShader.speed.value=[120.0];
-                    if(Main.saveFile.data.shaders){
+                    if(#if(windows||hl)Main.saveFile.data.preferences.shaders #else Main.saveFile.data.shaders#end){
                         for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                             cam.filters??[];
                             for(shader in [railFireShader]) {
@@ -180,10 +182,10 @@ class Weapon extends FlxSprite{
                     fire(power/100);
                     power=0;
                     fireTimers.set("railgun", Functions.wait(shoot_time, (_)->{
-                        if(Main.saveFile.data.shaders){
+                        if(#if(windows||hl)Main.saveFile.data.preferences.shaders #else Main.saveFile.data.shaders#end){
                             for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                                 for(filter in cam.filters) {
-                                    trace(filter.getClassName(true));
+                                    Main.Trace(DEBUG, filter.getClassName(true));
                                     //if(filter.getClassName(true));
                                 }
                             }
@@ -223,26 +225,26 @@ class WeaponParser {
             gunType: data.gunType,
             MagicType: data.magicType,
             item: data.name,
-            durability: 100, //TODO: somehow load from inventory save file. (NOT SEPRATE)
+            durability: data.durability??100,
             damage: data.damage,
             consumable: false,
             consumableType: NULL,
-            charges: 100, //TODO: somehow load from inventory save file.
+            charges: data.mag??100,
         };
     }
     public static function recycleWeapon(weapon:Weapon, path:String) {
         @:privateAccess
         if(path!=""&&(weapon!=null&&#if (html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path)) #end)) weapon.setUpWeapon(parse(path));
-        else if(weapon==null||#if(html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path));
+        else if(weapon==null||#if(html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path), null, haxe.CallStack.toString(haxe.CallStack.callStack()));
     }
     public static function parse(path:String):WeaponData {
         if(path==null) return null; //simple as that.
         if(#if(html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path))#end)return parseXML(Paths.weapon(path));
-        else Main.showError("IOERROR", Paths.weapon(path));
+        else Main.showError("IOERROR", Paths.weapon(path), null, haxe.CallStack.toString(haxe.CallStack.callStack()));
         return null;
     }
     private static function parseXML(path:String):WeaponData {
-        #if(debug&&(windows||hl)) Main.LOG('Parsing weapon file: $path'); #end
+        #if(debug) Main.Trace(INFO, 'Parsing weapon file: $path'); #end
         if(#if(html5) Assets.getText(path)!=null #else FileSystem.exists(path)#end){
             var xmlToParse:Xml = Xml.parse(#if(html5) Assets.getText(path) #else File.getContent(path)#end);
             var damge:Map<String, Float>=[];
@@ -268,7 +270,7 @@ class WeaponParser {
                 animations:[],
                 damage:[]
             };
-            #if(debug&&(windows||hl)) Main.LOG(returnedWeapon); #end //WHAT THE FUCK IS BROKEN.
+            #if(debug) Main.Trace(DEBUG, returnedWeapon); #end //WHAT THE FUCK IS BROKEN.
             for(element in root.elements()) {
                 if(element.nodeName=="Animation") anims.push({n:element.get('name'),f:element.get('frames').contains('...')?element.get('frames').StringToArray():element.get('frames').StringToArray(true),fr:Std.parseInt(element.get('frameRate')),l:element.get('loop').toBool(),fl:{x:element.get('flipX').toBool(),y:element.get('flipY').toBool()}});
                 else if(element.nodeName=="Damage") damge.set(element.get('type'), Std.parseFloat(element.get('value')));
@@ -276,7 +278,7 @@ class WeaponParser {
             returnedWeapon.damage=damge;
             returnedWeapon.animations=anims;
             return returnedWeapon;
-        }else Main.showError("IOERROR", path);
+        }else Main.showError("IOERROR", path, null, haxe.CallStack.toString(haxe.CallStack.callStack()));
         return null;
     }
 }

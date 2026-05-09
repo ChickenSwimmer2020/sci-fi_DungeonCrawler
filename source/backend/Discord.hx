@@ -12,7 +12,6 @@ package backend;
 
         public function new(clientId:String) {connect(clientId);};
 
-        //TODO: fix crash when trying to close while discord is attempting to connect.
         private function connect(clientId:String):Void {
             thread = Thread.create(() -> {
                 try {
@@ -35,7 +34,7 @@ package backend;
 
                     if (CLOSE) return;
                     if (pipe == null || pipeIn == null) {
-                        #if debug Main.LOG('discord: could not connect after $maxAttempts attempts'); #end
+                        #if debug Main.Trace(ERROR, 'discord: could not connect after $maxAttempts attempts'); #end
                         return;
                     }
 
@@ -52,13 +51,13 @@ package backend;
 
                         try {
                             var response = _read();
-                            #if(debug&&(windows||hl)) if (response != "") Main.LOG('discord: $response'); #end
+                            #if(debug) if (response != "") Main.Trace(INFO, 'discord: $response'); #end
                         } catch(_) {}
 
                         Sys.sleep(0.1);
                     }
                 } catch(e:Dynamic) {
-                    #if(debug&&(windows||hl)) Main.LOG('discord thread error: $e'); #end
+                    #if(debug) Main.Trace(ERROR, 'discord thread error: $e'); #end
                 }
             });
         }

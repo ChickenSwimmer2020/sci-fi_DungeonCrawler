@@ -3,6 +3,9 @@ package backend.game;
 import debugging.GameDebugger;
 
 class Player extends FlxSprite {
+    public static function resetVars() { //only for varibles actually touched by the death system.
+        overrideCameraZoom=false;
+    }
     public static var onDeath:Void->Void;
     public static var onPlayerSave:Void->Void;
     public static var instance:Player;
@@ -14,12 +17,14 @@ class Player extends FlxSprite {
     public var name:String="NONAME(ERROR)";
     public var difficulty:String="MISSING DIFFICULTY!!(ERROR)";
     public var depth:Int=0;
+    public var money:Int=0;
 
     public static var overrideCameraZoom:Bool=false;
 
     public var canMove:Bool=true;
     public var canOpenInventory:Bool=true;
     public var canFireWeapon:Bool=true;
+    public var canZoom:Bool=true;
 
     public static var elapsedTimeSeconds:Float=0;
     public static var updateSaveTime:Bool=true;
@@ -34,25 +39,30 @@ class Player extends FlxSprite {
 
     public function SAVED() {
         SLS=0;
-        var curSaveFile:SaveFile = Save.readSaveFile(Main.FILE);
-        curSaveFile.position = {x:this.x,y:this.y};
-        curSaveFile.health = this.health;
-        curSaveFile.stamina = this.stamina;
-        curSaveFile.xp = this.xp;
-        curSaveFile.inventory=this.inventory.inventory;
-        curSaveFile.meta = {
-            name: this.name,
-            playtime:{
-                H: ((elapsedTimeSeconds/60)/60).floor(),
-                M: (elapsedTimeSeconds/60).floor(),
-                s: elapsedTimeSeconds.floor()
-            },
-            difficulty: instance.difficulty,
-            depth: instance.depth,
-            level: instance.level
-        };
-        Save.writeSaveFile(); //flush to the save file (EG, actually save stuff.)
-        if(onPlayerSave!=null) onPlayerSave();
+        #if(windows||hl)
+
+        #else
+            var curSaveFile:SaveFile = Save.readSaveFile(Main.FILE);
+            curSaveFile.position = {x:this.x,y:this.y};
+            curSaveFile.health = this.health;
+            curSaveFile.stamina = this.stamina;
+            curSaveFile.xp = this.xp;
+            curSaveFile.inventory=this.inventory.inventory;
+            curSaveFile.meta = {
+                name: this.name,
+                playtime:{
+                    H: ((elapsedTimeSeconds/60)/60).floor(),
+                    M: (elapsedTimeSeconds/60).floor(),
+                    s: elapsedTimeSeconds.floor()
+                },
+                difficulty: instance.difficulty,
+                depth: instance.depth,
+                level: instance.level,
+                money: instance.money
+            };
+            Save.writeSaveFile(); //flush to the save file (EG, actually save stuff.)
+            if(onPlayerSave!=null) onPlayerSave();
+        #end
     }
 
     public var curHotbarSlot(default, set):Int=0;
@@ -94,7 +104,7 @@ class Player extends FlxSprite {
     private var ctrlInv:Array<FlxKey>;   
     private var ctrlSprint:Array<FlxKey>;   
     public function updateControls() {
-        trace(Main.controls);
+        Main.Trace(INFO, Main.controls);
         ctrlUp = Main.controls.get('moveUP');
         ctrlDown = Main.controls.get('moveDOWN');
         ctrlLeft = Main.controls.get('moveLEFT');
@@ -124,6 +134,12 @@ class Player extends FlxSprite {
             if(updateSaveTime) SLS++;
         }, 0);
     }
+
+    public function freeze() {
+        canMove=canZoom=canFireWeapon=canOpenInventory=false;
+        velocity.set();
+    }
+
     #if (debug)
         function addWatchObjects() {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
@@ -149,7 +165,10 @@ class Player extends FlxSprite {
             if(weaponTextTextTarget!='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}')
                 weaponTextTextTarget='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}';
         }
-        if(Main.camGame!=null) mousePosition=FlxG.mouse.getWorldPosition(Main.camGame)??FlxPoint.weak(0, 0);
+        if(Main.camGame!=null){
+            if(mousePosition==null) mousePosition = new FlxPoint(0, 0); //JUST in-case.
+            FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0);
+        }
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));
         if(weaponKickback.y > 0 || weaponKickback.y < 0) weaponKickback.y=FlxMath.lerp(0, weaponKickback.y, Math.exp(-elapsed * 3.126 * 4 * 1));
@@ -230,11 +249,10 @@ class Player extends FlxSprite {
         //HORRIBLE way to do it, but good enough.
         if(inventory.weaponText.text!=weaponTextTextTarget) inventory.weaponText.text=weaponTextTextTarget;
         
-        //TODO: add sprinting in a way thats ACTUALLY functional on web.
         if(canMove) velocity.x = ((velocity.x = (velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED)))); //add kickback on-top of the normal velocity based movement
         if(canMove) velocity.y = ((velocity.y = (velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED))));    //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
-        if(!overrideCameraZoom) Main.targetCamGameZoom = (Main.targetCamGameZoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
-        if(!overrideCameraZoom) Main.camGame.zoom = Main.targetCamGameZoom+Main.camGameZoomIncrement;
+        if(!overrideCameraZoom && canZoom) Main.targetCamGameZoom = (Main.targetCamGameZoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
+        if(!overrideCameraZoom && canZoom) Main.camGame.zoom = Main.targetCamGameZoom+Main.camGameZoomIncrement;
 
         if (canOpenInventory && Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
     }

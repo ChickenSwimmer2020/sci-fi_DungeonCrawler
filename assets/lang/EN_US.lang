@@ -123,6 +123,39 @@
     "debugger": {
         "title":"Debugger System",
         "genericexit": "Press [EXITKEY] to exit",
+
+
+        "windows": {
+            "save": {
+                "reader": "Save Reader",
+                "editor": "Save Editor"
+            },
+            "alphabet": {
+                "title": "Alphabet Viewer",
+                "charmap": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz 1234567890 -=[];',./` ~!@#$%^&*()_+{}:\"<>?\\|"
+            }
+        },
+        "notif": {
+            "error": {
+                "title": "Error!",
+                "nullerr": "Error type \"[T]\" doesnt exist\nThis is a very bad thing.\nYou should never see this error."
+            }
+        },
+        "menubar":{
+            "mapeditor": "Map",
+            "cutsceneeditor": "Cutscene",
+            "alphabet": "Alphabet",
+            "error": {
+                "menutitle": "Errors",
+                "reftext": "Reference",
+                "followtags": "Follow Tags"
+            },
+            "save": {
+                "menutitle": "Save",
+                "reader": "Reader",
+                "writer": "Writer"
+            }
+        },
         "testing": "Testing State",
         "alphabet": {
             "title": "Font",
@@ -160,7 +193,45 @@
             }
         },
         "cutscenemaker": {
-            "title": "Cutscene",
+            "menubar": {
+                "play": "Play",
+                "test": "Test",
+                "file": {
+                    "title": "File",
+                    "newcutscene": "New Cutscene",
+                    "loadcutscene": "Load Cutscene",
+                    "savecutscene": "Save Cutscene",
+                    "savecutsceneas": "Save As...",
+                    "quiteditor": "Quit"
+                },
+                "meta": {
+                    "title": "Meta",
+                    "fps": "Frames Per Second",
+                    "tf": "Total Frames"
+                },
+                "onionskinning": {
+                    "title": "Onion Skinning",
+                    "enabled": "Enabled",
+                    "preframes": "Pre Frames",
+                    "postframes": "Post Frames"
+                },
+                "view": {
+                    "title": "View",
+                    "tdarkmode": "Dark Mode"
+                }
+            },
+            "objects": {
+                "frame": {
+                    "label": "Objects",
+                    "button": "Add New..."
+                }
+            },
+            "timeline": {
+                "label": "TimeLine"
+            },
+
+
+
             "preview": {
                 "hint": "preview running  —  ESC to stop",
                 "stop": "■ STOP"
@@ -230,27 +301,27 @@
     "error": {
         "nullitem": {
             "title": "Null Item Exception",
-            "message": "An Pickup \"{OBJ}\" attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL."
+            "message": "An Pickup \"{OBJ}\" attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL.{STK}"
         },
         "renderfailure": {
             "title": "Engine Render Failure",
-            "message": "A graphic \"{OBJ}\" could not be loaded.\n\nTHIS ERROR IS NOT FATAL."
+            "message": "A graphic \"{OBJ}\" could not be loaded.\n\nTHIS ERROR IS NOT FATAL.{STK}"
         },
         "nullio": {
             "title": "Null I/O Exception",
-            "message": "The object \"{OBJ}\" couldnt be loaded."
+            "message": "The object \"{OBJ}\" couldnt be loaded.{STK}"
         },
         "cachefault": {
             "title": "Save Cache Fault",
-            "message": "The save file \"{OBJ}\" could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game."
+            "message": "The save file \"{OBJ}\" could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game.{STK}"
         },
         "languagemissing": {
             "title": "Language Fault",
-            "message": "The language file for \"{OBJ}\" could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]"
+            "message": "The language file for \"{OBJ}\" could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]{STK}"
         },
         "mapnotfound": {
             "title": "Map read Failure",
-            "message": "The map file \"{OBJ}\" could not be loaded. This error is not fatal and you will be returned to the main menu.\nYour save is corrupted, please delete it.[MENU]"
+            "message": "The map file \"{OBJ}\" could not be loaded. This error is not fatal and you will be returned to the main menu.\nYour save is corrupted, please delete it.[MENU]{STK}"
         }
     }
 }

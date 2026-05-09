@@ -6,10 +6,19 @@ class PauseMenu extends FlxSubState {
     var pauseCamera:ExtendedCamera;
     var menuBG:FlxSprite;
     var buttons:Array<FlxButton> = [];
+
+    var playerVelocity:FlxPoint;
     public function new() {
         super();
         //"pause" the player.
-        if(Player.instance!=null) Player.instance.canFireWeapon=Player.instance.canMove=Player.instance.canOpenInventory=false;
+
+        if(Player.instance!=null){
+            Player.instance.canFireWeapon=Player.instance.canMove=Player.instance.canOpenInventory=Player.instance.canZoom=false;
+            if(Player.instance.velocity != FlxPoint.weak(0, 0)) {
+                playerVelocity = FlxPoint.weak(Player.instance.velocity.x, Player.instance.velocity.y);
+            }else playerVelocity = FlxPoint.weak(0, 0);
+            Player.instance.velocity.set(); //stop the player velocity
+        }
         
         Music.doPauseFade();
         pauseCamera = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
@@ -38,14 +47,7 @@ class PauseMenu extends FlxSubState {
                 Language.getTranslatedKey("pause.exit", buttons[i]),
                 Language.getTranslatedKey("pause.debug.exittestingstate", buttons[i])
             ][i], [
-                ()->{
-                    FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
-                        close();
-                    }});
-                    for(i in 0...buttons.length) {
-                        FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
-                    }
-                },
+                ()->exit(),
                 ()->{
                     var options:FlxSubState = new OptionsMenuSubstate();
                     options.camera = Main.camHUD;
@@ -53,21 +55,21 @@ class PauseMenu extends FlxSubState {
                 },
                 ()->{},
                 ()->{
-                    trace(Player.SLS);
+                    Main.Trace(INFO, 'Time since player last saved: ${Player.SLS}');
                     if(Player.SLS > Flags.SLS_WARNING_THRESHOLD) {
                         GameState.inGame=false;
-                        FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                        FlxG.switchState(MainMenuState.new);
                     }else{
                         var popup:Popup = new Popup(
                             Language.getTranslatedKey("pause.exitnosave.popup.title", null),
                             Language.getTranslatedKey("pause.exitnosave.popup.message", null),
                             [
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
-                                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                                    FlxG.switchState(MainMenuState.new);
                                 }, c:true},
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
                                     Player.instance.SAVED(); //save the player stuff hopefully.
-                                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                                    FlxG.switchState(MainMenuState.new);
                                 }, c:true},
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
                             ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
@@ -77,7 +79,7 @@ class PauseMenu extends FlxSubState {
                 },
                 ()->{
                     GameState.inGame=false;
-                    FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+                    FlxG.switchState(MainMenuState.new);
                 }
             ][i]);
             button.camera = pauseCamera;
@@ -91,21 +93,25 @@ class PauseMenu extends FlxSubState {
             object.camera = pauseCamera;
         }
     }
+    private function exit() {
+        Music.undoPauseFade();
+        FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
+            Player.instance.velocity.set(playerVelocity.x, playerVelocity.y);
+            close();
+        }});
+        for(i in 0...buttons.length) {
+            FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
+        }
+    }
 
     override public function destroy() {
-        if(Player.instance!=null) Player.instance.canFireWeapon=Player.instance.canMove=Player.instance.canOpenInventory=true;
+        if(Player.instance!=null) Player.instance.canFireWeapon=Player.instance.canMove=Player.instance.canOpenInventory=Player.instance.canZoom=true;
         FlxG.cameras.remove(pauseCamera);
         super.destroy();
     }
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        if(FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE])){
-            Music.undoPauseFade();
-            FlxTween.tween(menuBG, {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut, onComplete: (_)->{
-                close();
-            }});
-            for(i in 0...buttons.length) FlxTween.tween(buttons[i], {y: FlxG.height}, 0.75, {ease:FlxEase.expoOut});
-        }
+        if(FlxG.keys.anyJustPressed([ESCAPE, BACKSPACE])) exit();
     }
 }

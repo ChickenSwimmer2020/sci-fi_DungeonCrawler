@@ -1,7 +1,22 @@
 package;
 
+import haxe.PosInfos;
+import haxe.CallStack;
 import haxe.ui.Toolkit;
 import backend.extensions.ExtendedCamera;
+
+#if(debug)
+    enum TRACETYPES {
+        INFO;
+        ERROR;
+        WARN;
+        DEBUG;
+        TODO;
+
+        //special circumstances.
+        EG; //ONLY used for Relocation_Failed Easter eggs.
+    }
+#end
 
 class Main extends openfl.display.Sprite {
     //VARIBLES
@@ -20,20 +35,16 @@ class Main extends openfl.display.Sprite {
 
     //VARIBLES
     public function new() {
-        super();
+        super();    
         Toolkit.init(); //init haxe-ui, this is important i think.
+        Toolkit.theme = "dark";
         FlxSprite.defaultAntialiasing=false;
         #if html5 stage.showDefaultContextMenu = false; #end
         //i hope this works.
         #if (debug)
             //yeah this probably works better.
-            Application.current.window.onClose.add(()->{
-                #if sys if(discord!=null){
-                    discord.close();
-                }#end
-                #if (debug&&(windows||hl)) BUILDDEBUGLOGFILE(); #end
-            });
-            Application.current.window.stage.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, (event:UncaughtErrorEvent) -> {
+            #if(windows||hl)Application.current.window.onClose.add(()->discord!=null?discord.close():null);#end
+            Application.current.window.stage.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, (event:UncaughtErrorEvent) -> { //TODO: make this work, tis supposed to be a "crash handler".
                 var errorMessage:String = "An unexpected error has occurred:\n";
                 if (Std.isOfType(event.error, Error)) {
                     var error:Error = cast event.error;
@@ -44,27 +55,30 @@ class Main extends openfl.display.Sprite {
                     errorMessage += "Unknown error type.";
                 }
                 Application.current.window.alert(errorMessage, "Unexpected Error");
-                #if (debug&&(windows||hl)) BUILDDEBUGLOGFILE(); #end
             });
         #end
         
-        #if (html5) Log.throwErrors = false; #end //if an Assets. call is null, it wont crash the program.
-        saveFile.bind("SAVES");
-        if(saveFile.data.saves == null) { //should fix it?
-            saveFile.data.saves=new Map<String, SaveFile>();
-        }
-        curLanguage=saveFile.data.language??EN_US; //default to EN_US if no language is specified in the save file.
-        if(saveFile.data.lastLoadedSave==null) saveFile.data.lastLoadedSave=Flags.DEFAULT_SAVE;
-        if(saveFile.data.lastLoadedSave!=null){
-            lastLoadedSaveName=saveFile.data.lastLoadedSave;
-            FILE=lastLoadedSaveName;
-            saveFile.flush();
-        }else FILE=Flags.DEFAULT_SAVE;
-        musicPostfix = saveFile.data.musicPF??"D"; //default to default if the musicPF is null.
+        #if (html5) //if an Assets. call is null, it wont crash the program.
+            Log.throwErrors = false;
+            saveFile.bind("SAVES");
+            if(saveFile.data.saves == null) { //should fix it?
+                saveFile.data.saves=new Map<String, SaveFile>();
+            }
+            curLanguage=saveFile.data.language??EN_US; //default to EN_US if no language is specified in the save file.
+            if(saveFile.data.lastLoadedSave==null) saveFile.data.lastLoadedSave=Flags.DEFAULT_SAVE;
+            if(saveFile.data.lastLoadedSave!=null){
+                lastLoadedSaveName=saveFile.data.lastLoadedSave;
+                FILE=lastLoadedSaveName;
+                saveFile.flush();
+            }else FILE=Flags.DEFAULT_SAVE;
+        #else
+            saveFile.readSaveFile("testSave");
+        #end
+        musicPostfix = #if(windows||hl)saveFile.data.preferences.musicPF??"D"#else saveFile.data.musicPF??"D"#end; //default to default if the musicPF is null.
         Application.current.window.title = Language.languageInformation.get(curLanguage).get("application_title");
         FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
             case EN_US: "Nokia Cellphone FC Small";
-            case JP: "assets/ui/fonts/k8x12L.ttf";
+            case JP: "assets/fonts/k8x12L.ttf";
             case ES: "Nokia Cellphone FC Small";
         }
 
@@ -73,11 +87,11 @@ class Main extends openfl.display.Sprite {
             Conductor.update(FlxG.elapsed??0);
             for(target => camera in cameras) {
                 camera.update(FlxG.elapsed??0); //kinda forgot i have to call this manually.
-                switch(target) {
-                    case "game","hud","other": continue; //donothing
-                    default:
-                        camera.zoom = FlxMath.lerp(1, camera.zoom, Math.exp(-FlxG.elapsed??0 * 3.125 * 1 * 1));
-                }
+                //switch(target) {
+                //    case "game","hud","other": continue; //donothing
+                //    default:
+                //        camera.zoom = FlxMath.lerp(1, camera.zoom, Math.exp(-FlxG.elapsed??0 * 3.125 * 1 * 1));
+                //}
             }
         });
 
@@ -90,13 +104,17 @@ class Main extends openfl.display.Sprite {
         @:privateAccess game._customSoundTray = SoundTray;
         addChild(game);
         #if (windows||hl)
-            discord = new Discord("1487613766077120724");
-            discord.setActivity("IPC RICH PRESENCE TEST 01");
+            //discord = new Discord("1487613766077120724"); //TODO: fix this.
+            //discord.setActivity("IPC RICH PRESENCE TEST 01");
         #end
         initDefaultSaveParemeters();
         #if (debug&&!html5) initDebugWindows(); #end
 
-        FlxG.autoPause = saveFile.data.autoPause??true; //default to true if not specified.
+        #if(windows||hl) //default to true if not specified.
+            FlxG.autoPause = saveFile.data.preferences.autoPause??true;
+        #else
+            FlxG.autoPause = saveFile.data.autoPause??true; 
+        #end
     }
     //CAMERA STUFF
     public static var cameras:Map<String,ExtendedCamera>=[];
@@ -113,7 +131,7 @@ class Main extends openfl.display.Sprite {
     }
     public static inline function clearCameraFilters(cam:FlxCamera) if(cam!=null && cam.filters!=null) for(filter in cam.filters) cam.filters.remove(filter);
     public static inline function clearAllCameraFilters() for(cam in FlxG.cameras.list) if(cam.filtersEnabled) clearCameraFilters(cam);
-
+    public static inline function flashCameras(color:Int, time:Float) for(cam in FlxG.cameras.list) if(#if(windows||hl)saveFile.data.preferences.flashingLights#else saveFile.data.flashingLights#end) cam.flash(color, time);
 
     //DEBUGGING
     #if (debug)
@@ -221,59 +239,60 @@ class Main extends openfl.display.Sprite {
             }else mapArrayText.text = "feature disabled for performance reasons.";
         }
 
-        public static function DEBUG_updateSaveInfo(save:String) {
-            var file:SaveFile = Save.readSaveFile(save);
-            curSaveLoaded.text = save;
-            healthTxt.text = 'Health: ${file.health}';
-            staminaTxt.text = 'Stamina: ${file.stamina}';
-            xpTxt.text = 'XP: ${file.xp}';
-            inventoryTxt.text = 'Inventory: ${file.inventory}';
+        public static function Trace(type:TRACETYPES, message:Dynamic, ?p:PosInfos) {
+            #if html5
+                var label:String;
+                var style:String;
+                var resetStyle = "color: unset; background: unset; font-weight: normal;";
+                switch(type) {
+                    case INFO:  label = "[- INFO -]:";  style = "color: #4488ff; font-weight: bold;";
+                    case ERROR: label = "[- ERROR -]:"; style = "color: #ff4444; font-weight: bold;";
+                    case WARN:  label = "[- WARN -]:";  style = "color: #ffcc00; font-weight: bold;";
+                    case DEBUG: label = "[- DEBUG -]:"; style = "color: #44ff44; font-weight: bold;";
+                    case TODO:  label = "[- TODO -]:";  style = "color: #000000; background: #ffa500; font-weight: bold;";
+                    case EG:    label = "[- R_F--EASTER EGG!!! -]:"; style = "color: #0000ff; background: #ff0000; font-weight: bold;";
+                    default:    js.Syntax.code("console.log({0})", message); return;
+                }
+                js.Syntax.code("console.log('%c' + {0} + '%c ' + {1} + ' (' + {2} + ' line ' + {3} + ')', {4}, {5})",
+                    label, message, p.fileName, p.lineNumber, style, resetStyle);
+            #else
+                switch(type) {
+                    case INFO:  trace('\x1b[34m[- INFO -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+                    case ERROR: trace('\x1b[31m[- ERROR -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+                    case WARN:  trace('\x1b[33m[- WARN -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+                    case DEBUG: trace('\x1b[32m[- DEBUG -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+                    case TODO:  trace('\033[48;2;255;165;0m[- TODO -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+                    case EG:    trace('\033[38;2;0;0;255m\033[48;2;255;0;0m[- R_F--EASTER EGG!!! -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+                    default:    trace(message);
+                }
+            #end
         }
+
         #if(windows||hl)
-            private static var OutputThread:Thread;
-            public static function LOG(str:Dynamic) {
-                //this is just to make it so that the console isnt freezing the game when we try to trace a fucking save file.
-                if(Std.string(str).length>100) {
-                    if(FlxG.log.redirectTraces) FlxG.log.add("log is longer than 100 chars. outputting directly to file."); //still fully functional.
-                    else trace("log is longer than 100 chars. outputting directly to file.");
-                    OutputThread = Thread.create(() -> { //apparently this auto-kills after it finishes.
-                        DEBUGLOG.push(str);
-                    });
-                }else{
-                    if(FlxG.log.redirectTraces) FlxG.log.add(str); //still fully functional.
-                    else trace(str);
-                    DEBUGLOG.push(str);
-                }
-            }
-            public static var DEBUGLOG:Array<Dynamic>=[];
-            public static function BUILDDEBUGLOGFILE() {
-                var content:String="";
-                for(line in DEBUGLOG) {
-                    content += line + "\n";
-                }
 
-                var dateString:String = '${Date.now()}';
-                dateString = dateString.replace(':', '-'); //replace colons with dashes to avoid issues with file naming on windows.
-
-                
-                if(!FileSystem.exists('DebugLogs')) FileSystem.createDirectory('DebugLogs');
-                File.saveContent('DebugLogs/debuglog$dateString.txt', content);
+        #else //uses old system.
+            public static function DEBUG_updateSaveInfo(save:String) {
+                var file:SaveFile = Save.readSaveFile(save);
+                curSaveLoaded.text = save;
+                healthTxt.text = 'Health: ${file.health}';
+                staminaTxt.text = 'Stamina: ${file.stamina}';
+                xpTxt.text = 'XP: ${file.xp}';
+                inventoryTxt.text = 'Inventory: ${file.inventory}';
             }
         #end
     #end
 
-    //TODO: make this work, it already SOMEWHAT works, but its fucky.
     public static function set_curLanguage(value:Lang) {
         curLanguage = value;
 
         for(key => object in Language.activeLanguageObject) {
-            trace(Type.getClass(object));
+            Trace(DEBUG, Type.getClass(object));
             //if(Std.isOfType(object, FlxText) || Std.isOfType(object, FlxUIText)) {
             //    var textObject:FlxText = cast object;
             //    textObject.text = Language.getTranslatedKey(key, null);
             //    textObject.font = switch(curLanguage){
             //        case EN_US: "Nokia Cellphone FC Small";
-            //        case JP: "assets/ui/fonts/k8x12L.ttf";
+            //        case JP: "assets/fonts/k8x12L.ttf";
             //        case ES: "Nokia Cellphone FC Small";
             //    }
             //}else if(Std.isOfType(object, FlxUIButton)) {
@@ -281,7 +300,7 @@ class Main extends openfl.display.Sprite {
             //    buttonObject.text = Language.getTranslatedKey(key, null);
             //    buttonObject.label.font = switch(curLanguage){
             //        case EN_US: "Nokia Cellphone FC Small";
-            //        case JP: "assets/ui/fonts/k8x12L.ttf";
+            //        case JP: "assets/fonts/k8x12L.ttf";
             //        case ES: "Nokia Cellphone FC Small";
             //    }
             //}else if(Std.isOfType(object, FlxButton)) {
@@ -289,7 +308,7 @@ class Main extends openfl.display.Sprite {
             //    buttonObject.text = Language.getTranslatedKey(key, null);
             //    buttonObject.label.font = switch(curLanguage){
             //        case EN_US: "Nokia Cellphone FC Small";
-            //        case JP: "assets/ui/fonts/k8x12L.ttf";
+            //        case JP: "assets/fonts/k8x12L.ttf";
             //        case ES: "Nokia Cellphone FC Small";
             //    }
             //}
@@ -306,71 +325,75 @@ class Main extends openfl.display.Sprite {
     //hehe we can store static varibles here to be accessed EVERYWHERE.
 
 
-    public static function showLanguageError(lang:Lang) {
-        showError("MISSINGLANG", lang, Flags.DEFAULT_LANGUAGE);
+    public static function showLanguageError(lang:Lang, stack:String) {
+        showError("MISSINGLANG", lang, Flags.DEFAULT_LANGUAGE, stack);
     }
-    public static function showError(input:String,?missingObject:Dynamic=null, ?forceLanguage:Lang=null) {
+    public static function showError(input:String,?missingObject:Dynamic=null, ?forceLanguage:Lang=null, stack:String, followTags:Bool=true) {
         @:bypassAccessor if(forceLanguage!=null)curLanguage=forceLanguage; //since we dont have language input on Language.getTranslatedKey anymore.
         var type:Array<String> = ErrorType.get(input);
-        var Message:String=Language.getTranslatedKey(type[1], null, ["{OBJ}"=>missingObject]);
+        var Message:String=Language.getTranslatedKey(type[1], null, ["{OBJ}"=>missingObject, "{STK}"=>stack.toString()]);
         var Title:String=Language.getTranslatedKey(type[0], null);
         var close:Bool=false;
         var gotomenu:Bool=false;
         if(Message.indexOf('[SHUTDOWN]')!=-1){
-            close=true;
-            Message = Message.remove('[SHUTDOWN]');
+            if(followTags){
+                close=true;
+                Message = Message.remove('[SHUTDOWN]');
+            }else{
+                Message = Message.replace('[SHUTDOWN]', '\nGame should shut down');
+            }
         }
         if(Message.indexOf('[MENU]')!=-1) {
-            gotomenu=true;
-            Message = Message.remove('[MENU]');
+            if(followTags){
+                gotomenu=true;
+                Message = Message.remove('[MENU]');
+            }else{
+                Message = Message.replace('[MENU]', '\nGame should go to MainMenuState');
+            }
         }
 
         
         Application.current.window.alert(Message, Title);
-        if(close){
-            #if html5
-                js.Browser.window.close();
-            #else
-                Sys.exit(1);
-            #end
-        }
-        if(gotomenu) FlxG.switchState(()->new MainMenuState(#if(debug)false#end));
+        if(close) #if(html5)js.Browser.window.close();#else Sys.exit(1);#end
+        if(gotomenu) FlxG.switchState(MainMenuState.new);
     }
     
-    public static var saveFile:FlxSave = new FlxSave();
+    public static var saveFile:#if(windows||hl)Save = new Save(); #else FlxSave = new FlxSave();#end
     public static var lastLoadedSaveName:Null<String>;
     public static var FILE:Null<String>;
 
     public static var targetCamGameZoom:Float=1.0;
     public static var camGameZoomIncrement:Float=0.0;
-    #if sys public static var discord:Discord; #end
+    #if(windows||hl) public static var discord:Discord; #end
     public static function resetGlobalSettings() {
         for(setting in Reflect.fields(saveFile.data)) {
             switch(setting) {
-                case "saves","lastLoadedSave","language": //donothing
+                case "saves","lastLoadedSave","language","controls": //donothing
                 default: Reflect.setField(saveFile.data, setting, null);
             }
         }
         initDefaultSaveParemeters();
     }
     private static function initDefaultSaveParemeters() {
-        if((saveFile.data.saves:Map<String,SaveFile>).get(Flags.DEFAULT_SAVE)==null){
-            (saveFile.data.saves:Map<String,SaveFile>).set(Flags.DEFAULT_SAVE, Flags.DEFAULT_SAVEFILE);
-        }
-        if(saveFile.data.shaders==null)saveFile.data.shaders=true;
-        if(saveFile.data.autoPause==null)saveFile.data.autoPause=true;
-        if(saveFile.data.controls==null)saveFile.data.controls=([
-            {c:"moveUP", keys:["UP", "W"]},
-            {c:"moveDOWN", keys:["DOWN", "S"]},
-            {c:"moveRIGHT", keys:["RIGHT", "D"]},
-            {c:"moveLEFT", keys:["LEFT", "A"]},
-            {c:"zoomIN", keys:["PLUS", "NONE"]},
-            {c:"zoomOUT", keys:["MINUS", "NONE"]},
-            {c:"pause", keys:["ESCAPE", "BACKSPACE"]},
-            {c:"inventory", keys:["I", "NONE"]},
-            {c:"interact", keys:["E", "ENTER"]},
-            {c:"sprint", keys:["SHIFT", "NONE"]}
-        ]:Array<{c:String, keys:Array<FlxKey>}>); //default init.
-        if(saveFile.data.language==null)saveFile.data.language="EN_US";
+        #if(windows||hl) 
+            saveFile.initDefaults();
+        #else
+            if(saveFile.data.flashingLights==null)saveFile.data.flashingLights=true;
+            if(saveFile.data.shaders==null)saveFile.data.shaders=true;
+            if(saveFile.data.autoPause==null)saveFile.data.autoPause=true;
+            if(saveFile.data.controls==null)saveFile.data.controls=([
+                {c:"moveUP", keys:["UP", "W"]},
+                {c:"moveDOWN", keys:["DOWN", "S"]},
+                {c:"moveRIGHT", keys:["RIGHT", "D"]},
+                {c:"moveLEFT", keys:["LEFT", "A"]},
+                {c:"zoomIN", keys:["PLUS", "NONE"]},
+                {c:"zoomOUT", keys:["MINUS", "NONE"]},
+                {c:"pause", keys:["ESCAPE", "BACKSPACE"]},
+                {c:"inventory", keys:["I", "NONE"]},
+                {c:"interact", keys:["E", "ENTER"]},
+                {c:"sprint", keys:["SHIFT", "NONE"]}
+            ]:Array<{c:String, keys:Array<FlxKey>}>); //default init.
+            if(saveFile.data.language==null)saveFile.data.language="EN_US";
+        #end
     }
 }

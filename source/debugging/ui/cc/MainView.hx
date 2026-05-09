@@ -1,40 +1,84 @@
 package debugging.ui.cc;
 
+import haxe.ui.core.Component;
+import haxe.ui.components.Label;
+import haxe.ui.components.Image;
 import haxe.ui.notifications.NotificationType;
 import haxe.ui.notifications.NotificationManager;
 import haxe.ui.containers.SideBar;
+using haxe.ui.animation.AnimationTools;
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/views/CutsceneEditor.xml"))
 class MainView extends VBox {
     public var onObjectCreate:(type:Class<Dynamic>,x:Float,y:Float,name:String,path:String,isNested:Bool,grpName:String)->Void;
     public function new() {
         super();
+        doLanguageStuff();
 
         menuBar.onMenuSelected = (e:MenuEvent)->{
             switch(e.menuItem.id) {
-                case "QuitEditor": FlxG.switchState(()->new MainMenuState(false));
+                case "QuitEditor": FlxG.switchState(Debugger.new);
 
                 case "ToggleUIDarkMode": Flags.CC_DARKMODE=!Flags.CC_DARKMODE; //toggle it
-                default: trace('unkown id type: ${e.menuItem.id}');
+                default: Main.Trace(WARN, 'unkown id type: ${e.menuItem.id}');
             }
         };
         addNewCutsceneObject.onClick=(_)->ObjectCreationDialogObject();
 
+        TL_AddLayer.onClick = (_:MouseEvent)->{
+            var idInput:String = "text";
+            var labl:Label = new Label();
+            labl.text = idInput;
+            labl.percentWidth=100;
+            labl.height=20;
+            var l:Layer = new Layer(idInput); //we can always do stuff with this later.
 
+            TL_LayerNamesList.addComponent(labl);
+            TL_KFArea.addComponent(l);
+        };
+        
+        menuBar.onMenuClosed = (_:MenuEvent)->{ //assign that when the menuBar is closed to relaod all the total frames properly
+            Main.Trace(DEBUG, _.menu.text);
+            if(_.menu.text=="Meta"){
+                reloadFramesTotal(menuBar.findComponent("TOTALFRAMESINPUT", HUITextField, true, "id").text.toInt());
+                menuBarOpen=false;
+            }
+        };
+        menuBar.onMenuOpened=(_:MenuEvent)->{menuBarOpen=true;};
+        reloadFramesTotal(menuBar.findComponent("TOTALFRAMESINPUT", HUITextField, true, "id").text.toInt()); //then just run this anyways.
+        //TimeLineKFScroller.isScrollableHorizontally=false; //dont allow for the main scroll that shows layers to horizontally scroll.
+    }
+    var menuBarOpen:Bool=false;
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
 
+        if(menuBarOpen && menuBar.findComponent('TOTALFRAMESINPUT', HUITextField, true, "id").focus) { //if the textfield is focused, and the menuBar is opened, if enter is pressed, automatically update the total frames of the cutscene.
+            if(FlxG.keys.justPressed.ENTER) {
+                reloadFramesTotal(menuBar.findComponent("TOTALFRAMESINPUT", HUITextField, true, "id").text.toInt());
+            }
+        }
+    }
 
-
+    public function reloadFramesTotal(f:Int) {
+        var display:HBox = TL_FrameRuler;
+        display.removeAllComponents(); //get rid of all the current labels.
+        for(i in 0...f) {
+            var l:Label = new Label();
+            l.text = '${i+1}|    '; //technically, its 0-{f-1}, but we can fix that right up!
+            display.addComponent(l);
+        }
     }
 
     private function ObjectCreationDialogObject(?item:Dynamic, ?forceType:Int=null) {
         var dialog = new MyCustomDialog();
         dialog.onDialogClosed=(e:DialogEvent)->{
-            trace(e.button);
+            Main.Trace(INFO, e.button);
             switch(e.button.toString().toUpperCase()) {
                 case "ADD":
                     if (item == null) item = ActiveCutsceneObjects;
                     switch(forceType!=null?forceType:dialog.tabs.pageIndex) {
                         case 0: //Sprite
+                        #if(!html5)
                             if(!FileSystem.exists(dialog.findComponent("SPR_Path", HUITextField, true, "id").text)) {
                                 NotificationManager.instance.addNotification({
                                     title: "Error!",
@@ -43,13 +87,19 @@ class MainView extends VBox {
                                 });
                                 return; //prolly gonna close it :/
                             }else{
-                                item.addNode(
+                                var n:TreeViewNode = item.addNode(
                                     {
                                         name: dialog.findComponent("SPR_Name", HUITextField, true, "id").text,
                                         path: dialog.findComponent("SPR_Path", HUITextField, true, "id").text,
                                         icon: "assets/debug/cc_spriteObject.png"
                                     }
                                 );
+                                n.onClick = (_:MouseEvent)->{
+                                    Main.Trace(INFO, 'to add name: ${n.data.name} returned: ${CutsceneMaker.instance.trackedUIObjects.get(n.data.name)}');
+                                    if(CutsceneMaker.instance.trackedUIObjects.get(n.data.name)!=null) {
+                                        CutsceneMaker.instance.trackedUIObjects.get(n.data.name).flash(0xFF7D7DFF);
+                                    }
+                                };
                                 if(onObjectCreate!=null) onObjectCreate(
                                     FlxSprite, Std.parseFloat(dialog.findComponent("SPR_X", HUITextField, true, "id").text), //class, x
                                     Std.parseFloat(dialog.findComponent("SPR_Y", HUITextField, true, "id").text), //y
@@ -58,14 +108,51 @@ class MainView extends VBox {
                                     false, ""
                                 );
                             }
+                        #else
+                            if(!Assets.exists(dialog.findComponent('SPR_Path', HUITextField, true, "id").text)) {
+                                NotificationManager.instance.addNotification({
+                                    title: "Error!",
+                                    body: '${dialog.findComponent("SPR_Path", HUITextField, true, "id").text}\nDoes not exist!',
+                                    type: NotificationType.Error
+                                });
+                                return; //prolly gonna close it :/
+                            }else{
+                                var n:TreeViewNode = item.addNode(
+                                    {
+                                        name: dialog.findComponent("SPR_Name", HUITextField, true, "id").text,
+                                        path: dialog.findComponent("SPR_Path", HUITextField, true, "id").text,
+                                        icon: "assets/debug/cc_spriteObject.png"
+                                    }
+                                );
+                                n.onClick = (_:MouseEvent)->{
+                                    Main.Trace(INFO, 'to add name: ${n.data.name} returned: ${CutsceneMaker.instance.trackedObjects.get(n.data.name)}');
+                                    if(CutsceneMaker.instance.trackedObjects.get(n.data.name)!=null) {
+                                        CutsceneMaker.instance.trackedUIObjects.get(n.data.name).flash(0xFF7D7DFF);
+                                    }
+                                };
+                                if(onObjectCreate!=null) onObjectCreate(
+                                    FlxSprite, Std.parseFloat(dialog.findComponent("SPR_X", HUITextField, true, "id").text), //class, x
+                                    Std.parseFloat(dialog.findComponent("SPR_Y", HUITextField, true, "id").text), //y
+                                    dialog.findComponent("SPR_Name", HUITextField, true, "id").text, //name
+                                    dialog.findComponent("SPR_Path", HUITextField, true, "id").text,
+                                    false, ""
+                                );
+                            }
+                        #end
                         case 1: //Text
-                            item.addNode(
+                            var n:TreeViewNode = item.addNode(
                                 {
                                     name: dialog.findComponent("TXT_Name", HUITextField, true, "id").text,
                                     path: dialog.findComponent("TXT_Text", HUITextField, true, "id").text,
                                     icon: "assets/debug/cc_textObject.png"
                                 }
                             );
+                            n.onClick = (_:MouseEvent)->{
+                                Main.Trace(INFO, 'to add name: ${n.data.name} returned: ${CutsceneMaker.instance.trackedUIObjects.get(n.data.name)}');
+                                //if(CutsceneMaker.instance.trackedUIObjects.get(n.data.name)!=null) {
+                                    CutsceneMaker.instance.trackedUIObjects.get(n.data.name).flash(0xFF7D7DFF);
+                                //}
+                            };
                             if(onObjectCreate!=null) onObjectCreate(
                                 FlxText, Std.parseFloat(dialog.findComponent("TXT_X", HUITextField, true, "id").text), //class, x
                                 Std.parseFloat(dialog.findComponent("TXT_Y", HUITextField, true, "id").text), //y
@@ -76,26 +163,28 @@ class MainView extends VBox {
                         case 2: //Group
                             // pre-set up stuff, so that we can account for errors before trying to make something that shouldnt exist.
                             var tItem:haxe.ui.core.Component = cast item;
-                            trace('${tItem.screenTop} && ${tItem.height}');
+                            Main.Trace(DEBUG, '${tItem.screenTop} && ${tItem.height}');
                             var toAdd:Dynamic={};
 
                             switch(dialog.findComponent("GRP_IOT", DropDown, true, "id").text) {
                                 case "Sprite":
-                                    if(!FileSystem.exists(dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text)) {
-                                        NotificationManager.instance.addNotification({
-                                            title: "Error!",
-                                            body: '${dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text}\nDoes not exist!',
-                                            type: NotificationType.Error
-                                        });
-                                        return; //prolly gonna close it :/
-                                    }else{
-                                        toAdd =
-                                            {
-                                                name: dialog.findComponent("GRP_IO_Name", HUITextField, true, "id").text,
-                                                path: dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text,
-                                                icon: "assets/debug/cc_spriteObject.png"
-                                            };
-                                    }
+                                    #if(!html5)
+                                        if(!FileSystem.exists(dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text)) {
+                                            NotificationManager.instance.addNotification({
+                                                title: "Error!",
+                                                body: '${dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text}\nDoes not exist!',
+                                                type: NotificationType.Error
+                                            });
+                                            return; //prolly gonna close it :/
+                                        }else{
+                                            toAdd =
+                                                {
+                                                    name: dialog.findComponent("GRP_IO_Name", HUITextField, true, "id").text,
+                                                    path: dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text,
+                                                    icon: "assets/debug/cc_spriteObject.png"
+                                                };
+                                        }
+                                    #end
                                 case "Text":
                                     toAdd =
                                         {
@@ -103,14 +192,20 @@ class MainView extends VBox {
                                             path: dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text,
                                             icon: "assets/debug/cc_textObject.png"
                                         };
-                                default: trace('unknown type ${dialog.findComponent("GRP_IOT", DropDown, true, "id").text}, this is a bad thing.');
+                                default: Main.Trace(WARN, 'unknown type ${dialog.findComponent("GRP_IOT", DropDown, true, "id").text}, this is a bad thing.');
                             }
 
 
                             var i:TreeViewNode = item.addNode({text: 'Group: ${dialog.tabs.getPageById("tab_groupmode").getComponentAt(0).text}', icon: "haxeui-core/styles/default/haxeui_tiny.png", count: 0});
-                            i.addNode(toAdd);
-                            //TODO: button that opens the properties sidebar
-                            item.onRightClick = (e:MouseEvent)->{ //TODO: find way to only apply to the header.
+                            var internal = i.addNode(toAdd);
+
+                            //item.onClick = (_:MouseEvent)->{
+                            //    trace('to add name: ${toAdd.name} returned: ${CutsceneMaker.instance.trackedObjects.get(toAdd.name)}');
+                            //    if(CutsceneMaker.instance.trackedObjects.get(toAdd.name)!=null) {
+                            //        CutsceneMaker.instance.trackedUIObjects.get(toAdd.name).flash(0xFF7D7DFF);
+                            //    }
+                            //};
+                            item.onRightClick = (e:MouseEvent)->{
                                 var obj = new FlxObject(tItem.screenLeft, tItem.screenTop, 300, 600);
                                 if (FlxG.mouse.overlaps(obj)) {
                                     var menu = new MyMenu();
@@ -120,15 +215,15 @@ class MainView extends VBox {
                                     menu.onSelect=(_:String)->{
                                         switch(_) {
                                             case "addToGroup": ObjectCreationDialogObject(item);
-                                            case "delete": trace("FUCKR, NOOOOOOOOOO!!!!!");
-                                            default: trace('no');
+                                            case "delete": Main.Trace(DEBUG, "FUCKR, NOOOOOOOOOO!!!!!");
+                                            default: Main.Trace(DEBUG, 'no');
                                         }
                                     };
                                 }
                                 obj.destroy();
                             }
 
-                        default: trace('unknown tab, this is a bad thing.');
+                        default: Main.Trace(ERROR, 'unknown tab, this is a bad thing.');
                     }
 
 
@@ -148,6 +243,45 @@ class MainView extends VBox {
         };
         dialog.showDialog();
     }
+
+    private function doLanguageStuff() {
+        //-------------
+        //   menubar
+        //-------------
+        File.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.file.title", null); 
+        NewCutscene.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.file.newcutscene", null);
+        LoadCutscene.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.file.loadcutscene", null);
+        SaveCutscene.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.file.savecutscene", null);
+        SaveCutsceneSEPERATE.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.file.savecutsceneas", null);
+        QuitEditor.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.file.quiteditor", null);
+
+        Meta.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.meta.title", null);
+        MetaFPS.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.meta.fps", null);
+        MetaTF.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.meta.tf", null);
+
+        Os.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.onionskinning.title", null);
+        OnionSkinToggle.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.onionskinning.enabled", null);
+        OsPreFrames.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.onionskinning.preframes", null);
+        OsPostFrames.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.onionskinning.postframes", null);
+
+        View.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.view.title", null);
+        ToggleUIDarkMode.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.view.tdarkmode", null);
+
+        
+        PlayCutscene.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.play", null);
+        TestCutscene.text = Language.getTranslatedKey("debugger.cutscenemaker.menubar.test", null);
+
+        //-------------
+        //   objects
+        //-------------
+        objectsFrame.text = Language.getTranslatedKey("debugger.cutscenemaker.objects.frame.label", null);
+        addNewCutsceneObject.text = Language.getTranslatedKey("debugger.cutscenemaker.objects.frame.button", null);
+
+        //-------------
+        //   timeline
+        //-------------
+        TL_Label.text = Language.getTranslatedKey("debugger.cutscenemaker.timeline.label", null);
+    }
 }
 
 @:build(haxe.ui.macros.ComponentMacros.build("assets/views/Cutscene_PropertiesEditor.xml"))
@@ -166,7 +300,7 @@ class MyMenu extends Menu {
         super();
 
         onMenuSelected = (e:MenuEvent)->{
-            trace(e.menuItem.id);
+            Main.Trace(INFO, e.menuItem.id);
             if(onSelect!=null) onSelect(e.menuItem.id);
         };
     }

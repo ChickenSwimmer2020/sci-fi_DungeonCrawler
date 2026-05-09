@@ -18,7 +18,6 @@ class Breaker extends SpecialTile {
                 HUDSubstate.instance.openSubState(popup);
             },
             Language.getTranslatedKey("game.specialtile.breaker.interact", null)=>()->{
-                FlxG.sound.play('${Paths.paths.get('sfx')}/breakerpull.${#if(html5)'mp3'#else'ogg'#end}');
                 animation.play('pull');
             }
         ];
@@ -33,13 +32,12 @@ class Breaker extends SpecialTile {
         animation.add("default", [0], 0, true);
         animation.add("pull", [1,2,3], 36, false);
         animation.add("pulled", [4], 0, true);
-        animation.play('default');
+        animation.play('default', true, false, 0);
         updateHitbox();
 
         animation.onFinish.add((_)->{
             switch(_) {
                 case "pull":
-                    
                     screenShakeShader=new ScreenShake();
                     screenShakeShader.intensity.value=[0.01];
                     screenShakeShader.speed.value=[120.0];
@@ -57,12 +55,20 @@ class Breaker extends SpecialTile {
                     });
 
                     FlxG.sound.music.volume = 1;
+                    Music.stopLoops(true); //TODO: seperate function for stopping looped sound effects
+                    Music.stopMusic();
                     loopedMusicObject.kill();
-                    FlxG.sound.music.kill();
-                    Music.playOnce("ProtocolValidation", "HitCutscene", "hitcutscene", "mainloop", ()->{ //TODO: fix, broken for some reason.
-                        GameState.beginCountdown();
+                    Music.playSfx('breakerpull', false, null); //have to do this after it calls stopLoops because stopLoops effects playSfx.
+                    Music.playOnceMusic("ProtocolValidation", "hitcutscene", "mainloop", ()->{
+                        Main.Trace(DEBUG, 'handing music over to other stuff');
                         Conductor.targetAudioObject = FlxG.sound.music;
                         Conductor.cameraBopRate = 2;
+                        Conductor.bopCamera = true;
+                        GameState.beginCountdown();
+                        Music.onSectionReachedMusic('looptense30s', ()->{
+                            Conductor.additionalBopOnSection=true;
+                            Conductor.cameraBopRate = 1;
+                        });
                     });
 
                     Conductor.targetAudioObject = Music.activeMusicObjects.get('HitCutscene');
@@ -80,11 +86,11 @@ class Breaker extends SpecialTile {
     var shaderTime:Float=0;
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        if(screenShakeShader!=null){
+        if(screenShakeShader!=null && !GameMap.isDying){ //freeze the shader when player dies.
             shaderTime+=FlxG.elapsed;
             screenShakeShader.iTime.value = [shaderTime];
             screenShakeShader.intensity.value=[FlxMath.lerp(0.0, screenShakeShader.intensity.value[0], Math.exp(-elapsed * 3.125 * 1 * 0.5))];
-        }                        
+        }
 
         #if debug
             FlxG.watch.addQuick("DistanceBetween Value:", FlxMath.distanceToPoint(this, GameMap.instance.plr?.getGraphicMidpoint()).clampf(0, 100));

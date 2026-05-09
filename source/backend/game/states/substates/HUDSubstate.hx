@@ -26,9 +26,9 @@ enum abstract PotionType(String) from String to String {
     var NONE="NONE";
     public static function getPotionEffect(type:String) {
         switch(type) {
-            case HEALTH: trace('used health potion');
+            case HEALTH: Main.Trace(INFO, 'used health potion');
             case NONE: //donothing.
-            default: trace("test");
+            default: Main.Trace(DEBUG, "test");
         }
     }
 }
@@ -78,6 +78,7 @@ enum abstract WeaponType(String) from String to String{
     var NULL="NULL";
 }
 typedef Item = {
+    @:optional var lastSlot:Null<Int>;
     var type:OneOfTwo<ItemType,PotionType>;
     @:optional var weaponType:WeaponType;
     @:optional var gunType:GunType;
@@ -120,9 +121,9 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
             if(item.consumable==true){
                 if(((item.consumableType==SHOT||(item.consumableType==GLASS||item.consumableType==BOTTLE)||item.isPotion))){
                     RightClickOptions.push("Drink");
-                    RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                    RightClickFunctions.push(
                         ()->{
-                            #if(debug&&(windows||hl)) Main.LOG('player has drank something.'); #end
+                            #if(debug) Main.Trace(DEBUG, 'player has drank something.'); #end
                             onItemUsed("drink", curItem);
                             unloadItem();
                         }
@@ -130,9 +131,9 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
                 }
                 if((item.consumableType==CRUMB||(item.consumableType==SNACK||item.consumableType==MEAL))){
                     RightClickOptions.push("Eat");
-                    RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                    RightClickFunctions.push(
                         ()->{
-                            #if(debug&&(windows||hl)) Main.LOG('player has eaten something.'); #end
+                            #if(debug) Main.Trace(DEBUG, 'player has eaten something.'); #end
                             onItemUsed("consume", curItem);
                             unloadItem();
                         }
@@ -169,7 +170,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
             object.setGraphicSize(SIZE, SIZE);
             object.updateHitbox();
             add(object);
-            Main.showError("RENDERFAILURE", item);
+            Main.showError("RENDERFAILURE", item, null, haxe.CallStack.toString(haxe.CallStack.callStack()));
         }
     }
     override public function update(elapsed:Float) {
@@ -180,6 +181,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
             if(((FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressed)) && !optionsOpen //if the options menu is open we dont wanna try and grab the item.
             ) {
                 if(curItem!=null && (Main.curHeldItem==null && hasItem)) {
+                    curItem.lastSlot = Player.instance.inventory.slots.indexOf(this);
                     Main.curHeldItem=curItem;
                     unloadItem();
                     onItemMoveStart();
@@ -192,7 +194,7 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
             if(((FlxG.mouse.overlaps(this)&&FlxG.mouse.justPressedRight)) && hasItem==true
             ) {
                 openRightClickMenu();
-                #if(debug&&(windows||hl)) Main.LOG('attempting right click menu'); #end
+                #if(debug) Main.Trace(DEBUG, 'attempting right click menu'); #end
             }
         }
 
@@ -217,9 +219,9 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
         if(item?.consumable==true){ //null safety hopefully.
             if(((item?.consumableType==SHOT||(item?.consumableType==GLASS||item?.consumableType==BOTTLE)||item?.isPotion))){
                 RightClickOptions.push("Drink");
-                RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                RightClickFunctions.push(
                     ()->{
-                        #if(debug&&(windows||hl)) Main.LOG('player has drank something.'); #end
+                        #if(debug) Main.Trace(DEBUG, 'player has drank something.'); #end
                         onItemUsed("drink", curItem);
                         unloadItem();
                     }
@@ -227,9 +229,9 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
             }
             if((item?.consumableType==CRUMB||(item?.consumableType==SNACK||item?.consumableType==MEAL))){
                 RightClickOptions.push("Eat");
-                RightClickFunctions.push( //TODO: checks to see if player is in hardmode and decrease hunger otherwise increase health by a small ammount (hunger and thirst are a hard difficulty exclusive)
+                RightClickFunctions.push(
                     ()->{
-                        #if(debug&&(windows||hl)) Main.LOG('player has eaten something.'); #end
+                        #if(debug) Main.Trace(DEBUG, 'player has eaten something.'); #end
                         onItemUsed("consume", curItem);
                         unloadItem();
                     }
@@ -334,11 +336,19 @@ class HUDSubstate extends FlxSubState {
             };
             slot.onItemUsed = (action, item)->{
                 switch(action){
-                    case "consume": inventory[slots.indexOf(slot)] = "EMPTY";
-                    case "drink": inventory[slots.indexOf(slot)] = "EMPTY";
+                    case "consume":
+                        inventory[slots.indexOf(slot)] = "EMPTY";
+                        //if(Player.instance.difficulty == "HARDMODE" || Player.instance.difficulty == "SURVIVAL") {
+                        //    //add hunger
+                        //}else Player.instance.health+=Flags.DIFFSPECS.get(Player.instance.difficulty.toUpperCase()).CONSUMABLEHEALTHGAIN;
+                    case "drink":
+                        inventory[slots.indexOf(slot)] = "EMPTY";
+                        //if(Player.instance.difficulty == "HARDMODE" || Player.instance.difficulty == "SURVIVAL") {
+                        //    //add thirst
+                        //}else Player.instance.health+=Flags.DIFFSPECS.get(Player.instance.difficulty.toUpperCase()).CONSUMABLEHEALTHGAIN;
 
                     case "drop": inventory[slots.indexOf(slot)] = "EMPTY"; //so the slot doesnt get IMMEDIATELY overwritten by inventory reloading items constantly.
-                    default: #if(debug&&(windows||hl)) Main.LOG('unknown action tyep $action on $item'); #end
+                    default: #if(debug) Main.Trace(WARN, 'unknown action type $action on $item'); #end
                 }
             }
             index++;
@@ -371,7 +381,7 @@ class HUDSubstate extends FlxSubState {
             //create the small graphic that follows the cursor when holding an item
             if(Main.heldItemGraphic==null) {
                 Main.heldItemGraphic = new FlxSprite(FlxG.mouse.viewX, FlxG.mouse.viewY);
-                #if(debug&&(windows||hl)) Main.LOG(Main.curHeldItem); #end
+                #if(debug) Main.Trace(DEBUG, Main.curHeldItem); #end
                 if(#if (html5) Paths.image('ui/items', Main.curHeldItem.item)!=null #else FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))#end) {
                     Main.heldItemGraphic.loadGraphic(Paths.image('ui/items', Main.curHeldItem.item));
                     Main.heldItemGraphic.setGraphicSize(32, 32);
@@ -382,7 +392,6 @@ class HUDSubstate extends FlxSubState {
             }else{
                 Main.heldItemGraphic.setPosition(FlxG.mouse.viewX+16, FlxG.mouse.viewY);
                 if(!fullOpen) {
-                    //TODO: make the item move back to the last slot it was in instead of the first available slot.
                     Pickup.ExternalsendToInventory(Main.curHeldItem); //send to the first available slot in the inventory.
                     Main.curHeldItem=null; //doing this should automatically destroy the graphic, if im correct.
                 }

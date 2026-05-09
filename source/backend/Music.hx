@@ -43,8 +43,8 @@ class Music {
      * Heres a little reminder, dont include the song postfix within the path, as the game engine AUTOMATICALLY swaps it to what we want at runtime.
      */
     public static final musicInfos:Map<String, MusicInfo>=[
-        "CellCompilation"=>{
-            path: '${Paths.paths.get('music')}/CellCompilation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+        "CellCompilation"=>{ //(Main Menu Theme)
+            path: 'assets/audio/music/CellCompilation-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "CellCompilation",
             name: "Cell Compilation",
             artist: "ChickenSwimmer2020",
@@ -54,8 +54,8 @@ class Music {
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 185
         },
-        "ProtocolValidation"=>{
-            path: '${Paths.paths.get('music')}/ProtocolValidation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+        "ProtocolValidation"=>{ //(Security Theme)
+            path: 'assets/audio/music/ProtocolValidation-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "ProtocolValidation",
             name: "Protocol Validation",
             artist: "ChickenSwimmer2020",
@@ -71,8 +71,8 @@ class Music {
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 175
         },
-        "SubLayers"=>{
-            path: '${Paths.paths.get('music')}/SubLayers-p${#if(sys)'.ogg'#else'.mp3'#end}',
+        "SubLayers"=>{ //(Idle Theme)
+            path: 'assets/audio/music/SubLayers-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "SubLayers",
             name: "SubLayers",
             artist: "ChickenSwimmer2020",
@@ -91,8 +91,8 @@ class Music {
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 109
         },
-        "PowerCells"=>{
-            path: '${Paths.paths.get('music')}/PowerCells-p${#if(sys)'.ogg'#else'.mp3'#end}',
+        "PowerCells"=>{ //(Exposition Theme)
+            path: 'assets/audio/music/PowerCells-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "PowerCells",
             name: "PowerCells",
             artist: "ChickenSwimmer2020",
@@ -104,7 +104,27 @@ class Music {
             ],
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 100
-        }
+        },
+        "lithiumdegredation"=>{ //(Death Theme)
+            path: 'assets/audio/music/lithiumdegredation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "lithiumdegredation",
+            name: "Lithium Degredation",
+            artist: "ChickenSwimmer2020",
+            sections: [],
+            versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
+            BPM: 100
+        },
+        "miscalculation"=>{ //(Death Theme (Relocation Failed Death EasterEgg))
+            path: 'assets/audio/music/miscalculation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "miscalculation",
+            name: "Miscalculation",
+            artist: "ChickenSwimmer2020",
+            sections: [],
+            versionInfo: {NewestVersion: "f", OldestVersion: "f", AvailableVersions: ["f"]},
+            BPM: 90
+        },
+        //"colbaltenhancement"=>{ //(Low Health Theme (health under 50%))
+        //}
     ];
     /**
      * if the correct path is input for a song, it will automatically replace the postfix with whatever the default/requested version is
@@ -126,9 +146,21 @@ class Music {
                 truePostFix = songInfo.versionInfo.AvailableVersions[0]; //the first one is always the newest.
             }
         }
-        trace('returned path from ResolvePostfix: ${Paths.paths.get('music')}/$name-$truePostFix.${#if(sys)'ogg'#else'mp3'#end}');
-        return '${Paths.paths.get('music')}/$name-$truePostFix.${#if(sys)'ogg'#else'mp3'#end}';
+        Main.Trace(INFO, 'returned path from ResolvePostfix: ${Paths.getPath('audio/music', '$name-$truePostFix', #if(sys)'ogg'#else'mp3'#end)}');
+        return '${Paths.getPath('audio/music', '$name-$truePostFix', #if(sys)'ogg'#else'mp3'#end)}';
     }
+
+    public static function playSfx(name:String, looped:Bool=false, ?onComplete:Void->Void) {
+        var sound:FlxSound = new FlxSound();
+        sound.loadEmbedded(Paths.sfx(name), looped, true, ()->{
+            activeSoundEffects.remove(name);
+            if(onComplete!=null) onComplete();
+        });
+        activeSoundEffects.set(name, sound);
+        sound.play();
+    }
+
+
     /**
      * active playing music file of FlxG.sound.music.
      */
@@ -137,6 +169,7 @@ class Music {
      * active music objects that are not running based off of FlxG.sound.music.
      */
     public static var activeMusicObjects:Map<String,FlxSound>=[];
+    public static var activeSoundEffects:Map<String, FlxSound>=[];
     /**
      * removes a looping audio file found in `activeMusicObjects`
      * @param name what to remove
@@ -150,7 +183,14 @@ class Music {
             object = null;
             activeMusicObjects.remove(name);
             return activeMusicObjects.get(name)==null;
-        }else return false;
+        }else if(activeSoundEffects.get(name)!=null){
+            var object:FlxSound = activeSoundEffects.get(name);
+            object.kill();
+            object.destroy();
+            object = null;
+            activeSoundEffects.remove(name);
+            return activeSoundEffects.get(name)==null;
+        }return false;
     }
     /**
      * Start a looping audio track from a song, name, and start/end sections.
@@ -179,6 +219,9 @@ class Music {
         );
     }
     static var startedChecker:Bool=false;
+    static var checkingForMusicSection:Bool=false;
+    static var MUSIC_targetFunctionSection:String="";
+    static var MUSIC_targetFunctionSectionFunc:Void->Void;
     /**
      * just for updating the invidual audio objects, since i cant automatically update them from FlxG, i call Event.ENTER_FRAME in Main to update these manually.
      * @param elapsed 
@@ -201,7 +244,23 @@ class Music {
                     audio.time = audio.loopTime;
                 }
             }else{
-                trace('audio Object $name tried to update, but was null! (should be destroyed)');
+                Main.Trace(ERROR, 'audio Object $name tried to update, but was null! (should be destroyed)');
+            }
+        }
+        for(name => sfx in activeSoundEffects) {
+            if(sfx!=null) {
+                sfx.update(elapsed);
+            }else{
+                Main.Trace(ERROR, 'attempted to update SFX object $name but was null! (should be destroyed)');
+            }
+        }
+
+
+        if(checkingForMusicSection) {
+            if(FlxG.sound.music.time >= getLoopSection(currentlyPlayingSong, MUSIC_targetFunctionSection)){
+                Main.Trace(INFO, 'reached section $MUSIC_targetFunctionSection in $currentlyPlayingSong');
+                if(MUSIC_targetFunctionSectionFunc!=null) MUSIC_targetFunctionSectionFunc();
+                checkingForMusicSection = false;
             }
         }
     }
@@ -228,8 +287,18 @@ class Music {
                 getLoopSection(songInfo.internalName, endSection??null)
             )
         );
-        trace(activeMusicObjects);
+        Main.Trace(DEBUG, activeMusicObjects);
     }
+
+    public static function onSectionReached() {} //TODO
+
+    public static function onSectionReachedMusic(s:OneOfTwo<String,Float>, f:Void->Void) {
+        Main.Trace(INFO, 'added listener for section $s in $currentlyPlayingSong');
+        MUSIC_targetFunctionSectionFunc = f;
+        MUSIC_targetFunctionSection = s;
+        checkingForMusicSection=true;
+    }
+
     private static var lastMusicVolume:Float=0.0;
     /**
      * play an audio file once, starting from startSection, and ending at endSection. also allows for an onFinish callback. (USES FlxG.sound.music!)
@@ -242,36 +311,85 @@ class Music {
     public static function playOnceMusic(song:String, startSection:OneOfTwo<String,Float>, endSection:OneOfTwo<String,Float>=null, onFinish:Void->Void) {
         lastMusicVolume=FlxG.sound.music.volume;
         var songInfo:MusicInfo = musicInfos.get(song);
-        if(songInfo==null) return;
+        if(songInfo==null){
+            Main.Trace(ERROR, 'null song info for $song');
+            return;
+        }
         startedChecker=false;
         currentlyPlayingSong = songInfo.internalName; //automatically do this because i realized that i should do it.
-        FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), 1.0, true);
+        FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), 1.0, false);
         FlxG.sound.music.onComplete = onFinish;
-        FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection);
+        FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection); //just realized this is useless :/
         FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection);
-        FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??null);
+        FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??FlxG.sound.music.length);
         FlxG.sound.music.volume = lastMusicVolume; //so dynamic music doesnt bug in the pause menu.
     }
+
+    public static function makeSureThatSoundsArentLooping() {
+        for(name=>audio in activeSoundEffects) {
+            Main.Trace(INFO, '$name is ${audio.playing?'playing':'not playing'}');
+            audio.stop();
+        }
+    }
+
+    public static function resetPitch() {
+        for(sfx in activeSoundEffects) if(sfx.pitch!=Flags.DEFAULT_PITCH) sfx.pitch = Flags.DEFAULT_PITCH;
+        for(music in activeMusicObjects) if(music.pitch!=Flags.DEFAULT_PITCH) music.pitch = Flags.DEFAULT_PITCH;
+        if(Conductor.pitch!=Flags.DEFAULT_PITCH) Conductor.pitch = Flags.DEFAULT_PITCH;
+        if(FlxG.sound.music.pitch!=Flags.DEFAULT_PITCH) FlxG.sound.music.pitch = Flags.DEFAULT_PITCH;
+    }
+
     /**
      * play looping music (uses FlxG.sound.music)
      * @param song song to play
      * @param startSection what section to start playing from
      * @param endSection what section to end at and loop back to `startSection`
      */
-    public static function playLoopingMusic(song:String, startSection:OneOfTwo<String, Float>, endSection:OneOfTwo<String, Float>) {
+    public static function playLoopingMusic(song:String, ?startSection:OneOfTwo<String, Float>=null, ?endSection:OneOfTwo<String, Float>=null) {
         var songInfo:MusicInfo = musicInfos.get(song);
         if(songInfo==null) return;
         startedChecker=false;
-        //TODO: better detection system for moving between looping parts and non-looping parts of the same song.
         //if(currentlyPlayingSong!=songInfo.internalName) { //only change the song if the current playing music is not what we want.
             currentlyPlayingSong = songInfo.internalName;
             Conductor.BPM = songInfo.BPM;
             FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), 1.0, true);
-            FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection);
-            FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection);
-            FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection);
+            FlxG.sound.music.looped=true; //apparently this doesnt get properly set after doDeathGlitch??
+            FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection??0);
+            FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection??0);
+            FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??FlxG.sound.music.length);
+
+            Main.Trace(INFO, 'looping music "$song" should loop: ${FlxG.sound.music.looped}');
         //}
     }
+    private static final GLITCH_TIME:Int = 30;
+    private static final AUDIOPITCHVARIENCE:Float = FlxG.random.float(0.95, 1.15); //just for some varience on the death themes n shtuff.
+    public static function doDeathGlitch() {
+        Conductor.pitch = AUDIOPITCHVARIENCE; //jsut as a precaution
+        FlxG.sound.music.pitch=AUDIOPITCHVARIENCE;
+        for(sfx in activeSoundEffects) {
+            Main.Trace(DEBUG, activeSoundEffects);
+            //sfx.destroy(); //TODO: make this ACTUALLY fucking work instead of breaking everything by looping sound effects that shouldnt loop in the first fucking place. im going to fucking crash out so goddamn hard over this one stupid fucking line of code istg.
+            sfx.pitch = AUDIOPITCHVARIENCE;
+            sfx.loopTime = sfx.time;
+            sfx.endTime = (sfx.loopTime+GLITCH_TIME);
+            sfx.looped = true;
+            sfx.onComplete=null;
+        }
+        for(looping in activeMusicObjects) {
+            //if(looping.playing) {
+                looping.pitch = AUDIOPITCHVARIENCE;
+                looping.loopTime = looping.time;
+                looping.endTime = (looping.time+GLITCH_TIME);
+                looping.looped=true;
+            //}
+        }
+        //if(FlxG.sound.music.playing){
+            FlxG.sound.music.onComplete = null; //cancel the onComplete stuff. maybe this will fix it?
+            FlxG.sound.music.loopTime = FlxG.sound.music.time;
+            FlxG.sound.music.endTime = (FlxG.sound.music.time+GLITCH_TIME);
+            FlxG.sound.music.looped=true;
+        //}
+    }   
     public static function deathFadeOut(?time:Float=1.1231) {
         overrideSpecialTileAudioVolume=true;
         stopLoops();
@@ -307,7 +425,7 @@ class Music {
         var songInfo:MusicInfo = musicInfos.get(song);
         if(songInfo==null) return;
         startedChecker=false;
-        trace('current song $currentlyPlayingSong ${currentlyPlayingSong==songInfo.internalName?"is":"is not"} equL to song (no Path) "${songInfo.internalName}"');
+        Main.Trace(INFO, 'current song $currentlyPlayingSong ${currentlyPlayingSong==songInfo.internalName?"is":"is not"} equL to song (no Path) "${songInfo.internalName}"');
         if(currentlyPlayingSong!=songInfo.internalName || section!="") { //only override if the current song isnt what we want, or the section is forced.
             currentlyPlayingSong = songInfo.internalName;
             FlxG.sound.playMusic(songInfo.path, 1.0, (loopSection!=""&&looping==true)); 
@@ -321,17 +439,38 @@ class Music {
      */
     public static function stopLoops(soft:Bool=true) {
         if(soft){
+            Main.Trace(DEBUG, activeMusicObjects);
             for(name=>object in activeMusicObjects){
                 if(object!=null){
-                    object.volume=0;
-                    object.pause();
+                    if(object.playing){
+                        object.volume=0;
+                        object.pause();
+                    }else{
+                        Main.Trace(DEBUG, '$name == $object\nshouldnt be null');
+                    }
                 }else{
-                    trace('audio Object "$name" tried to stop, but was null! (should be destroyed)');
+                    Main.Trace(ERROR, 'audio Object "$name" tried to stop, but was null! (should be destroyed)');
+                }
+            }
+            for(name=>object in activeSoundEffects){
+                if(object!=null){
+                    if(object.playing){
+                        if(object.looped) object.looped=false;
+                        object.volume=0;
+                        object.pause();
+                    }else{
+                        Main.Trace(DEBUG, '$name == $object\nshouldnt be null');
+                    }
+                }else{
+                    Main.Trace(ERROR, 'audio Object "$name" tried to stop, but was null! (should be destroyed)');
                 }
             }
         }else stopLoopsUnsafe();
     }
-    public static inline function stopLoopsUnsafe() for(name=>object in activeMusicObjects) removeLooping(name);
+    public static inline function stopLoopsUnsafe(){
+        for(name=>object in activeMusicObjects) removeLooping(name);
+        for(name=>object in activeSoundEffects) removeLooping(name);
+    }
     /**
      * stop all currently playing audio, and force play a new song if requested.
      */
@@ -390,8 +529,7 @@ class DynamicMusic {
             var random:Int = FlxG.random.int(0, Lambda.count(info.sections));
             for(choice in [for(section=>time in info.sections) section]) {
                 if(choice == [for(section=>time in info.sections) section][random]) {
-                    trace(choice);
-                    trace([for(section=>time in info.sections) section][random+1]);
+                    Main.Trace(DEBUG, 'chose $choice in dynamic music $curDynamicSong, next section should be ${[for(section=>time in info.sections) section][random+1]}');
                     Music.playOnceMusic(song, choice, [for(section=>time in info.sections) section][random+1], ()->{
                         if(onSectionEnd!=null) onSectionEnd();
                         playRandomSection(song);

@@ -17,7 +17,7 @@ class AlphabetDebugger extends FlxUIState{
         super.update(elapsed);
         //READING_textInputOther.visible = READING_textInputOther.active = (tabs_radio_1.selectedId=="OTHER"||tabs_radio_1.selectedId=="INVENTORY");
 
-        if(FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(()->new MainMenuState(true));
+        if(FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(MainMenuState.new);
     }
 }
 #end

@@ -79,23 +79,48 @@ final class Functions {
      * @return Milliseconds.
      */
     public static inline function MSCSToMS(M:Int, S:Int, CS:Int):Float return (M*60*1000)+(S*1000)+(CS*10);
-
-    public static function allKeysPressed(keys:Array<FlxKey>):Bool {
-        var curPressed:Array<Bool>=[];
+    /**
+     * check if all the given keys are pressed at the same time
+     * @param keys keys to check
+     * @param inverse should we check if all the keys are pressed, or none of them are pressed.
+     * @return Bool if all the keys are pressed
+     */
+    public static function allKeysPressed(keys:Array<FlxKey>, inverse:Bool=false):Bool {
+        var curPressed:Array<Bool> = new Array<Bool>(); //we dont have to set this by default, so we'll use the normal start sys.
         for(key in keys) {
             if(curPressed.length<keys.length) curPressed.push(false);
-            if(FlxG.keys.anyPressed([key])) curPressed[keys.indexOf(key)] = true;
-            else curPressed[keys.indexOf(key)] = false;
+            if(FlxG.keys.anyPressed([key])) curPressed[keys.indexOf(key)] = inverse?false:true;
+            else curPressed[keys.indexOf(key)] = inverse?true:false;
         }
-        for(item in curPressed) {
-            if(item==true) continue;
+        for(item in curPressed) item==(inverse?false:true)?continue:return(inverse?true:false); //optimization!
+        return inverse?false:true;
+    }
+    /**
+     * check through an array of things, if any are true, return true, else return false.
+     * @param toCheck things to check
+     * @return Bool if any of them are true
+     */
+    public static function anyTrue(toCheck:Array<Bool>):Bool {
+        for(thingy in toCheck) {
+            if(thingy) return true;
             else return false;
         }
-        return true;
+        return false;
+    }
+
+    /**
+     * convert from savefile's controls array storage, to internal map controls storage.
+     * @param i 
+     * @return Map<String, Array<Int>>
+     */
+    public static function convertFromControlsArray(i:Array<{c:String,keys:Array<FlxKey>}>):Map<String, Array<Int>> {
+        var out:Map<String, Array<Int>>=new Map<String, Array<Int>>();
+        for(entry in i) out.set(entry.c, entry.keys);
+        return out;
     }
 }
 final class Additions{
-    private static final fileExtensionsList:Array<String>=[ //TODO: find automatic way to do this.
+    private static final fileExtensionsList:Array<String>=[
         ".png", ".json", ".xml", #if(html5)".mp3",#else".ogg",#end ".weapon",
         ".lang", ".ttf"
     ];
@@ -237,12 +262,24 @@ final class Additions{
     }
 
     //arrays
+    /**
+     * combine two arrays
+     * @param a original array
+     * @param b secondary array
+     * @return both arrays combined, a then b
+     */
     public static function combine(a:Array<Dynamic>, b:Array<Dynamic>):Array<Dynamic> {
         var returnArray:Array<Dynamic>=[];
         for(item in a) returnArray.push(item);
         for(item in b) returnArray.push(item);
         return returnArray;
     }
+    /**
+     * clear an array
+     * @param a original array
+     * @return it just returns an empty array lol.
+     */
+    public static function clear(a:Array<Dynamic>):Array<Dynamic> return a=[];
     /**
      * Specifically made for the inventory system as im implementing item movement between slots in a very basic way now.
      * @param a inventory array (must be Array<OneOfTwo<String, Item>>)
@@ -268,9 +305,10 @@ final class Additions{
     }
 
     //actual objects.
-    public static function center(spr:FlxSprite, on:FlxObject):FlxSprite {
-        spr.x = on.x+on.width/2-spr.width/2;
-        spr.y = on.y+on.height/2-spr.height/2;
+    public static function center(spr:FlxSprite, on:FlxObject, ?offs:FlxPoint):FlxSprite {
+        if(offs==null) offs=FlxPoint.weak(0, 0);
+        spr.x = (on.x+on.width/2-spr.width/2)+(offs.x);
+        spr.y = (on.y+on.height/2-spr.height/2)+(offs.y);
         return spr;
     }
 }

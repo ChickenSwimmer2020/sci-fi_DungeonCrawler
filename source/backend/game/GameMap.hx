@@ -1,11 +1,13 @@
 package backend.game;
 
+import backend.shaders.Invert;
 import backend.game.states.DeathState;
 
 class GameMap extends FlxTypedGroup<Dynamic> {
+    public static function reset() {
+        isDying=false;
+    }
     public static var isDying:Bool=false;
-    public static var death_screenShakeShader:ScreenShake;
-    public static var death_screenStaticShader:ScreenShake;
 
     public static var instance:GameMap;
     public static final TILE_SIZE:Int = 16; //we can avvoid MAGIC numbers
@@ -37,35 +39,45 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 Conductor.bopCamera=false;
                 isDying=true;
 
-                death_screenShakeShader = new ScreenShake();
-                death_screenStaticShader = new ScreenShake(); //this shader has both a static and shake mode lol.
-                death_screenStaticShader.staticMode.value=[true];
+                for(group in ([tiles, tileObjects, enemies, plr]:Array<Dynamic>)) {
+                    //TODO: freeze all logic
+                    if(group is Array) {
+                        var a:Array<Dynamic>=cast(group); //because i have to do this.
+                        for(object in a) {
+                            if(Reflect.hasField(object, 'frozen')) {
+                                Reflect.setProperty(object, 'frozen', true);
+                            }else{
+                                if(Reflect.hasField(object, 'velocity')) {
+                                    Reflect.setProperty(object, 'velocity', FlxPoint.weak(0, 0));
+                                }
 
-                if(Main.saveFile.data.shaders){
-                    for(filter in [death_screenShakeShader, death_screenStaticShader]) {
-                        for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
-                            cam.filters.push(new ShaderFilter(filter));
+
+                            }
+                        }
+                    }else{
+                        if(Reflect.hasField(group, 'velocity')) {
+                            Reflect.setProperty(group, 'velocity', FlxPoint.weak(0, 0));
+                        }
+                        if(group is Player) {
+                            var s:Player = cast(group);
+                            s.freeze();
                         }
                     }
                 }
 
-                Functions.wait(0.0001, (_)->{
-                    death_screenShakeShader.intensity.value = [(death_screenShakeShader.intensity.value[0]+0.0005)];
-                    death_screenStaticShader.intensity.value = [(death_screenStaticShader.intensity.value[0]+0.0001)];
-                    death_screenShakeShader.speed.value = [(death_screenShakeShader.speed.value[0]+0.05)];
-                    death_screenStaticShader.speed.value = [(death_screenStaticShader.speed.value[0]+0.005)];
-                }, 51231);
-                //TODO: Death Sound
-                Functions.wait((1.1231*2), (_)->{ //wait for two times the thing, this is for the death sound :3
-                    Music.deathFadeOut();
-                    for(cam in [Main.camGame, FlxG.camera]){
-                        Player.overrideCameraZoom=true;
-                        //RELOCATION FAILED REFERENCE.
-                        FlxTween.tween(cam, {zoom: 0.02, angle: 90}, 1.1231, {ease: FlxEase.expoIn, onComplete: (_)->{ //zoom out and angle.
-                            Main.clearAllCameraFilters(); //clear all camera filters.
-                            FlxG.switchState(DeathState.new);
-                        }});
+                Music.doDeathGlitch();
+
+                if(#if(windows||hl)Main.saveFile.data.preferences.shaders#else Main.saveFile.data.shaders#end){
+                    for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
+                        cam.filters.push(new ShaderFilter(new Invert()));
                     }
+                }
+
+                Functions.wait(0.5, (_)->{ //wait for two times the thing, this is for the death sound :3
+                    Player.overrideCameraZoom=true;
+                    Music.stopMusic();
+                    Music.stopLoops(true);
+                    FlxG.switchState(DeathState.new);
                 });
             };
             add(new Pickup(0, 0, { //for testing.
@@ -120,7 +132,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                         tileToBeAdded.color=0x7100FF00;
                     #end
                     playerSpawnPoint=FlxPoint.weak(tileToBeAdded.x, tileToBeAdded.y);
-                    //createElevator() //TODO: elevator & stuff.
+                    //createElevator() 
                 case WALKABLEAREA: #if (debug) tileToBeAdded.color = 0xFF00FF00; #end
                 case BREAKER:
                     tileToBeAdded = new Breaker(0+(TILE_SIZE*x), 0+(TILE_SIZE*y), tileObjects);
@@ -138,20 +150,10 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         tileToBeAdded.camera=Main.camGame;
         return tileToBeAdded;
     }
-    var shaderItime:Float=0.0;
     override public function update(elapsed:Float) {
         super.update(elapsed);
         FlxG.watch.addQuick('player position:', plr?.getPosition());
         FlxG.watch.addQuick('word boundries:', FlxG.worldBounds);
-        shaderItime+=elapsed;
-        if(isDying) {
-            if(death_screenShakeShader!=null) { 
-                death_screenShakeShader.iTime.value = [shaderItime];
-            }
-            if(death_screenStaticShader!=null) { 
-                death_screenStaticShader.iTime.value = [shaderItime];
-            }
-        }
 
         for(row in tileObjects){
             for(tile in row){
@@ -175,11 +177,10 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                     for(bullet in plr?.weapon.activeProjectiles) {
                         var vx = Math.abs(Math.floor(bullet.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE));
                         var vy = Math.abs(Math.floor(bullet.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE));
-                        if(vx <= COLLISION_RADIUS && vy <= COLLISION_RADIUS){
-                            //TODO: fix bullets clipping through walls
+                        if((vx<=COLLISION_RADIUS&&vy<=COLLISION_RADIUS)||bullet.overlaps(tile)){ //if the bullet is either within collision distance, or on the tile.
                             FlxG.collide(bullet, tile, (d1, d2)->{
                                 bullet.forceRemoval();
-                                var effect:FlxSprite = new FlxSprite(bullet.x, bullet.y).loadGraphic(Paths.image('fx', 'Bullet_impact'), true, 16, 16); //TODO: real graphic
+                                var effect:FlxSprite = new FlxSprite(bullet.x, bullet.y).loadGraphic(Paths.image('fx', 'Bullet_impact'), true, 16, 16);
                                 effect.animation.add('hit', [0,1,2,3,4,5], 24, false, false, false);
                                 effect.animation.play('hit');
                                 effect.animation.onFinish.add((_)->{

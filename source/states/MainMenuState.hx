@@ -1,14 +1,30 @@
 package states;
+#if(debug)import debugging.Debugger;#end
+
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
     var buttons:Array<FlxButton>=[];
-    public function new(#if(debug)fromChooser:Bool=false#end) {
+    public function new() {
         super();
+
+        var vText:FlxText = new FlxText(0, 0, 0, '${Flags.VERSION_PREFIX}${Application.current.meta.get('version')}', 12, true);
+        add(vText);
+        vText.setPosition(FlxG.width-vText.width, FlxG.height-vText.height);
 
         logo=new FlxSprite(FlxG.width-500, 0).loadGraphic(Paths.image('ui/menu', 'logo'));
         logo.setGraphicSize(500, 200);
         logo.updateHitbox();
         add(logo);
+
+
+        var pod:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('ui/menu', 'pod'));
+        var char:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('ui/menu', 'char'));
+        char.center(pod, FlxPoint.weak(-85, 0));
+
+        add(char);
+        FlxTween.tween(char, {y: char.y+15}, 5.2314, {ease: FlxEase.circInOut, type: PINGPONG}); //TODO: bubbles.
+        add(pod);
+
         
         final onButtonClicked:Array<Void->Void>=[
             ()->{
@@ -19,11 +35,11 @@ class MainMenuState extends FlxState {
             },
             ()->{openSubState(new LoadGameSubstate());},
             ()->{openSubState(new OptionsMenuSubstate());},
-            ()->{#if(debug&&(windows||hl)) Main.LOG('gallery');#end},
-            ()->{#if(debug&&(windows||hl)) Main.LOG('achivements');#end},
+            ()->{#if(debug) Main.Trace(DEBUG, 'gallery');#end},
+            ()->{#if(debug) Main.Trace(DEBUG, 'achivements');#end},
             #if(windows||hl)()->{Sys.exit(1);}#end
         ];
-        Music.stopLoops();
+        Music.stopLoops(true);
         Music.playMusic("CellCompilation", true, "", true, "loop");
 
         for(i in 0...#if(windows||hl)6#else 5#end) {
@@ -40,70 +56,14 @@ class MainMenuState extends FlxState {
             add(button);
         }
 
-        //TODO: cool bg art
-
 
         #if (debug)
-            if(fromChooser) openSubState(new DebuggerChooser());
             var debuggerButton:FlxButton = new FlxButton(FlxG.width-(logo.width+80), 200, "", ()->{
-                openSubState(new DebuggerChooser());
+                //openSubState(new DebuggerChooser());
+                FlxG.switchState(Debugger.new);
             });
             debuggerButton.text = Language.getTranslatedKey("menu.debug.debugger", debuggerButton);
             add(debuggerButton);
         #end
     }
 }
-
-
-
-#if (debug)
-class DebuggerChooser extends FlxSubState {
-    final debuggerOptions:Map<String, Void->Void>=[
-        Language.getTranslatedKey("debugger.map.title", null) => ()->{
-            FlxG.switchState(MapDebugger.new);
-        },
-        Language.getTranslatedKey("debugger.testing", null)=>()->{
-            FlxG.switchState(()->new TestingState(false));
-        },
-        Language.getTranslatedKey("debugger.save.title", null)=>()->{
-            FlxG.switchState(SaveDebugger.new);
-        },
-        Language.getTranslatedKey("debugger.alphabet.title", null)=>()->{
-            FlxG.switchState(AlphabetDebugger.new);
-        },
-        Language.getTranslatedKey("debugger.error.title", null)=>()->{
-            FlxG.switchState(ErrorDebugger.new);
-        },
-        Language.getTranslatedKey("debugger.cutscenemaker.title", null)=>()->{
-            FlxG.switchState(CutsceneMaker.new/*CutSceneCreator.new*/);
-        },
-        //Language.getTranslatedKey("debugger.ui.title", null)=>()->{ //ill bring it back later.
-        //    FlxG.switchState(UIDebugger.new);
-        //}
-    ];
-    public function new() {
-        super();
-        var bg = add(new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xFF000000));
-        Reflect.setField(bg, "alpha", 0); //stupid that i have to do this but OKAY.
-        FlxTween.tween(bg, {alpha: 0.25}, 0.54212, {ease: FlxEase.expoOut});
-
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey('debugger.title', null), 48, true);
-        add(text);
-        text.screenCenter();
-        text.y=0;
-
-        var i:Int=0;
-        for(label => func in debuggerOptions) {
-            var button = add(new FlxButton((FlxG.width/2)-40, (FlxG.height/2-20/2-(20*Lambda.count(debuggerOptions)))+(40*i), label, func));
-            add(button);
-            i++;
-        }
-    }
-
-    override public function update(elapsed:Float) {
-        super.update(elapsed);
-
-        if(FlxG.keys.justPressed.ESCAPE) close();
-    }
-}
-#end

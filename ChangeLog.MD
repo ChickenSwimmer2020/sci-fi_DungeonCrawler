@@ -1,5 +1,27 @@
 # ChangeLog
 
+## Prototype Update_MAJOR 0.04 (Overhaul of a bunch of shit)
+
+> Saves are getting rewritten for specifically windows and hashlink, because FlxSave is a slow grandma.
+
+* Added `dump` folder to .gitignore
+* Moved `k8x12.ttf` to assets/fonts
+* Moved `k8x12L.ttf` to assets/fonts
+* Added `terminus.ttf` to assets/fonts
+* Updated `EN_US.lang`
+* Started making the new save system for Windows and Hashlink
+* Added lab BG for death screen
+* Added placeholder Menu Char
+* Added placeholder Menu Pod
+* Cutscene Editor is NO LONGER made with AI, it also doesnt work anymore.
+* Added Lithium Degredation
+* Added Miscalculation
+* Added typing sounds and terminal clicking for death screen
+* moved TODO's to the TODO.hx file.
+* bumped version number
+* added some stuff to additions.
+* bunch of other changes im too tired to put these in here, fight me.
+
 ## Prototype Update 0.03.9 (Starting work on maps)
 
 > Starting work on the new map system!

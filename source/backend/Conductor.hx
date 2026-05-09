@@ -1,13 +1,13 @@
 package backend;
 
 class Conductor {
-    public static var pitch:Float=1.0;
+    public static var pitch:Float=Flags.DEFAULT_PITCH;
     public static var BPM:Int=120;
 
     public static var bopCamera:Bool=false;
     public static var cameraBopRate:Int=4;
     public static var cameraBopStrength:Float=0.005;
-    public static var additionalBopOnSection:Bool=true;
+    public static var additionalBopOnSection:Bool=false;
 
     public static var targetAudioObject:FlxSound;
 
@@ -22,6 +22,9 @@ class Conductor {
     public static var onStepHit:Array<(Int)->Void>=[
         
     ];
+    public static var stepCrochet(get, never):Float;
+    public static function get_stepCrochet() return ((15000/BPM)/pitch); //does dividing by pitch work?
+
     public static var curMeasure:Int=0;
     public static var lastMeasure:Int=-1;
     public static var curBeat:Int=0;
@@ -29,13 +32,23 @@ class Conductor {
     public static var curStep:Int=0;
     public static var lastStep:Int=-1;
     public static inline function reset(){
+        pitch = Flags.DEFAULT_PITCH;
+        BPM=120;
+        bopCamera=additionalBopOnSection=false;
+        cameraBopRate=4;
+        cameraBopStrength=0.005;
+        targetAudioObject=null;
+        onCameraBop.clear();
+        onMeasureHit.clear();
+        onBeatHit.clear();
+        onStepHit.clear();
         curMeasure=curBeat=curStep=0;
         lastMeasure=lastBeat=curStep=-1;
     }
     public static function update(elapsed:Float) {
         if(targetAudioObject==null) {
             if(FlxG.sound.music==null) {
-                trace('Conductor attempted to init with unaccessable music object target!!\nThis is a bad thing.');
+                Main.Trace(WARN, 'Conductor attempted to init with inaccessable music object target!!');
             }else targetAudioObject=FlxG.sound.music;
         }
         pitch = Math.round(pitch * 100)/100;
@@ -100,6 +113,27 @@ class Conductor {
                 if(onMeasureHit!=null){
                     for(func in onMeasureHit) {
                         func(curMeasure);
+                    }
+
+                    if(bopCamera && additionalBopOnSection) {
+                        if(Main.camGame != null){
+                            for(target => camera in Main.cameras) {
+                                switch(target) {
+                                    case 'hud',"game","other": continue; //skip over them
+                                    default: camera.zoom+=(cameraBopStrength * ((Main.camHUD.zoom)*2)); //lets base this on camHUD actually.
+                                }
+                            }
+                            Main.camGameZoomIncrement += (cameraBopStrength * ((Main.camGame.zoom)*2));
+                            Main.camHUD.zoom += (cameraBopStrength*Main.camGame.zoom)/4;
+                        }else{
+                            FlxG.camera.zoom += cameraBopStrength;
+                            for(target => camera in Main.cameras) {
+                                switch(target) {
+                                    case 'hud',"game","other": continue; //skip over them
+                                    default: camera.zoom+=cameraBopStrength;
+                                }
+                            }
+                        }
                     }
                 }
             }

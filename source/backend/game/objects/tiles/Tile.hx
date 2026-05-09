@@ -1,6 +1,7 @@
 package backend.game.objects.tiles;
 
 class Tile extends FlxSprite {
+    public var bulletCollisionRect:FlxRect;
     public static var curImage:String="";
     final mapTiles:Map<String, Map<String, Int>> = [
         "fuck" => [
@@ -76,5 +77,11 @@ class Tile extends FlxSprite {
     private function initTileGraphic(image:String) {
         curImage=image;
         loadGraphic(Paths.tiles(curImage), true, 16, 16);
+        if(bulletCollisionRect!=null){
+            bulletCollisionRect.destroy();
+            bulletCollisionRect = new FlxRect(width/2, height/2, width/2, height/2); //not sure if thisll work
+        }else{
+            bulletCollisionRect = new FlxRect(width/2, height/2, width/2, height/2);
+        }
     }
 }

@@ -8,20 +8,28 @@ class TestingState extends GameState {
         FlxG.watch.addQuick("main file", Main.FILE);
 
         #if (debug)
-            if(LoadingFromSave==true){
+            if(LoadingFromSave!=true){ //FINALLY changed this back.
                 Save.createNewFile("fucker", null, ()->{ //proably should migrate to this new function.
-                    Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
+                    #if(windows||hl)
+                        Main.saveFile.readSaveFile('fucker');
+                    #else
+                        Save.readSaveFile('fucker'); //load controls, we'll use this more in the future
+                    #end
                     MapGenerator.generateMap(100, 100, 0);
                     add(MapGenerator.createMap('depth_0'));
                 });
             }else{
-                #if(debug&&(windows||hl)) Main.LOG('is this even working?'); #end
-                var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "depth_0");
+                #if(debug) Main.Trace(DEBUG, 'is this even working?'); #end
+                var map:GameMap = #if(windows||hl)Main.saveFile.getMap("depth_0") #else Save.getMapFromSaveFile(Main.FILE, "depth_0")#end;
                 add(map);
-                Save.readSaveFile(Main.FILE);
+                #if(windows||hl)
+                    Main.saveFile.readSaveFile(Main.FILE);
+                #else
+                    Save.readSaveFile(Main.FILE);
+                #end
             }
         #else
-            trace('not in a debug build. functionality disabled.\nHow\'d you even load this state??');
+            Main.Trace(INFO, 'not in a debug build. functionality disabled.\nHow\'d you even load this state??');
         #end
     }
 }

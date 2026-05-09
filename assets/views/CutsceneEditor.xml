@@ -10,14 +10,14 @@
             <menuitem id="QuitEditor" text="Quit" shortcutText="Ctrl+Q" />
         </menu>
 
-        <menu text="Meta">
+        <menu id="Meta" text="Meta">
             <hbox width="100%">
-                <label text="Frames Per Second" width="75%" verticalAlign="center" />
+                <label id="MetaFPS" text="Frames Per Second" width="75%" verticalAlign="center" />
                 <textfield id="FRAMESPERSECOND" width="25%" restrictChars="0-9" validator="required" text="60" />
             </hbox>
 
             <hbox width="100%">
-                <label text="Total Frames" width="75%" verticalAlign="center" />
+                <label id="MetaTF" text="Total Frames" width="75%" verticalAlign="center" />
                 <textfield id="TOTALFRAMESINPUT" width="25%" restrictChars="0-9" validator="required" text="120" />
             </hbox>
             <menuseparator />
@@ -34,21 +34,21 @@
             <menuoptionbox text="Item 12" group="somegroup" />
         </menu>
 
-        <menu text="OnionSkinning">
+        <menu id="Os" text="Onion Skinning">
             <menucheckbox id="OnionSkinToggle" text="Enabled" selected="true" />
 
             <hbox width="100%">
-                <label text="Pre Frames" width="75%" verticalAlign="center" />
+                <label id="OsPreFrames" text="Pre Frames" width="75%" verticalAlign="center" />
                 <number-stepper id="OnionSkinPreframes" pos="2" />
             </hbox>
 
             <hbox width="100%">
-                <label text="Post Frames" width="75%" verticalAlign="center" />
+                <label id="OsPostFrames" text="Post Frames" width="75%" verticalAlign="center" />
                 <number-stepper id="OnionSkinPostframes" pos="2" />
             </hbox>
         </menu>
 
-        <menu text="View">
+        <menu id="View" text="View">
             <menucheckbox id="ToggleUIDarkMode" text="Dark Mode" selected="true" />
         </menu>
 
@@ -84,18 +84,16 @@
     </menubar>
 
     <splitter direction="vertical" width="100%" height="100%" verticalAlign="center" horizontalAlign="center">
-
         <splitter direction="horizontal" width="100%" height="70%"> <!--objects panel -->
             <vbox height="100%" width="100%"> <!-- objects panel -->
-                <frame collapsible="true" text="Objects" width="100%" icon="assets/debug/cc_objectsPanel.png">    
+                <frame id="objectsFrame" collapsible="true" text="Objects" width="100%" icon="assets/debug/cc_objectsPanel.png">    
                     <button id="addNewCutsceneObject" width="100%" text="Add new..." />
                 </frame>
 
-                <hbox width="100%" height="100%"> <!--TODO: figure out why and when this crashes.-->
+                <hbox width="100%" height="100%"> 
                     <tree-view id="ActiveCutsceneObjects" width="100%" height="100%" styleName="full-width">
-                        <!--TODO: make this properly only show when the list is empty-->
                         <!--<vbox horizontalAlign="center" verticalAlign="center" styleName="empty-contents-component">
-                            <progress indeterminate="true" /> TODO: replace with spinner when possible
+                            <progress indeterminate="true" /> 
                             <label text="No Objects in scene!" horizontalAlign="center" verticalAlign="center" />
                         </vbox>-->
 
@@ -130,13 +128,48 @@
         </splitter>
 
 
-
         <!--timeline stuff goes down here-->
-        
-        <scrollview id="TimeLine" width="100%" height="100%">
-            <box width="100%" style="background-color: #FFFFAA;">
-                <label text="Timeline" verticalAlign="center" horizontalAlign="center" />
-            </box>
-        </scrollview>
+        <vbox id="TimeLine" width="100%" height="100%">
+            <hbox width="100%" height="32" verticalAlign="center" style="padding:4px 8px;spacing:6px;">
+                <label id="TL_Label" text="Timeline" verticalAlign="center" />
+                <button id="TL_Play" width="32" text="▶" />
+                <button id="TL_Stop" width="32" text="■" />
+                <button id="TL_PrevFrame" width="32" text="◀" />
+                <button id="TL_NextFrame" width="32" text="▶|" />
+                <!--<separator direction="vertical" height="16" />-->
+                <button id="TL_AddKeyframe" text="◆ keyframe" />
+                <button id="TL_AddBlank" text="◇ blank" />
+                <button id="TL_AddTween" text="⟿ tween" />
+                <!--<separator direction="vertical" height="16" />-->
+                <button id="TL_AddLayer" width="32" text="+" />
+                <button id="TL_RemoveLayer" width="32" text="-" />
+                <label id="TL_FrameCounter" text="F: 1" verticalAlign="center" />
+            </hbox>
+
+            <hbox width="100%" height="100%">
+                <!-- layer names panel, fixed width, scrolls vertically in sync -->
+                <vbox id="TL_LayersDisplay" width="150" height="100%" style="border-right: 1px solid #444444;">
+                    <!-- header row to align with frame numbers -->
+                    <hbox width="100%" height="24" style="border-bottom: 1px solid #444444;">
+                        <label text="Layer" verticalAlign="center" style="font-size:10;padding-left:4px;" />
+                    </hbox>
+                    <!-- layer rows get added here dynamically -->
+                    <scrollview id="TL_LayerNamesScroll" width="100%" height="100%">
+                        <grid columns="1" id="TL_LayerNamesList" width="100%" height="100%"/>
+                    </scrollview>
+                </vbox>
+
+                <!-- keyframe area, scrolls both axes -->
+                <scrollview id="TL_KFArea" width="100%" height="100%">
+                    <vbox id="TL_KFContent" width="100%">
+                        <!-- frame number ruler -->
+                        <hbox id="TL_FrameRuler" width="100%" height="24" style="border-bottom: 1px solid #444444;" />
+                        <!-- keyframe rows get added here dynamically, one hbox per layer -->
+                        <vbox id="TL_LayerRows" width="100%" />
+                    </vbox>
+                </scrollview>
+
+            </hbox>
+        </vbox>
     </splitter>     
 </vbox>

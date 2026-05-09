@@ -1,13 +1,21 @@
 package;
 #if(!html5) import openfl.filesystem.File as OpenFLFile; #end
 class Flags {
+    public static final DIFFSPECS:Map<String, Dynamic>=[
+        "HARDMODE"=>{
+            CONSUMABLEHEALTHGAIN: 1.0
+        }
+    ];
+    public static final DEFAULT_PITCH:Float = 1;
     #if debug
+        public static final COMMAND_COOLDOWN:Float = 1.02;
         public static var CC_DARKMODE:Bool=true; //true by default.
         
         public static var CC_MADECUTSCENE:Bool=false; //allows create new popup to be closed if you accidently click it.
         public static var CC_THEREISAPOPUPOPENDONOTUSECUTSCENECONTROLS:Bool=false;
         public static final CC_DEFAULTLOADPATH:String = #if(html5)"assets/cutscenes/"#else'${OpenFLFile.applicationDirectory.nativePath}/assets/cutscenes/'#end;
     #end
+    public static final VERSION_PREFIX:String = "PROTOTYPE: ";
     public static final SLS_WARNING_THRESHOLD:Int=120; //this is in seconds. (120=2 minutes)
     public static final ERROR_MESSAGES:Map<String, Array<String>>=[
         "TEST"=>["window title", "message box"],
@@ -52,15 +60,33 @@ class Flags {
     public static final DEFAULT_SAVEFILE:SaveFile = { //would be inline but apparently this isnt constant?
         meta:{
             name: "",
-            playtime:{H: 0,M: 0,s: 0},
+            #if(html5)playtime:{H: 0,M: 0,s: 0}#else playTime:{H: 0,M: 0,S: 0}#end,
             difficulty: "",
             depth: 0,
-            level: 0
+            level: 0,
+            money: 0
         },
-        health: 0,
-        stamina: 0,
-        xp: 0,
-        position: {x:0, y:0},
+        #if(html5)
+            health: 0,
+            stamina: 0,
+            xp: 0,
+            position: {x:0, y:0},
+        #else
+            playerState:{
+                health: 0,
+                stamina: 0,
+                xp: 0,
+                position:{x:0, y:0},
+            },
+            preferences: {
+                autoPause: true,
+                musicPF: "D",
+                flashingLights: true,
+                shaders: true,
+                controls: [],
+                language: "EN_US"
+            },
+        #end
         inventory: [],
         maps: [],
     };

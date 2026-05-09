@@ -31,7 +31,7 @@ class MapDebugger extends FlxUIState{
         tab_group_1.add(heightStepper);
 
         GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey("debugger.map.generate", null), ()->{
-            #if(debug&&(windows||hl)) Main.LOG('generate map'); #end
+            #if(debug) Main.Trace(DEBUG, 'generate map'); #end
         });
         tab_group_1.add(GenerateButton);
 
@@ -81,7 +81,7 @@ class MapDebugger extends FlxUIState{
         super.update(elapsed);
         //READING_textInputOther.visible = READING_textInputOther.active = (tabs_radio_1.selectedId=="OTHER"||tabs_radio_1.selectedId=="INVENTORY");
 
-        if(FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(()->new MainMenuState(true));
+        if(FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(Debugger.new);
     }
 }
 #end

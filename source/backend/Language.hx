@@ -20,9 +20,13 @@ class Language {
             "JP"
         ]
     ];
+    /**
+     * keys that the Language parser will completely ignore, EG: just return nothing if the key is disabled.
+     */
     private static final disabledKeys:Array<String>=[
         "",
-        "weapon.null"
+        "weapon.null",
+        "window title"
     ];
     public static var activeLanguageObject:Map<String, Dynamic> = [];
     public static function getLanguageLable(key:String):String{ //return the key, if its null just return the input.
@@ -41,14 +45,14 @@ class Language {
             }
             targetString = Json.checkRecursive(lang, key)??key;
             if(targetString==key){
-                trace('could not locate language key for $key in ${getLanguageLable(Main.curLanguage)}\ncalled from ${haxe.CallStack.toString(haxe.CallStack.callStack())}');
+                Main.Trace(WARN, 'could not locate language key for "$key" in ${getLanguageLable(Main.curLanguage)}!');
                 return key; //causes crashes if this isnt here??
             }else if(overrides!=null){
                 for(key => replacer in overrides) targetString = targetString.replace(key, replacer);
                 return targetString;
             }else return targetString;
 
-        }else Main.showLanguageError(Main.curLanguage);
+        }else Main.showLanguageError(Main.curLanguage, haxe.CallStack.toString(haxe.CallStack.callStack()));
         return null;
     }
 }

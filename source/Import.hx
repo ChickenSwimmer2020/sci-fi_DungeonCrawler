@@ -141,13 +141,13 @@ import backend.game.objects.tiles.Breaker;
 import backend.ai.BaseEnemy;
 import backend.ui.ScrollableArea;
 import backend.game.objects.tiles.SpecialTile;
-import debugging.CutSceneCreator.KFDocument;
-import debugging.CutSceneCreator.KFCutscene; //this actually isnt used for just debugging, AS ITS THE ACTUAL CUTSCENE TOO!!
+import backend.game.cutscenes.CDocument;
+import backend.game.cutscenes.Cutscene; //this actually isnt used for just debugging, AS ITS THE ACTUAL CUTSCENE TOO!!
 #if (debug)
-    import debugging.SaveDebugger;
-    import debugging.MapDebugger;
-    import debugging.AlphabetDebugger;
-    import debugging.ErrorDebugger;
+    //import debugging.SaveDebugger;
+    //import debugging.MapDebugger;
+    //import debugging.AlphabetDebugger;
+    //import debugging.ErrorDebugger;
     //import debugging.UIDebugger;
     import debugging.CutsceneMaker; //import debugging.CutSceneCreator;
 #end

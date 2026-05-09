@@ -39,6 +39,14 @@
 
 package debugging;
 
+//jsut for now, i need this to stop yelling at me and let me compile.
+import backend.game.cutscenes.Cutscene as KFCutscene;
+import backend.game.cutscenes.CData as KFData;
+import backend.game.cutscenes.CDocument as KFDocument;
+import backend.game.cutscenes.CFrame as KFFrame;
+import backend.game.cutscenes.CObject as KFObject;
+import backend.game.cutscenes.CTween as KFTween;
+
 import haxe.io.Bytes;
 import flixel.FlxG;
 import flixel.FlxCamera;
@@ -65,578 +73,24 @@ using flixel.util.FlxSpriteUtil;
 //  NEW XML DATA MODEL
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** Top-level document for the new keyframe format. */
-class KFDocument {
-    public var name:String    = "untitled";
-    public var fps:Int        = 60;
-    public var objects:Array<KFObject>         = [];
-    public var frames:Map<Int, KFFrame>         = [];
-    public var totalFrames:Int                  = 120;
 
-    public var snapshots:Array<Map<String, Map<String, Float>>> = [];
-    public var snapshotsDirty:Bool = true;
 
-    public function new() {}
 
-    // ── serialisation ────────────────────────────────────────────────
 
-    public function toXmlString():String {
-        var sb = new StringBuf();
-        sb.add('<CutScene name="${escXml(name)}" fps="$fps">\n');
-        sb.add('    <objects>\n');
-        for (o in objects) o.serialize(sb, 2);
-        sb.add('    </objects>\n');
-        sb.add('    <frames>\n');
-        var keys = [for (k in frames.keys()) k];
-        keys.sort((a, b) -> a - b);
-        for (k in keys) frames.get(k).serialize(sb, 2);
-        sb.add('    </frames>\n');
-        sb.add('</CutScene>');
-        return sb.toString();
-    }
 
-    public function toXml():Xml return Xml.parse(toXmlString());
 
-    public static function fromXml(xml:Xml):KFDocument {
-        var doc = new KFDocument();
-        var root = xml.firstElement();
-        if (root == null) throw "No root element";
-        doc.name = root.get("name") ?? "untitled";
-        doc.fps  = Std.parseInt(root.get("fps") ?? "60") ?? 60;
 
-        for (el in root.elements()) {
-            switch(el.nodeName) {
-                case "objects":
-                    for (obj in el.elements()) doc.objects.push(KFObject.fromXml(obj));
-                case "frames":
-                    doc.totalFrames = Std.parseInt(el.get('total') ?? "120") ?? 120;
-                    for (f in el.elements()) {
-                        var kf = KFFrame.fromXml(f);
-                        doc.frames.set(kf.frameNum, kf);
-                        if (kf.frameNum >= doc.totalFrames) doc.totalFrames = kf.frameNum + 1;
-                    }
-            }
-        }
-        doc.totalFrames == 0 ? doc.totalFrames = 120 : doc.totalFrames = doc.totalFrames;
-        doc.snapshotsDirty = true;
-        return doc;
-    }
 
-    public function clone():KFDocument {
-        return fromXml(toXml());
-    }
 
-    // ── snapshot baking ──────────────────────────────────────────────
 
-    public function bakeSnapshots() {
-        snapshots = [];
-        snapshotsDirty = false;
 
-        var current:Map<String, Map<String, Float>> = [];
-        for (o in objects) _initObjectState(o, current);
-
-        var activeTweens:Array<BakedTween> = [];
-
-        for (f in 0...totalFrames) {
-            var stillActive:Array<BakedTween> = [];
-            for (t in activeTweens) {
-                if (f > t.endFrame) continue;
-                var pct = t.endFrame == t.startFrame ? 1.0 : (f - t.startFrame) / (t.endFrame - t.startFrame);
-                var eased = t.easeFn(pct);
-                var val = t.from + (t.to - t.from) * eased;
-                _setStateVal(current, t.obj, t.prop, val);
-                if (f < t.endFrame) stillActive.push(t);
-            }
-            activeTweens = stillActive;
-
-            var kf = frames.get(f);
-            if (kf != null) {
-                for (d in kf.data) {
-                    for (prop => val in d.props) _setStateVal(current, d.obj, prop, val);
-                }
-                for (tw in kf.tweens) {
-                    var objState = current.get(tw.obj);
-                    var fromVal  = tw.from != null ? tw.from : (objState != null ? (objState.get(tw.prop) ?? 0.0) : 0.0);
-                    if (tw.from != null) _setStateVal(current, tw.obj, tw.prop, tw.from);
-                    activeTweens.push({
-                        obj: tw.obj, prop: tw.prop,
-                        from: fromVal, to: tw.to,
-                        startFrame: f, endFrame: f + tw.duration,
-                        easeFn: KFTween.resolveEase(tw.ease)
-                    });
-                }
-            }
-
-            var snap:Map<String, Map<String, Float>> = [];
-            for (objName => props in current) {
-                var pc:Map<String, Float> = [];
-                for (p => v in props) pc.set(p, v);
-                snap.set(objName, pc);
-            }
-            snapshots.push(snap);
-        }
-    }
-
-    function _initObjectState(o:KFObject, state:Map<String, Map<String, Float>>) {
-        var props:Map<String, Float> = [];
-        for (k => v in o.attrs) {
-            var f = Std.parseFloat(v);
-            if (!Math.isNaN(f)) props.set(k, f);
-        }
-        if (!props.exists("x"))       props.set("x", 0);
-        if (!props.exists("y"))       props.set("y", 0);
-        if (!props.exists("alpha"))   props.set("alpha", 1);
-        if (!props.exists("angle"))   props.set("angle", 0);
-        if (!props.exists("scale.x")) props.set("scale.x", 1);
-        if (!props.exists("scale.y")) props.set("scale.y", 1);
-        state.set(o.name, props);
-        for (child in o.children) _initObjectState(child, state);
-    }
-
-    function _setStateVal(state:Map<String, Map<String, Float>>, obj:String, prop:String, val:Float) {
-        if (!state.exists(obj)) state.set(obj, []);
-        state.get(obj).set(prop, val);
-    }
-
-    static function escXml(s:String):String
-        return s.split("&").join("&amp;").split('"').join("&quot;").split("<").join("&lt;").split(">").join("&gt;");
-
-    // ── cascade rename ───────────────────────────────────────────────
-
-    /** Rename an object everywhere: objects list, all frame data, all tweens. */
-    public function renameObject(oldName:String, newName:String) {
-        _renameInList(objects, oldName, newName);
-        for (_ => kf in frames) {
-            for (d in kf.data)   if (d.obj == oldName)  d.obj = newName;
-            for (tw in kf.tweens) if (tw.obj == oldName) tw.obj = newName;
-        }
-        snapshotsDirty = true;
-    }
-
-    static function _renameInList(list:Array<KFObject>, oldName:String, newName:String) {
-        for (o in list) {
-            if (o.name == oldName) {
-                o.name = newName;
-                o.attrs.set("name", newName);
-            }
-            _renameInList(o.children, oldName, newName);
-        }
-    }
-
-    /** Reparent an object into a group (or to root if groupName == null). */
-    public function embedIntoGroup(objName:String, groupName:Null<String>) {
-        var obj = _extractFromList(objects, objName);
-        if (obj == null) return;
-        if (groupName == null) {
-            objects.push(obj);
-        } else {
-            var parent = findObject(groupName, objects);
-            if (parent != null) parent.children.push(obj);
-        }
-        snapshotsDirty = true;
-    }
-
-    public function _extractFromList(list:Array<KFObject>, name:String):KFObject {
-        for (i in 0...list.length) {
-            if (list[i].name == name) { var o = list[i]; list.splice(i, 1); return o; }
-            var r = _extractFromList(list[i].children, name);
-            if (r != null) return r;
-        }
-        return null;
-    }
-
-    public static function findObject(name:String, list:Array<KFObject>):KFObject {
-        for (o in list) {
-            if (o.name == name) return o;
-            var r = findObject(name, o.children);
-            if (r != null) return r;
-        }
-        return null;
-    }
-}
-
-typedef BakedTween = {
-    obj:String, prop:String,
-    from:Float, to:Float,
-    startFrame:Int, endFrame:Int,
-    easeFn:Float->Float
-}
-
-/** Object declaration in <objects> block. */
-class KFObject {
-    public var name:String;
-    public var type:String;
-    public var attrs:Map<String, String> = [];
-    public var children:Array<KFObject> = [];
-
-    public function new(type:String, name:String) { this.type = type; this.name = name; }
-
-    public static function fromXml(el:Xml):KFObject {
-        var o = new KFObject(el.nodeName, el.get("name") ?? "unnamed");
-        for (a in el.attributes()) o.attrs.set(a, el.get(a));
-        for (child in el.elements()) o.children.push(fromXml(child));
-        return o;
-    }
-
-    public function serialize(sb:StringBuf, depth:Int) {
-        var ind = _indent(depth);
-        var attrStr = [for (k => v in attrs) '$k="${_esc(v)}"'].join(" ");
-        if (children.length > 0) {
-            sb.add('$ind<$type $attrStr>\n');
-            for (c in children) c.serialize(sb, depth + 1);
-            sb.add('$ind</$type>\n');
-        } else {
-            sb.add('$ind<$type $attrStr/>\n');
-        }
-    }
-
-    static function _indent(d:Int) return StringTools.rpad("", " ", d * 4);
-    static function _esc(s:String) return s.split("&").join("&amp;").split('"').join("&quot;");
-}
-
-/** One frame in the <frames> block. */
-class KFFrame {
-    public var frameNum:Int;
-    public var data:Array<KFData>    = [];
-    public var tweens:Array<KFTween> = [];
-    public var timers:Array<KFTimer> = [];
-
-    public function new(n:Int) { this.frameNum = n; }
-
-    public static function fromXml(el:Xml):KFFrame {
-        var kf = new KFFrame(Std.parseInt(el.get("n") ?? "0") ?? 0);
-        for (child in el.elements()) {
-            switch(child.nodeName) {
-                case "data":  kf.data.push(KFData.fromXml(child));
-                case "Tween": kf.tweens.push(KFTween.fromXml(child));
-                case "timer": kf.timers.push(KFTimer.fromXml(child));
-            }
-        }
-        return kf;
-    }
-
-    public function serialize(sb:StringBuf, depth:Int) {
-        var ind = _indent(depth);
-        sb.add('$ind<frame n="$frameNum">\n');
-        for (d in data)   d.serialize(sb, depth + 1);
-        for (t in tweens) t.serialize(sb, depth + 1);
-        for (t in timers) t.serialize(sb, depth + 1);
-        sb.add('$ind</frame>\n');
-    }
-
-    static function _indent(d:Int) return StringTools.rpad("", " ", d * 4);
-}
-
-/** <data obj="sky" y="-720" alpha="1" scale.x="2"/> */
-class KFData {
-    public var obj:String;
-    public var props:Map<String, Float> = [];
-
-    public function new(obj:String) { this.obj = obj; }
-
-    public static function fromXml(el:Xml):KFData {
-        var d = new KFData(el.get("obj") ?? "");
-        for (a in el.attributes()) {
-            if (a == "obj") continue;
-            var f = Std.parseFloat(el.get(a));
-            if (!Math.isNaN(f)) d.props.set(a, f);
-        }
-        return d;
-    }
-
-    public function serialize(sb:StringBuf, depth:Int) {
-        var ind = _indent(depth);
-        var attrs = ['obj="$obj"'];
-        for (k => v in props) attrs.push('$k="$v"');
-        sb.add('$ind<data ${attrs.join(" ")}/>\n');
-    }
-
-    static function _indent(d:Int) return StringTools.rpad("", " ", d * 4);
-}
-
-/** <Tween obj="sky" prop="y" from="-720" to="0" duration="218" ease="expoIn"/> */
-class KFTween {
-    public var obj:String;
-    public var prop:String;
-    public var from:Null<Float>;
-    public var to:Float;
-    public var duration:Int;
-    public var ease:String = "linear";
-
-    public function new() {}
-
-    public static function fromXml(el:Xml):KFTween {
-        var t = new KFTween();
-        t.obj      = el.get("obj") ?? "";
-        t.prop     = el.get("prop") ?? "x";
-        t.to       = Std.parseFloat(el.get("to") ?? "0") ?? 0;
-        t.duration = Std.parseInt(el.get("duration") ?? "24") ?? 24;
-        t.ease     = el.get("ease") ?? "linear";
-        var fromStr = el.get("from");
-        t.from = fromStr != null ? Std.parseFloat(fromStr) : null;
-        return t;
-    }
-
-    public function serialize(sb:StringBuf, depth:Int) {
-        var ind = _indent(depth);
-        var fromAttr = from != null ? ' from="$from"' : "";
-        sb.add('$ind<Tween obj="$obj" prop="$prop"$fromAttr to="$to" duration="$duration" ease="$ease"/>\n');
-    }
-
-    public function clone():KFTween {
-        var t = new KFTween();
-        t.obj = obj; t.prop = prop; t.from = from; t.to = to;
-        t.duration = duration; t.ease = ease;
-        return t;
-    }
-
-    public static function resolveEase(name:String):Float->Float {
-        return switch(name) {
-            case "quadIn":      FlxEase.quadIn;
-            case "quadOut":     FlxEase.quadOut;
-            case "quadInOut":   FlxEase.quadInOut;
-            case "cubeIn":      FlxEase.cubeIn;
-            case "cubeOut":     FlxEase.cubeOut;
-            case "cubeInOut":   FlxEase.cubeInOut;
-            case "expoIn":      FlxEase.expoIn;
-            case "expoOut":     FlxEase.expoOut;
-            case "expoInOut":   FlxEase.expoInOut;
-            case "sineIn":      FlxEase.sineIn;
-            case "sineOut":     FlxEase.sineOut;
-            case "sineInOut":   FlxEase.sineInOut;
-            case "bounceIn":    FlxEase.bounceIn;
-            case "bounceOut":   FlxEase.bounceOut;
-            case "bounceInOut": FlxEase.bounceInOut;
-            case "elasticIn":   FlxEase.elasticIn;
-            case "elasticOut":  FlxEase.elasticOut;
-            case "backIn":      FlxEase.backIn;
-            case "backOut":     FlxEase.backOut;
-            default:            (t:Float) -> t;
-        };
-    }
-
-    public static final ALL_EASES:Array<String> = [
-        "linear","quadIn","quadOut","quadInOut","cubeIn","cubeOut","cubeInOut",
-        "expoIn","expoOut","expoInOut","sineIn","sineOut","sineInOut",
-        "bounceIn","bounceOut","bounceInOut","elasticIn","elasticOut",
-        "backIn","backOut"
-    ];
-
-    static function _indent(d:Int) return StringTools.rpad("", " ", d * 4);
-}
-
-/** <timer frames="48"> children... </timer> */
-class KFTimer {
-    public var frames:Int;
-    public var children:Array<KFData> = [];
-
-    public function new(f:Int) { this.frames = f; }
-
-    public static function fromXml(el:Xml):KFTimer {
-        var t = new KFTimer(Std.parseInt(el.get("frames") ?? "24") ?? 24);
-        for (child in el.elements())
-            if (child.nodeName == "data") t.children.push(KFData.fromXml(child));
-        return t;
-    }
-
-    public function serialize(sb:StringBuf, depth:Int) {
-        var ind = _indent(depth);
-        sb.add('$ind<timer frames="$frames">\n');
-        for (c in children) c.serialize(sb, depth + 1);
-        sb.add('$ind</timer>\n');
-    }
-
-    static function _indent(d:Int) return StringTools.rpad("", " ", d * 4);
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  RUNTIME — KFCutscene
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Keyframe-based cutscene runtime.
- * Can run as a substate (full test) OR be embedded directly into the editor
- * state and rendered to a dedicated camera (live preview).
- */
-class KFCutscene extends FlxSubState {
-    public var doc:KFDocument;
-    public var currentFrame:Int = 0;
-    public var playing:Bool     = false;
-    public var onComplete:Void->Void;
 
-    public var objects:Map<String, Dynamic> = [];
 
-    var _frameTimer:Float = 0;
-    var _secPerFrame:Float;
-    var _activeFlxTweens:Array<FlxTween> = [];
-
-    public function new(doc:KFDocument) {
-        super(0x00000000);
-        this.doc = doc;
-        _secPerFrame = 1.0 / doc.fps;
-    }
-
-    override public function create() {
-        super.create();
-        _buildObjects(doc.objects, null);
-        if (doc.snapshotsDirty) doc.bakeSnapshots();
-        _applySnapshot(0);
-    }
-
-    // ── object construction ──────────────────────────────────────────
-
-    function _buildObjects(list:Array<KFObject>, ?parentGroup:FlxSpriteGroup) {
-        for (o in list) {
-            var built:Dynamic = null;
-            switch(o.type) {
-                case "Text":
-                    var t = new FlxText(
-                        Std.parseFloat(o.attrs.get("x") ?? "0") ?? 0,
-                        Std.parseFloat(o.attrs.get("y") ?? "0") ?? 0,
-                        Std.parseInt(o.attrs.get("width") ?? "0") ?? 0,
-                        o.attrs.get("text") ?? "",
-                        Std.parseInt(o.attrs.get("size") ?? "16") ?? 16
-                    );
-                    built = t;
-                case "Sprite" if (o.children.length > 0):
-                    var g = new FlxSpriteGroup(
-                        Std.parseFloat(o.attrs.get("x") ?? "0") ?? 0,
-                        Std.parseFloat(o.attrs.get("y") ?? "0") ?? 0
-                    );
-                    built = g;
-                    _buildObjects(o.children, g);
-                case "Sprite":
-                    var s = new FlxSprite(
-                        Std.parseFloat(o.attrs.get("x") ?? "0") ?? 0,
-                        Std.parseFloat(o.attrs.get("y") ?? "0") ?? 0
-                    );
-                    var imgDir = o.attrs.get("image_dir") ?? "";
-                    var img    = o.attrs.get("image") ?? "";
-                    if (img != "") {
-                        var animated = (o.attrs.get("animated") ?? "false") == "true";
-                        var fw = Std.parseInt(o.attrs.get("frameWidth") ?? "64") ?? 64;
-                        var fh = Std.parseInt(o.attrs.get("frameHeight") ?? "64") ?? 64;
-                        if (animated) s.loadGraphic(Paths.image(imgDir, img), true, fw, fh);
-                        else          s.loadGraphic(Paths.image(imgDir, img));
-                    }
-                    built = s;
-                default:
-                    built = new FlxSprite(0, 0).makeGraphic(4, 4, FlxColor.TRANSPARENT);
-            }
-
-            if (built != null) {
-                objects.set(o.name, built);
-                if (parentGroup != null) parentGroup.add(built);
-                else add(built);
-            }
-        }
-    }
-
-    // ── snapshot application ─────────────────────────────────────────
-
-    public function _applySnapshot(frame:Int) {
-        if (frame < 0 || frame >= doc.snapshots.length) return;
-        var snap = doc.snapshots[frame];
-        for (objName => props in snap) {
-            var obj = objects.get(objName);
-            if (obj == null) continue;
-            for (prop => val in props) _setReflect(obj, prop, val);
-        }
-    }
-
-    function _setReflect(obj:Dynamic, prop:String, val:Dynamic) {
-        if (prop.indexOf(".") >= 0) {
-            var parts = prop.split(".");
-            var target = obj;
-            for (i in 0...parts.length - 1) {
-                target = Reflect.getProperty(target, parts[i]);
-                if (target == null) return;
-            }
-            Reflect.setProperty(target, parts[parts.length - 1], val);
-        } else {
-            Reflect.setProperty(obj, prop, val);
-        }
-    }
-
-    // ── playback ─────────────────────────────────────────────────────
-
-    public function play():KFCutscene  { playing = true; return this; }
-    public function pause() { playing = false; }
-
-    public function seekTo(frame:Int) {
-        currentFrame = Std.int(Math.max(0, Math.min(frame, doc.totalFrames - 1)));
-        for (t in _activeFlxTweens) t.cancel();
-        _activeFlxTweens = [];
-        _applySnapshot(currentFrame);
-        _fireFrameActions(currentFrame, false);
-    }
-
-    override public function update(elapsed:Float) {
-        super.update(elapsed);
-        if (!playing) return;
-
-        _frameTimer += elapsed;
-        if (_frameTimer >= _secPerFrame) {
-            _frameTimer -= _secPerFrame;
-            _advanceFrame();
-        }
-    }
-
-    function _advanceFrame() {
-        if (currentFrame >= doc.totalFrames - 1) {
-            playing = false;
-            if (onComplete != null) onComplete();
-            return;
-        }
-        currentFrame++;
-        _applySnapshot(currentFrame);
-        _fireFrameActions(currentFrame, true);
-    }
-
-    function _fireFrameActions(frame:Int, fireTimers:Bool) {
-        var kf = doc.frames.get(frame);
-        if (kf == null) return;
-
-        for (tw in kf.tweens) {
-            var obj = objects.get(tw.obj);
-            if (obj == null) continue;
-            var durationSec = tw.duration / doc.fps;
-            var ease = KFTween.resolveEase(tw.ease);
-            if (tw.from != null) _setReflect(obj, tw.prop, tw.from);
-            var startVal:Float = _getReflect(obj, tw.prop);
-            var endVal   = tw.to;
-            var flxTw = FlxTween.num(startVal, endVal, durationSec, {ease: ease, onComplete: _ -> {}}, v -> _setReflect(obj, tw.prop, v));
-            _activeFlxTweens.push(flxTw);
-        }
-
-        if (fireTimers) {
-            for (timer in kf.timers) {
-                var delayFrames = timer.frames;
-                var children    = timer.children.copy();
-                new FlxTimer().start(delayFrames / doc.fps, _ -> {
-                    for (d in children) {
-                        var obj = objects.get(d.obj);
-                        if (obj == null) continue;
-                        for (prop => val in d.props) _setReflect(obj, prop, val);
-                    }
-                }, 1);
-            }
-        }
-    }
-
-    function _getReflect(obj:Dynamic, prop:String):Float {
-        if (prop.indexOf(".") >= 0) {
-            var parts  = prop.split(".");
-            var target = obj;
-            for (i in 0...parts.length - 1) {
-                target = Reflect.getProperty(target, parts[i]);
-                if (target == null) return 0;
-            }
-            return Reflect.getProperty(target, parts[parts.length - 1]) ?? 0;
-        }
-        return Reflect.getProperty(obj, prop) ?? 0;
-    }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  EDITOR
@@ -1086,7 +540,7 @@ class CutSceneCreator extends FlxState {
         if (saveAs || (p == "" || p == null)) {
             var filediag:FileDialog = new FileDialog();
             filediag.save(Bytes.ofString(doc.toXmlString()), "cutscene", '$p${doc.name}.cutscene', "Save Cutscene");
-            filediag.onSave.add((_) -> { trace('file saved successfully!'); });
+            filediag.onSave.add((_) -> { Main.Trace(DEBUG, 'file saved successfully!'); });
             return;
         } else {
             try {
@@ -1122,7 +576,7 @@ class CutSceneCreator extends FlxState {
             });
         } catch(e) {
             showError("Load failed: " + e.toString());
-            trace('something went wrong: $e with stack: ${e.stack}');
+            Main.Trace(ERROR, 'something went wrong: $e with stack: ${e.stack}');
         }
         #else
             //TODO: HTML5
@@ -1472,7 +926,7 @@ class KFToolbar extends FlxSpriteGroup {
         add(frameCountInput); x += 44;
 
         x = _sep(x);
-        _btn(x, "Back", () -> FlxG.switchState(() -> new MainMenuState(true)));
+        _btn(x, "Back", () -> FlxG.switchState(() -> new MainMenuState())); //stop yelling at me.
     }
 
     function _chkbx(x:Int, label:String, cb:Void->Void):Int {

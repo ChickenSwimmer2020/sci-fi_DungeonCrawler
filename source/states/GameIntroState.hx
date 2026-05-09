@@ -1,5 +1,8 @@
 package states;
 
+import backend.game.cutscenes.CDocument;
+import backend.game.cutscenes.Cutscene;
+
 
 class GameIntroState extends FlxState {
     public function new() {
@@ -10,8 +13,12 @@ class GameIntroState extends FlxState {
         Music.deathFadeIn(1.24);
         FlxG.camera.fade(0xFF000000, 1.24, true);
         
-        #if !html5
-            openSubState(new KFCutscene(KFDocument.fromXml(Xml.parse(File.getContent('${Paths.paths.get('cutscene')}/intro.cutscene')))).play()); //TODO: support on HTML5
-        #end
+        
+        openSubState(new Cutscene(Paths.getPath('cutscenes', 'intro', 'cutscene')).play().setCompleteFunc(()->{
+            FlxG.camera.fade(0xFF000000, 1.24, false, ()->{
+                //TODO: tutorial area
+                FlxG.switchState(()->new GameState(false));
+            });
+        }));
     }
 }

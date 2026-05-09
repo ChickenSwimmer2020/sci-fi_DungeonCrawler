@@ -8,7 +8,7 @@ class Pickup extends FlxSprite {
         super(x, y);
         data=dat;
         if(data==null){
-            Main.showError('NULLITEM');
+            Main.showError('NULLITEM', null, null, haxe.CallStack.toString(haxe.CallStack.callStack()));
             destroy();
         }
         #if (windows||hl)
@@ -20,7 +20,7 @@ class Pickup extends FlxSprite {
                 makeGraphic(32, 32, 0xFFFF00FF);
                 setGraphicSize(0, 10);
                 updateHitbox();
-                Main.showError("RENDERFAILURE", data.item);
+                Main.showError("RENDERFAILURE", data.item, null, haxe.CallStack.toString(haxe.CallStack.callStack()));
             }
         #else
             if(Paths.image('items/images', data.item)!=null){
@@ -31,7 +31,7 @@ class Pickup extends FlxSprite {
                 makeGraphic(10, 10, 0xFFFF00FF);
                 setGraphicSize(0, 10);
                 updateHitbox();
-                Main.showError("RENDERFAILURE", data.item);
+                Main.showError("RENDERFAILURE", data.item, null, haxe.CallStack.toString(haxe.CallStack.callStack()));
             }
         #end
         camera=Main.camGame; //just gonna do this automatically.
@@ -62,7 +62,7 @@ class Pickup extends FlxSprite {
                         ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
                     );
                     Player.instance.inventory.openSubState(popup);
-                    #if(debug&&(windows||hl)) Main.LOG('TODO: logic for showing the text telling you that your inventory is full'); #end
+                    #if(debug) Main.Trace(TODO, 'logic for showing the text telling you that your inventory is full'); #end
                 }
             }
         }else{
@@ -73,18 +73,23 @@ class Pickup extends FlxSprite {
     private function sendToInventory(item:Item) {
         var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
         var it:Item = item;
-        if(Paths.exists(Paths.paths.get('weapon'), item.item, 'weapon'))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
+        if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
         if(inv[inv.getFirstEmpty()]!=null && ((inv[inv.getFirstEmpty()] is String) && inv[inv.getFirstEmpty()]=="EMPTY")){
             inv[inv.getFirstEmpty()] = it;
         }
     }
 
     public static function ExternalsendToInventory(item:Item) {
+        var toGoTo:Null<Int>=null;
+        if(item.lastSlot!=null) {
+            toGoTo = item.lastSlot;
+        }
         var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
         var it:Item = item;
-        if(Paths.exists(Paths.paths.get('weapon'), item.item, 'weapon'))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
-        if(inv[inv.getFirstEmpty()]!=null && ((inv[inv.getFirstEmpty()] is String) && inv[inv.getFirstEmpty()]=="EMPTY")){
-            inv[inv.getFirstEmpty()] = it;
+        if(Paths.weaponExists(item.item))it=WeaponParser.buildWeaponItemPointer(WeaponParser.parse(item.item));
+        if(toGoTo!=null) {
+            if(inv[toGoTo] is String && inv[toGoTo]=="EMPTY") inv[toGoTo]=it;
+            else inv[inv.getFirstEmpty()]=it; //if we cant set the target slot, get the first empty slot.
         }
     }
 

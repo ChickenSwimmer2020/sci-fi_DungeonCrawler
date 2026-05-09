@@ -7,6 +7,10 @@ typedef RayResult = {
 }
 
 class BaseEnemy extends FlxSprite {
+    /**
+     * used when the player dies, it locks all forms of logic, "freezing" the enemy.
+     */
+    public var frozen:Bool=false; //TODO: make functional
     #if debug
         var debugCanvas:FlxSprite;
     #end

@@ -65,7 +65,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         tab_menu.addGroup(controls); //dont even ADD difficulty if we're in gamestate.
         add(tab_menu);
 
-        trace(neededX);
+        Main.Trace(INFO, 'Delete button calculated X: $neededX');
         deleteButton=new FlxUIButton(tab_menu.x+neededX, tab_menu.y, Language.getTranslatedKey("menu.settings.clear.button", null), ()->{
             var popup:Popup = new Popup(
                 Language.getTranslatedKey("menu.save.delete.popup.title", null),
@@ -86,6 +86,24 @@ class OptionsMenuSubstate extends FlxUISubState{
         add(deleteButton);
         deleteButton.label.alignment=RIGHT;
         deleteButton.labelOffsets = [FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 1), FlxPoint.weak(-5, 0)];
+
+        var deleteAllSaves:FlxUIButton =new FlxUIButton(deleteButton.x+105, deleteButton.y, "Erase All Data", ()->{
+            openSubState(new Popup("Warning!", "This will clear ALL save data\nProceed?", [
+                {l: "Clear", c:true, f:()->{
+                    Main.saveFile.erase();
+                    close();
+                }},
+                {l: "Cancel", c:true},
+            ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)));
+        }, false);
+        deleteAllSaves.loadGraphic(Paths.image('ui/menu', "button_wide"), true, 100, 20);
+        deleteAllSaves.updateHitbox();
+        deleteAllSaves.autoCenterLabel();
+        var icon:FlxSprite = new FlxSprite().loadGraphic(Paths.image('ui/menu', "icon_delete"));
+        icon.color = 0xFFFF0000;
+        deleteAllSaves.addIcon(icon, 0, 0, false);
+        add(deleteAllSaves);
+        deleteAllSaves.labelOffsets = [FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 0), FlxPoint.weak(-5, 1), FlxPoint.weak(-5, 0)];
     }
 
     /**CONTROLS SETTINGS OBJECTS AND FUNCTION**/
@@ -106,20 +124,32 @@ class OptionsMenuSubstate extends FlxUISubState{
     }
     private function createControlsUI() {
         SBG=new FlxUI9SliceSprite(controls.x+5, controls.y+5, Paths.image('ui', "chrome_inset"), new Rectangle(0,0, 490, 370), [5,5,8,8]);
-        Save.readSaveFile(Main.FILE); //just in-case.
+        #if(html5)Save.readSaveFile(Main.FILE);#end //just in-case.
         ControlsScroll = new ScrollableArea((FlxG.width/2-250)+5, (FlxG.height/2-200)+25, 490, 370, 1);
         Main.addCameraToGame(ControlsScroll, "settingsControlsScroller");
-        #if(debug&&(windows||hl)) Main.LOG(Main.controls); #end
         for(control => keys in Main.controls) {
             var assigner:ControlsAssignmentObject = new ControlsAssignmentObject(5, 5+(27*index), control, keys);
             add(assigner);
             ControlsScroll.add(assigner);
-            assigner.controlSubsateRequest = (obj:ControlsAssignmentObject, index:Int)->{
-                var sub:ControlsAssinmentKeyPressSubState = new ControlsAssinmentKeyPressSubState(obj, index);
+            assigner.controlSubsateRequest = (obj:ControlsAssignmentObject, ind:Int)->{
+                var sub:ControlsAssinmentKeyPressSubState = new ControlsAssinmentKeyPressSubState(obj, ind);
                 openSubState(sub);
                 sub.onReassignment = (key:FlxKey)->{
-                    trace(key);
-                    obj.changeVisuals(key.toString().toUpperCase(), index); //SO, changing this WILL allow for saving controls, because im cool like that :sunglasses:
+                    Main.Trace(INFO, key);
+                    obj.changeVisuals(key.toString().toUpperCase(), ind); //SO, changing this WILL allow for saving controls, because im cool like that :sunglasses:
+
+                    switch(ind) { //these seem to be reversed for some reason, so ill just reverse the code and hope that works properly.
+                        case 2: //meaning we're changing firstkey. (obj.input0);
+                            if(obj.input1.text == obj.input0.text) {
+                                obj.changeVisuals("NONE", 1);
+                                Main.Trace(INFO, 'changing input0 to NONE');
+                            }
+                        case 1: //meaning we're changing secondKey (obj.input1);
+                            if(obj.input1.text == obj.input0.text || obj.input0.text == obj.input1.text) { //i guess check both instances?
+                                obj.changeVisuals("NONE", 2);
+                                Main.Trace(INFO, 'changing input1 to NONE');
+                            }
+                    }
                     onControlsSave();
                 };
             }
@@ -159,11 +189,14 @@ class OptionsMenuSubstate extends FlxUISubState{
     private var shadersCheck:FlxUICheckBox;
     private function createGraphicsUI() {
         shadersCheck=new FlxUICheckBox(5, 5, null, null, "Shaders", 100, null, ()->{
-            Main.saveFile.data.shaders=shadersCheck.checked;
-            Main.saveFile.flush(); //automatically save the update
-            #if(debug&&(windows||hl)) Main.LOG(Main.saveFile.data); #end
+            #if(windows||hl)
+                Main.saveFile.set("preferences", "shaders", shadersCheck.checked); //auto-saves
+            #else
+                Main.saveFile.data.shaders=shadersCheck.checked;
+                Main.saveFile.flush(); //automatically save the update
+            #end
         }); 
-        shadersCheck.checked = Main.saveFile.data.shaders??false; //if null, default to false. else pull the value from the save file.
+        shadersCheck.checked = #if(windows||hl)Main.saveFile.data.preferences.shaders??false #else Main.saveFile.data.shaders??false #end; //if null, default to false. else pull the value from the save file.
 
         
         graphics.add(shadersCheck);
@@ -185,15 +218,15 @@ class OptionsMenuSubstate extends FlxUISubState{
         #end
         var languages:Array<StrNameLabel>=[];
         #if (hl||windows)
-            for(file in FileSystem.readDirectory(Paths.paths.get('lang'))) {
-                #if(debug&&(windows||hl)) Main.LOG('found lang file $file'); #end
+            for(file in FileSystem.readDirectory('assets/lang')) {
+                #if(debug) Main.Trace(INFO, 'found lang file $file'); #end
                 languages.push(new StrNameLabel(file.split('.')[0].toUpperCase(), Language.getLanguageLable(file.split('.')[0])));
             }
         #else
             for(language in 0...availableLanguages.length) {
                 if(Assets.exists('assets/lang/${availableLanguages[language]}.lang', AssetType.TEXT)) //validate that the assets for the language exist before even THINKING of adding them to the selectable dropdown.
                     languages.push(new StrNameLabel(availableLanguages[language], availableLanguagesLables[language]));
-                else Main.showError("MISSINGFONTORLANGUAGEASSET", availableLanguages[language]);
+                else Main.showError("MISSINGFONTORLANGUAGEASSET", availableLanguages[language], null, haxe.CallStack.toString(haxe.CallStack.callStack()));
             }
         #end
         var languageLabel:FlxUIText=new FlxUIText(5, 5, 0, "", 12, true);
@@ -203,13 +236,13 @@ class OptionsMenuSubstate extends FlxUISubState{
 
         languageDropdown=new FlxUIDropDownMenu(5, 30, languages, (_)->{
             Main.curLanguage=_; //Lang in Language is a string, so this should work.
-            Main.saveFile.data.language=Main.curLanguage;
+            #if(windows||hl)Main.saveFile.data.preferences.language=Main.curLanguage#else Main.saveFile.data.language=Main.curLanguage#end;
             Application.current.window.title = Language.languageInformation.get(Main.curLanguage).get('application_title'); //change application title to match with the new language setting.
             Main.saveFile.flush(); //upload new default language to save file.
-            #if(debug&&(windows||hl)) Main.LOG('attempting to index language $_ and change game target LANG file'); #end
+            #if(debug) Main.Trace(INFO, 'Attempting to index language $_ and change game target LANG file'); #end
             FlxAssets.FONT_DEFAULT=switch(Main.curLanguage){ //automatically switch the default font depending on language setting.
                 case EN_US: "Nokia Cellphone FC Small";
-                case JP: "assets/ui/fonts/k8x12L.ttf";
+                case JP: "assets/fonts/k8x12L.ttf";
                 default: "Nokia Cellphone FC Small";
             }
             @:privateAccess{
@@ -241,12 +274,12 @@ class OptionsMenuSubstate extends FlxUISubState{
         });
         for(languageOption in languageDropdown.list) {
             switch(languageOption.name) {
-                case 'Japanese', "JP", "にほんご": languageOption.label.font = "assets/ui/fonts/k8x12L.ttf";
+                case 'Japanese', "JP", "にほんご": languageOption.label.font = "assets/fonts/k8x12L.ttf";
                 case 'English (US)', "EN_US", "English": languageOption.label.font = "Nokia Cellphone FC Small";
             }
             switch(languageDropdown.header.text.text) {
                 case "English (US)", 'EN_US', "English": languageDropdown.header.text.font = "Nokia Cellphone FC Small";
-                case 'Japanese', "JP", "にほんご": languageOption.label.font = "assets/ui/fonts/k8x12L.ttf";
+                case 'Japanese', "JP", "にほんご": languageOption.label.font = "assets/fonts/k8x12L.ttf";
             }
             if(Main.curLanguage==languageOption.name) languageDropdown.selectedLabel=Main.curLanguage;
         }
@@ -264,20 +297,27 @@ class OptionsMenuSubstate extends FlxUISubState{
             new StrNameLabel("F", "Final"),
             //new StrNameLabel("R", "Remaster")
         ], (_)->{
-            #if(debug&&(windows||hl)) Main.LOG('changing music postfix to $_ and flushing to save file'); #end
-            Main.saveFile.data.musicPF = _;
-            Main.saveFile.flush();
+            #if(debug) Main.Trace(INFO, 'Changing music postfix to $_ and flushing to save file'); #end
+            #if(windows||hl)
+                Main.saveFile.set("preferences", "musicPF", _);
+            #else
+                Main.saveFile.data.musicPF = _;
+                Main.saveFile.flush();
+            #end
             Main.musicPostfix = _;
         });
         general.add(audioTrackDropdown);
 
         autoPauseCheck=new FlxUICheckBox(245, 5, null, null, Language.getTranslatedKey("menu.settings.general.autopause", autoPauseCheck), 100, null, ()->{
-            Main.saveFile.data.autoPause=autoPauseCheck.checked;
-            Main.saveFile.flush(); //automatically save the update
+            #if(windows||hl)
+                Main.saveFile.set("preferences", "autoPause", autoPauseCheck.checked);
+            #else
+                Main.saveFile.data.autoPause=autoPauseCheck.checked;
+                Main.saveFile.flush(); //automatically save the update
+            #end
             FlxG.autoPause = autoPauseCheck.checked; //immediately update the auto-pause setting without needing to restart the game.
-            #if(debug&&(windows||hl)) Main.LOG(Main.saveFile.data); #end
         }); 
-        autoPauseCheck.checked = Main.saveFile.data.autoPause??false; //if null, default to false. else pull the value from the save file.
+        autoPauseCheck.checked = #if(windows||hl)Main.saveFile.data.preferences.autoPause??false #else Main.saveFile.data.autoPause??false #end; //if null, default to false. else pull the value from the save file.
         general.add(autoPauseCheck);
     }
 
@@ -297,19 +337,23 @@ class OptionsMenuSubstate extends FlxUISubState{
     private function onControlsSave() {
         var controlsUpload:Array<{c:String, keys:Array<FlxKey>}>=[];
         for(i in 0...total_Controls) {
-            //#if(debug&&(windows||hl)) Main.LOG('generating control scheme object...'); #end
+            #if(debug) Main.Trace(DEBUG, 'generating control scheme object...'); #end
             var ReadObject:ControlsAssignmentObject=ControlObjects[i];
 
             final key0:FlxKey=(ReadObject.input0.text==""||(ReadObject.input0.text=="NONE"||ReadObject.input0.text=="null"))?NONE:FlxKey.fromString(ReadObject.input0.text);
             final key1:FlxKey=(ReadObject.input1.text==""||(ReadObject.input1.text=="NONE"||ReadObject.input1.text=="null"))?NONE:FlxKey.fromString(ReadObject.input1.text);
             controlsUpload.push({c:ReadObject.text.text,keys:[key0,key1]});
-            trace({c:ReadObject.text.text,keys:[Functions.FlxKeyFromInt(key0).toString(),Functions.FlxKeyFromInt(key1).toString()]});
-            //#if(debug&&(windows||hl)) Main.LOG(controlsUpload); #end
+            Main.Trace(INFO, 'Added: "{c:${ReadObject.text.text}, keys: [$key0, $key1]}" to `controlsUpload`');
         }
-        trace(controlsUpload);
-        Main.saveFile.data.controls=controlsUpload;
-        Main.saveFile.flush();
-        Main.controls = Save.loadControls(); //WHOOPS. kinda gotta re-call this each time.
+        Main.Trace(DEBUG, controlsUpload);
+        #if(windows||hl)
+            Main.saveFile.set("preferences", "controls", controlsUpload);
+        #else
+            Main.saveFile.data.controls=controlsUpload;
+            Main.saveFile.flush();
+        #end
+        //no more middleman from Save.
+        Main.controls = Functions.convertFromControlsArray(controlsUpload); //WHOOPS. kinda gotta re-call this each time.
         reloadControls();
     }
 }
@@ -412,7 +456,6 @@ private final class ControlsAssinmentKeyPressSubState extends Popup {
             case NONE: return; //nothing is pressed.
             default:{
                 onReassignment(key);
-                //TODO: prevent assining the same key to both inputs of a control.
                 close(); //close the substate but run the code on reassignment lol.
             }
         }
