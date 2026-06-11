@@ -78,7 +78,6 @@ class MainView extends VBox {
                     if (item == null) item = ActiveCutsceneObjects;
                     switch(forceType!=null?forceType:dialog.tabs.pageIndex) {
                         case 0: //Sprite
-                        #if(!html5)
                             if(!FileSystem.exists(dialog.findComponent("SPR_Path", HUITextField, true, "id").text)) {
                                 NotificationManager.instance.addNotification({
                                     title: "Error!",
@@ -108,37 +107,6 @@ class MainView extends VBox {
                                     false, ""
                                 );
                             }
-                        #else
-                            if(!Assets.exists(dialog.findComponent('SPR_Path', HUITextField, true, "id").text)) {
-                                NotificationManager.instance.addNotification({
-                                    title: "Error!",
-                                    body: '${dialog.findComponent("SPR_Path", HUITextField, true, "id").text}\nDoes not exist!',
-                                    type: NotificationType.Error
-                                });
-                                return; //prolly gonna close it :/
-                            }else{
-                                var n:TreeViewNode = item.addNode(
-                                    {
-                                        name: dialog.findComponent("SPR_Name", HUITextField, true, "id").text,
-                                        path: dialog.findComponent("SPR_Path", HUITextField, true, "id").text,
-                                        icon: "assets/debug/cc_spriteObject.png"
-                                    }
-                                );
-                                n.onClick = (_:MouseEvent)->{
-                                    Main.Trace(INFO, 'to add name: ${n.data.name} returned: ${CutsceneMaker.instance.trackedObjects.get(n.data.name)}');
-                                    if(CutsceneMaker.instance.trackedObjects.get(n.data.name)!=null) {
-                                        CutsceneMaker.instance.trackedUIObjects.get(n.data.name).flash(0xFF7D7DFF);
-                                    }
-                                };
-                                if(onObjectCreate!=null) onObjectCreate(
-                                    FlxSprite, Std.parseFloat(dialog.findComponent("SPR_X", HUITextField, true, "id").text), //class, x
-                                    Std.parseFloat(dialog.findComponent("SPR_Y", HUITextField, true, "id").text), //y
-                                    dialog.findComponent("SPR_Name", HUITextField, true, "id").text, //name
-                                    dialog.findComponent("SPR_Path", HUITextField, true, "id").text,
-                                    false, ""
-                                );
-                            }
-                        #end
                         case 1: //Text
                             var n:TreeViewNode = item.addNode(
                                 {
@@ -168,23 +136,21 @@ class MainView extends VBox {
 
                             switch(dialog.findComponent("GRP_IOT", DropDown, true, "id").text) {
                                 case "Sprite":
-                                    #if(!html5)
-                                        if(!FileSystem.exists(dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text)) {
-                                            NotificationManager.instance.addNotification({
-                                                title: "Error!",
-                                                body: '${dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text}\nDoes not exist!',
-                                                type: NotificationType.Error
-                                            });
-                                            return; //prolly gonna close it :/
-                                        }else{
-                                            toAdd =
-                                                {
-                                                    name: dialog.findComponent("GRP_IO_Name", HUITextField, true, "id").text,
-                                                    path: dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text,
-                                                    icon: "assets/debug/cc_spriteObject.png"
-                                                };
-                                        }
-                                    #end
+                                    if(!FileSystem.exists(dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text)) {
+                                        NotificationManager.instance.addNotification({
+                                            title: "Error!",
+                                            body: '${dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text}\nDoes not exist!',
+                                            type: NotificationType.Error
+                                        });
+                                        return; //prolly gonna close it :/
+                                    }else{
+                                        toAdd =
+                                            {
+                                                name: dialog.findComponent("GRP_IO_Name", HUITextField, true, "id").text,
+                                                path: dialog.findComponent("GRP_IO_TextPath", HUITextField, true, "id").text,
+                                                icon: "assets/debug/cc_spriteObject.png"
+                                            };
+                                    }
                                 case "Text":
                                     toAdd =
                                         {

@@ -1,5 +1,13 @@
 # TODO
 
+* awards menu
+* gallery menu (TBD)
+* make settings not stutter on window open
+* swap all game uis minus in-game to HaxeUI
+* make save loading not crash the game.
+* make cutscene maker function properly.
+* map debugger.
+
 * Make sure [build.sh](./build.sh) works >`check if this actually works ig.`
 * Expand lore [Lore.MD](./Lore.MD) >`expand on.`
 * Figure out why crashes occur [CutsceneEditor.xml](assets\views\CutsceneEditor.xml#L94) >`figure out why and when this crashes.`

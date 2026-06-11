@@ -121,7 +121,7 @@ final class Functions {
 }
 final class Additions{
     private static final fileExtensionsList:Array<String>=[
-        ".png", ".json", ".xml", #if(html5)".mp3",#else".ogg",#end ".weapon",
+        ".png", ".json", ".xml", ".ogg", ".weapon",
         ".lang", ".ttf"
     ];
     //for math

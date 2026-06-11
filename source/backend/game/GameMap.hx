@@ -13,8 +13,8 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     public static final TILE_SIZE:Int = 16; //we can avvoid MAGIC numbers
     public static final COLLISION_RADIUS:Int=2;
 
-    public var tiles:Array<Array<TilePointer>> = []; //quick access to each tile without problems.
-    public var tileObjects:Array<Array<Tile>> = [];
+    public var tiles:Array<TileData> = []; //quick access to each tile without problems.
+    public var tileObjects:Array<Tile> = [];
     public var plr:Player;
     public var enemies:Array<BaseEnemy>=[];
    
@@ -26,60 +26,59 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
     public function generate(?testingState:Bool=false){
-        for (y in 0...tiles.length){
-            tileObjects[y] = [];
-            for (x in 0...tiles[y].length){
-                add(generateObjectViaTile(tiles[y][x], x, y));
-            }
-        }
-        if(!testingState){
-            GameState.inGame=true;
-            add(plr = new Player());
-            Player.onDeath = ()->{
-                Conductor.bopCamera=false;
-                isDying=true;
-
-                for(group in ([tiles, tileObjects, enemies, plr]:Array<Dynamic>)) {
-                    //TODO: freeze all logic
-                    if(group is Array) {
-                        var a:Array<Dynamic>=cast(group); //because i have to do this.
-                        for(object in a) {
-                            if(Reflect.hasField(object, 'frozen')) {
-                                Reflect.setProperty(object, 'frozen', true);
-                            }else{
-                                if(Reflect.hasField(object, 'velocity')) {
-                                    Reflect.setProperty(object, 'velocity', FlxPoint.weak(0, 0));
-                                }
+        for(tile in tiles) add(generateObjectViaTile(tile));
 
 
+        GameState.inGame=true;
+        add(plr = new Player());
+        plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
+        plr.camera = Main.camGame;
+        Player.onDeath = ()->{
+            Conductor.bopCamera=false;
+            isDying=true;
+
+            for(group in ([tiles, tileObjects, enemies, plr]:Array<Dynamic>)) {
+                //TODO: freeze all logic
+                if(group is Array) {
+                    var a:Array<Dynamic>=cast(group); //because i have to do this.
+                    for(object in a) {
+                        if(Reflect.hasField(object, 'frozen')) {
+                            Reflect.setProperty(object, 'frozen', true);
+                        }else{
+                            if(Reflect.hasField(object, 'velocity')) {
+                                Reflect.setProperty(object, 'velocity', FlxPoint.weak(0, 0));
                             }
-                        }
-                    }else{
-                        if(Reflect.hasField(group, 'velocity')) {
-                            Reflect.setProperty(group, 'velocity', FlxPoint.weak(0, 0));
-                        }
-                        if(group is Player) {
-                            var s:Player = cast(group);
-                            s.freeze();
+
+
                         }
                     }
-                }
-
-                Music.doDeathGlitch();
-
-                if(#if(windows||hl)Main.saveFile.data.preferences.shaders#else Main.saveFile.data.shaders#end){
-                    for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
-                        cam.filters.push(new ShaderFilter(new Invert()));
+                }else{
+                    if(Reflect.hasField(group, 'velocity')) {
+                        Reflect.setProperty(group, 'velocity', FlxPoint.weak(0, 0));
+                    }
+                    if(group is Player) {
+                        var s:Player = cast(group);
+                        s.freeze();
                     }
                 }
+            }
 
-                Functions.wait(0.5, (_)->{ //wait for two times the thing, this is for the death sound :3
-                    Player.overrideCameraZoom=true;
-                    Music.stopMusic();
-                    Music.stopLoops(true);
-                    FlxG.switchState(DeathState.new);
-                });
-            };
+            Music.doDeathGlitch();
+
+            if(#if(windows||hl)Main.saveFile.data.preferences.shaders#else Main.saveFile.data.shaders#end){
+                for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
+                    cam.filters.push(new ShaderFilter(new Invert()));
+                }
+            }
+
+            Functions.wait(0.5, (_)->{ //wait for two times the thing, this is for the death sound :3
+                Player.overrideCameraZoom=true;
+                Music.stopMusic();
+                Music.stopLoops(true);
+                FlxG.switchState(DeathState.new);
+            });
+        };
+        if(testingState){
             add(new Pickup(0, 0, { //for testing.
                 type: RANGED,
                 item: "pistol",
@@ -106,25 +105,22 @@ class GameMap extends FlxTypedGroup<Dynamic> {
 
             //test pickup for consumables and right clickable items.
             add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y, {type: CONSUMABLE, item: "DEBUGCONSUMABLE", consumable: true, consumableType: CRUMB}));
-            plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
-            plr.camera = Main.camGame;
+
         }
-        
-        for(row in tileObjects){
-            for(tile in row){
-                if(tile==null) continue;
-                else @:privateAccess tile.checkNeighbors(tileObjects, Math.floor(tile.x), Math.floor(tile.y));
-            }
-        }
+
+        //for(tile in tileObjects) {
+        //    if(tile==null) continue;
+        //    else @:privateAccess tile.checkNeighbors();
+        //}
     }
     var tileToBeAdded:Tile;
-    private inline function generateObjectViaTile(type:TilePointer, x:Int, y:Int):Tile{
+    private inline function generateObjectViaTile(type:TileData):Tile{
         if(type==null) { //:3
-            tileObjects[y][x] = null;
+            tileObjects[tileObjects.length-1]=null;
             return null;
         }
-        tileToBeAdded = new Tile(0 + (TILE_SIZE*x), 0+(TILE_SIZE*y), tileObjects, type.type);
-        if(type.special==true){
+        tileToBeAdded = new Tile(0 + (TILE_SIZE*type.pos.row), 0+(TILE_SIZE*type.pos.colum), type.set);
+        if(type.isSpecial==true){
             switch(type.specialType) {
                 case SPAWN:
                     #if (debug)
@@ -135,10 +131,10 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                     //createElevator() 
                 case WALKABLEAREA: #if (debug) tileToBeAdded.color = 0xFF00FF00; #end
                 case BREAKER:
-                    tileToBeAdded = new Breaker(0+(TILE_SIZE*x), 0+(TILE_SIZE*y), tileObjects);
+                    tileToBeAdded = new Breaker(0+(TILE_SIZE*type.pos.row), 0+(TILE_SIZE*type.pos.colum));
+                    tileObjects[tileObjects.length-1] = tileToBeAdded;
                     tileToBeAdded.immovable = true;
                     tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
-                    tileObjects[y][x] = tileToBeAdded;
                     tileToBeAdded.camera=Main.camGame;
                 default: //for special types that dont really do anything. like hallway, since thats only used during generation itself.
             }
@@ -146,7 +142,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         tileToBeAdded.immovable = true;
         tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
         if(tileToBeAdded.allowCollisions==NONE) tileToBeAdded.alpha = 0.25;
-        tileObjects[y][x] = tileToBeAdded;
+        tileObjects[tileObjects.length-1]=tileToBeAdded;
         tileToBeAdded.camera=Main.camGame;
         return tileToBeAdded;
     }
@@ -155,38 +151,38 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         FlxG.watch.addQuick('player position:', plr?.getPosition());
         FlxG.watch.addQuick('word boundries:', FlxG.worldBounds);
 
-        for(row in tileObjects){
-            for(tile in row){
-                if(tile!=null){
-                    //the tile's active, alive, and visible state all corrispond to if they are on screen or not. good for optimization!
-                    tile.active=tile.alive=tile.visible=tile.isOnScreen(Main.camGame);
-                }
-                if(tile!=null && tile.allowCollisions == ANY){
+        for(tile in tileObjects) {
+            if(tile!=null) {
+                tile.active=tile.alive=tile.visible=tile.isOnScreen(Main.camGame);
+
+                if(tile.allowCollisions==ANY) {
                     for(enemy in enemies) {
-                        var vx = Math.abs(Math.floor(enemy.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE));
-                        var vy = Math.abs(Math.floor(enemy.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE));
-                        if(vx <= COLLISION_RADIUS && vy <= COLLISION_RADIUS){
-                            FlxG.collide(enemy??null, tile);
-                        }
+                        var vx = Math.abs((enemy.x/TILE_SIZE).floor() - (tile.x/TILE_SIZE).floor());
+                        var vy = Math.abs((enemy.y/TILE_SIZE).floor() - (tile.y/TILE_SIZE).floor());
+                        if(vx<=COLLISION_RADIUS || vy<=COLLISION_RADIUS) FlxG.collide(enemy??null, tile);
                     }
 
-                    if ((Math.abs(Math.floor(plr?.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE))) <= COLLISION_RADIUS && (Math.abs(Math.floor(plr.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE))) <= COLLISION_RADIUS){
+                    var pvx = Math.abs((plr?.x/TILE_SIZE).floor() - (tile?.x/TILE_SIZE).floor());
+                    var pvy = Math.abs((plr?.y/TILE_SIZE).floor() - (tile?.y/TILE_SIZE).floor());
+                    if(pvx<=COLLISION_RADIUS || pvy<=COLLISION_RADIUS) {
                         FlxG.collide(plr??null, tile);
-                        FlxG.collide(plr?.weapon, tile); //to hopefully move the weapon so it doesnt shoot through blocks
+                        FlxG.collide(plr?.weapon??null, tile);
                     }
+
                     for(bullet in plr?.weapon.activeProjectiles) {
-                        var vx = Math.abs(Math.floor(bullet.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE));
-                        var vy = Math.abs(Math.floor(bullet.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE));
-                        if((vx<=COLLISION_RADIUS&&vy<=COLLISION_RADIUS)||bullet.overlaps(tile)){ //if the bullet is either within collision distance, or on the tile.
+                        var bvx = Math.abs(Math.floor(bullet.x/TILE_SIZE) - Math.floor(tile.x/TILE_SIZE));
+                        var bvy = Math.abs(Math.floor(bullet.y/TILE_SIZE) - Math.floor(tile.y/TILE_SIZE));
+
+                        if((bvx<=COLLISION_RADIUS || bvy<=COLLISION_RADIUS) || bullet.overlaps(tile)) {
                             FlxG.collide(bullet, tile, (d1, d2)->{
                                 bullet.forceRemoval();
                                 var effect:FlxSprite = new FlxSprite(bullet.x, bullet.y).loadGraphic(Paths.image('fx', 'Bullet_impact'), true, 16, 16);
-                                effect.animation.add('hit', [0,1,2,3,4,5], 24, false, false, false);
+                                effect.animation.add('hit', [for(i in 0...5) i], 24, false, false, false);
                                 effect.animation.play('hit');
                                 effect.animation.onFinish.add((_)->{
-                                    if(_=='hit'){
-                                        effect.visible=false; //because just outright destroying it caused crashing.
-                                        Functions.wait(0.05, (_)->{ //so we'll give it a grace period
+                                    if(_=="hit") {
+                                        effect.visible=false;
+                                        Functions.wait(0.05, (_)->{
                                             remove(effect);
                                             effect.destroy();
                                             effect=null;

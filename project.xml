@@ -13,6 +13,8 @@
 should google choose to remove said policies, this platform will gain support again.
 PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
 
+    <error value="This build target is currently unsupported, but plans to be supported in the future!" if="html5"/>
+
     <!--linux upcoming? 👀-->
     <section if="hl||windows||linux"> <!--WHOOPS, FORGOT TO TELL WINDOWS TO USE THESE AS WELL!!--> 
         <window allow-high-dpi="true" hardware="true" vsync="true" width="1280" height="720"/> <!--default window params-->

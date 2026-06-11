@@ -16,7 +16,7 @@ class CreatePopup extends Popup {
     var scrolling:ScrollableArea;
     var hintText:FlxText;
     public function new() {
-        super(Language.getTranslatedKey("game.debugger.create.pickup.title", null), "", [], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0), true);
+        super(Language.getTranslatedKey("game.debugger.create.pickup.title", null), "", [], false, "", false, FlxPoint.weak(0, 0), true);
         body.visible=body.active=false; //no body text, because everything is getting moved around n shtuff.
         for(butt in butts) butt.visible=butt.active=false; //also no buttons, because we need to manually make the button.
         header.alignment=RIGHT;

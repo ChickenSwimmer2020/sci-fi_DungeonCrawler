@@ -139,7 +139,7 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
                     };
                     box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
                         var popup:Popup = new Popup(
-                            title, message, buttons, false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                            title, message, buttons, false, "", false, FlxPoint.weak(0, 0)
                         );
                         openSubState(popup);
                     }
@@ -166,7 +166,7 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
                     };
                     box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
                         var popup:Popup = new Popup(
-                            title, message, buttons, false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                            title, message, buttons, false, "", false, FlxPoint.weak(0, 0)
                         );
                         openSubState(popup);
                     }

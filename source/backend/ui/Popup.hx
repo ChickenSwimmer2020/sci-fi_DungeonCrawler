@@ -14,7 +14,7 @@ class Popup extends FlxSubState {
 
     public var popupCam:ExtendedCamera;
 
-    public function new(title:String, b:String, buttons:Array<{l:String,?f:Null<Void->Void>,c:Bool}>, ?itemPreview:Bool=false, object:#if(html5)BitmapData#else String#end, objectIsAnimated:Bool=false, frameSize:FlxPoint, ?skipIntroTween:Bool=false, colorable:Bool=false) {
+    public function new(title:String, b:String, buttons:Array<{l:String,?f:Null<Void->Void>,c:Bool}>, ?itemPreview:Bool=false, object:String, objectIsAnimated:Bool=false, frameSize:FlxPoint, ?skipIntroTween:Bool=false, colorable:Bool=false) {
         super();
         if(buttons.length>4){
             throw Error.Custom("Value outside of bounds. (4 buttons max!)");

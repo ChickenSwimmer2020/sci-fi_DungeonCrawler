@@ -59,7 +59,7 @@ class Pickup extends FlxSprite {
                         Language.getTranslatedKey("inventory.full.message", null),
                         [
                             {l: Language.getTranslatedKey("inventory.full.ok", null), c: true}
-                        ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                        ], false, "", false, FlxPoint.weak(0, 0)
                     );
                     Player.instance.inventory.openSubState(popup);
                     #if(debug) Main.Trace(TODO, 'logic for showing the text telling you that your inventory is full'); #end

@@ -7,28 +7,29 @@ enum abstract SpecialTileType(Int) from Int to Int {
     var WALKABLEAREA=2; //can be used for pathfinding, mainly used for setting things up to actually work and generate properly. hopefully.
     var BREAKER=3;
 }
-
-typedef TilePointer = {
-    type:String,
-    collides:Bool,
-    ?special:Bool,
-    ?specialType:SpecialTileType
-} 
-
-typedef Room = {
-    w:Int,
-    h:Int,
-    x:Int,
-    y:Int,
-    doors:Int,
-    doorLocations:Array<FlxPoint>,
-} 
-
-typedef MapFile = { //PENDING COMPLETE REWRITE FOR SYS.
+typedef TileData = {
+    var set:String;
+    @:optional var forcedIndex:Int;
+    var pos:{row:Int, colum:Int};
+    var collides:Bool;
+    var isSpecial:Bool;
+    @:optional var specialType:SpecialTileType;
+}
+typedef ObjectData = {
+    var object:String;
+    var size:{w:Int, h:Int}; //in tiles
+    var pos:{x:Int, y:Int};
+    var isAnimated:Bool;
+    @:optional var animations:Array<{name:String, frames:Array<Int>, fps:Int, flipX:Bool, flipY:Bool}>;
+}
+typedef MapFile = {
     var name:String;
-    var width:Int;
-    var height:Int;
-    var tiles:Array<Array<TilePointer>>;
+    var size:{w:Int, h:Int};
+    var spawn:{x:Int, y:Int};
+    var tiles:Array<TileData>;
+    var objects:Array<ObjectData>;
+    var enemies:Array<Dynamic>;
+    var npcs:Array<Dynamic>;
 }
 /**
  * basic map generation implementation.
@@ -38,138 +39,79 @@ class MapGenerator {
     public static final HALLWAY_MAX_LENGTH:Int = 16;
     public static final HALLWAY_HEIGHT:Int=3;
 
-    public static function generateTileAt(tile:TilePointer,x:Int,y:Int,map:Array<Array<TilePointer>>){
-        //this just got a bit more interesting!
-        if(tile?.special==true) {
-            switch(tile.specialType){
-                case HALLWAY:
-                    GENERATE_hallway(map,x,y);
-                default:
-            }
-        }else map[y][x]=tile;
-    }
-    public static function generateMap(width:Int, height:Int, depth:Int) {  
-        #if(debug) Main.Trace(DEBUG, 'Attempting to generate a ${width}x$height map...'); #end
-        var outputTiles:Array<Array<TilePointer>> = [];
+    public static function generateMap(width:Int, height:Int, depth:Int) {
+        #if(debug) Main.Trace(DEBUG, 'Attempting to generate a ${width}x$height map at depth $depth...'); #end
+        var outputTiles:Array<TileData>=[];
         var toMapFile:MapFile = {
             name: 'depth_$depth',
-            width: width,
-            height: height,
-            tiles: []
+            size: {
+                w: width,
+                h: height
+            },
+            spawn: {
+                x: (width/2).floor(),
+                y: (height/2).floor()
+            },
+            tiles: [],
+            objects: [],
+            enemies: [],
+            npcs: []
         };
 
-        for(h in 0...height) outputTiles[h]=[]; //just for assigning and making sure we dont access nulls in the arrays because im too lazy to initilize properly.
-        var generatedHallway:Bool=false;
-        for(h in 0...height){
-            for(w in 0...width) {
-                //generateTileAt({type: "placeholder", collides: FlxG.random.bool(50), specialType: HALLWAY, special: true}, 0, 0, outputTiles);
-                generateTileAt(
-                    FlxG.random.bool(50)?{
-                        type: "placeholder",
-                        collides: FlxG.random.bool(50),
-                        special: false,
-                        specialType: NONE
-                    }:null,
-                    w, h, outputTiles
-                );
-                //generatedHallway=true;
-            }
-        }
-        outputTiles[Math.floor(outputTiles.length/2)][Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)]={collides: false,type: "",specialType:SPAWN,special: true};
-        #if(debug) Main.Trace(DEBUG, 'placed spawn tile at ${Math.floor(outputTiles.length/2)}, ${Math.floor(outputTiles[Math.floor(outputTiles.length/2)].length/2)} tiles: ${outputTiles.length}'); #end
-        //force override tile 0, 0 with the breaker for testing.
-
-        toMapFile.tiles = outputTiles;
-
-        #if(html5)
-            if(Main.saveFile.data.saves!=null) {
-                if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE)==null) {
-                    Main.showError("SAVENOTCACHED", Main.FILE, null, haxe.CallStack.toString(haxe.CallStack.callStack()));
-                    return;
-                }else if((Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps==null) {
-                    (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps=[];
-                    Main.saveFile.flush(); //flush and then try to update.
+        for(index in 0...((width*height).floor())) { //width + height generally gives us
+            outputTiles[index]=(FlxG.random.bool(50)?{
+                set: 'placeholder',
+                collides: FlxG.random.bool(50),
+                isSpecial: false,
+                pos: {
+                    colum: index,
+                    row: ((index%width).floor())
                 }
-            }
-        #end
-
-        #if(windows||hl)
-            Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${Main.saveFile.get("", "maps")}');
-            //! TEMP DISABLED TO PREVENT CRASHES WHILE MESSING WITH MAP GENERATION.
-            //Main.saveFile.set("", "maps", (Main.saveFile.get("", "maps"):Array<MapFile>).combine([toMapFile])); //boom.
-        #else
-            (Main.saveFile.data.saves:Map<String,SaveFile>).get(Main.FILE).maps.push(toMapFile); //whoops, forgot to update this writing logic!
-            Main.saveFile.flush(); //should probably do this im realizing. maybe i should add a setter or something to automatically do this for me.
-        #end
-    }
-    private static function GENERATE_hallway(tiles:Array<Array<TilePointer>>, startX:Int, startY:Int){
-        var hallwayLength:Int = FlxG.random.int(HALLWAY_MIN_LENGTH, HALLWAY_MAX_LENGTH);
-        var tile:TilePointer={
-            type: "placeholder",
-            collides: false,
-            special: true,
-            specialType: WALKABLEAREA
-        };
-        for(HEIGHT in 0...HALLWAY_HEIGHT) {
-            for(WIDTH in 0...hallwayLength) {
-                generateTileAt(
-                    {
-                        type: "placeholder",
-                        collides: FlxG.random.bool(50),
-                        special: true,
-                        specialType: WALKABLEAREA
-                    },
-                    WIDTH, HEIGHT, tiles
-                );
-            }
+            }:null);
         }
+        #if(debug) Main.Trace(DEBUG, 'placed spawn tile at center of map. tiles: ${outputTiles.length}'); #end
+        //force override tile 0, 0 with the breaker for testing.
+        toMapFile.tiles = outputTiles;
+        Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${Main.saveFile.get("", "maps")}');
+        //! TEMP DISABLED TO PREVENT CRASHES WHILE MESSING WITH MAP GENERATION.
+        Main.saveFile.set("", "maps", (Main.saveFile.get("", "maps"):Array<MapFile>).combine([toMapFile])); //boom.
     }
-    private static function GENERATE_room(tiles:Array<Array<TilePointer>>, x:Int, y:Int, width:Int, height:Int, doors:Int, doorLocations:Array<FlxPoint>) {
-        
-    };
+
 
     public static function createMap(file:String):GameMap {
         var hasMap:Bool=false;
         var save:SaveFile;
-        #if(windows||hl)
-            save = Main.saveFile.data;
-            for(map in 0...save.maps.length){
-                //if(save.maps[map].name==file){ //TODO: scan through maps.json to find if we have the map we are requesting.
-                //    hasMap=true; //check if we have the target map in the save file.
-                //}
-            }
-        #else
-            save = (Main.saveFile.data.saves:Map<String, SaveFile>).get(Main.FILE);
-            for(map in 0...save.maps.length)if(save.maps[map].name==file)hasMap=true; //check if we have the target map in the save file.
-        #end
+        save = Main.saveFile.data;
+        for(map in 0...save.maps.length){
+            //if(save.maps[map].name==file){ //TODO: scan through maps.json to find if we have the map we are requesting.
+            //    hasMap=true; //check if we have the target map in the save file.
+            //}
+        }
         
         if(hasMap) {
             var internalMap:Null<MapFile>=null;
 
-            #if(windows||hl)
-
-            #else
-                for(possibleMap in 0...save.maps.length) {
-                    if(save.maps[possibleMap].name == file){
-                        internalMap={
-                            name: save.maps[possibleMap].name??"ERROR",
-                            width: save.maps[possibleMap].width??0,
-                            height: save.maps[possibleMap].height??0,
-                            tiles: save.maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
-                        }
-                    }
-                }
-            #end
+            //TODO: this
+            //for(possibleMap in 0...save.maps.length) {
+            //    if(save.maps[possibleMap].name == file){
+            //        internalMap={
+            //            name: save.maps[possibleMap].name??"ERROR",
+            //            width: save.maps[possibleMap].width??0,
+            //            height: save.maps[possibleMap].height??0,
+            //            tiles: save.maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
+            //        }
+            //    }
+            //}
             var returnMap:GameMap = new GameMap(internalMap);
             returnMap.generate();
             
-            #if (debug&&!html5) //maps window doesnt exist on html5.
+            #if (debug)
                 Functions.wait(1, (_)->{
-                    Main.DEBUG_updateMapsInfo(internalMap.width, internalMap.height, internalMap.tiles);
+                    Main.DEBUG_updateMapsInfo(internalMap.size.w, internalMap.size.h, internalMap.tiles);
                 });
             #end
             //if im correct, i should be able to override the world bounds to be better!
-            FlxG.worldBounds.set(0, 0, 0+(16*internalMap.width), 0+(16*internalMap.height));
+            FlxG.worldBounds.set(0, 0, 0+(16*internalMap.size.w), 0+(16*internalMap.size.h));
             return returnMap;
         }else{
             //Save.genereateMapFile shows this error. we dont need to do it twice.
@@ -185,15 +127,22 @@ class MapGenerator {
     public static inline function mapExists(name:String):Bool return Main.foundMaps.contains(name);
     public static inline function findMaps(){
         if(Main.saveFile.data.maps!=null) {
-            #if(windows||hl)
-                //TODO: scan maps.json.
-            #else
-                for(i in 0...(Main.saveFile.data.maps:Array<MapFile>).length) {
-                    Main.foundMaps.push((Main.saveFile.data.maps:Array<MapFile>)[i].name);
+            var allMaps:Dynamic = SaveReader.readMapsFile(Main.FILE); //finally properly reads maps!
+            if(allMaps==null) {
+                Main.Trace(ERROR, 'Unable to read the maps file of ${Main.FILE}, this is a bad thing!');
+                return;
+            }else{
+                for(map in Reflect.fields(allMaps)) {
+                    if(Reflect.getProperty(allMaps, map)!=null) {
+                        Main.foundMaps.push(map);
+                    }else{
+                        Main.Trace(ERROR, 'Map $map is null in map file for ${Main.FILE}.');
+                        continue;
+                    }
                 }
-            #end
+            }
         }else{
-            #if(debug) Main.Trace(WARN, 'No maps found in save file "${Main.FILE}"'); #end
+            Main.Trace(WARN, 'No maps found in save file "${Main.FILE}"');
         }
     }
 }

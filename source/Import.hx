@@ -73,20 +73,11 @@ import flixel.addons.ui.FlxUIRadioGroup;
 //haxe (never changes)
 import haxe.io.Error;
 
-//js
-#if html5
-    import js.html.FileSystem;
-    import js.html.File;
-    import js.Browser;
-#end
-
 //sys (does change depending on platform.)
-#if sys
-    import sys.FileSystem;
-    import backend.parsing.File; //extends sys.io.File, but gives me my custom functions & shit.
-    import sys.thread.Mutex;
-    import sys.thread.Thread;
-#end
+import sys.FileSystem;
+import backend.parsing.File; //extends sys.io.File, but gives me my custom functions & shit.
+import sys.thread.Mutex;
+import sys.thread.Thread;
 
 //openfl (never changes)
 import openfl.events.UncaughtErrorEvent;
@@ -100,14 +91,9 @@ import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 import openfl.filters.ShaderFilter;
 import openfl.geom.Rectangle;
-#if(html5)
-    import openfl.Assets;
-    import openfl.utils.AssetType;
-#end
 
 
 //lime
-#if(html5)import lime.utils.Log;#end
 import lime.utils.Resource;
 import lime.ui.FileDialog;
 import lime.app.Application;

@@ -234,19 +234,19 @@ class WeaponParser {
     }
     public static function recycleWeapon(weapon:Weapon, path:String) {
         @:privateAccess
-        if(path!=""&&(weapon!=null&&#if (html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path)) #end)) weapon.setUpWeapon(parse(path));
-        else if(weapon==null||#if(html5) Assets.getText(Paths.weapon(path))==null#else !FileSystem.exists(Paths.weapon(path))#end) Main.showError("IOERROR", Paths.weapon(path), null, haxe.CallStack.toString(haxe.CallStack.callStack()));
+        if(path!=""&&(weapon!=null&&FileSystem.exists(Paths.weapon(path)))) weapon.setUpWeapon(parse(path));
+        else if(weapon==null||!FileSystem.exists(Paths.weapon(path))) Main.showError("IOERROR", Paths.weapon(path), null, haxe.CallStack.toString(haxe.CallStack.callStack()));
     }
     public static function parse(path:String):WeaponData {
         if(path==null) return null; //simple as that.
-        if(#if(html5) Assets.getText(Paths.weapon(path))!=null#else FileSystem.exists(Paths.weapon(path))#end)return parseXML(Paths.weapon(path));
+        if(FileSystem.exists(Paths.weapon(path)))return parseXML(Paths.weapon(path));
         else Main.showError("IOERROR", Paths.weapon(path), null, haxe.CallStack.toString(haxe.CallStack.callStack()));
         return null;
     }
     private static function parseXML(path:String):WeaponData {
         #if(debug) Main.Trace(INFO, 'Parsing weapon file: $path'); #end
-        if(#if(html5) Assets.getText(path)!=null #else FileSystem.exists(path)#end){
-            var xmlToParse:Xml = Xml.parse(#if(html5) Assets.getText(path) #else File.getContent(path)#end);
+        if(FileSystem.exists(path)){
+            var xmlToParse:Xml = Xml.parse(File.getContent(path));
             var damge:Map<String, Float>=[];
             var anims:Array<{n:String, f:Array<Int>, fr:Int, l:Bool, fl:{x:Bool,y:Bool}}>=[];
             final root:Xml = xmlToParse.firstChild();

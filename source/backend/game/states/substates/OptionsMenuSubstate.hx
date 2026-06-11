@@ -75,7 +75,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
                         Main.resetGlobalSettings();
                     }, c:true}
-                ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                ], false, "", false, FlxPoint.weak(0, 0)
             );
             openSubState(popup);
         }, false);
@@ -94,7 +94,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     close();
                 }},
                 {l: "Cancel", c:true},
-            ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)));
+            ], false, "", false, FlxPoint.weak(0, 0)));
         }, false);
         deleteAllSaves.loadGraphic(Paths.image('ui/menu', "button_wide"), true, 100, 20);
         deleteAllSaves.updateHitbox();
@@ -124,7 +124,6 @@ class OptionsMenuSubstate extends FlxUISubState{
     }
     private function createControlsUI() {
         SBG=new FlxUI9SliceSprite(controls.x+5, controls.y+5, Paths.image('ui', "chrome_inset"), new Rectangle(0,0, 490, 370), [5,5,8,8]);
-        #if(html5)Save.readSaveFile(Main.FILE);#end //just in-case.
         ControlsScroll = new ScrollableArea((FlxG.width/2-250)+5, (FlxG.height/2-200)+25, 490, 370, 1);
         Main.addCameraToGame(ControlsScroll, "settingsControlsScroller");
         for(control => keys in Main.controls) {
@@ -180,7 +179,7 @@ class OptionsMenuSubstate extends FlxUISubState{
             Language.getTranslatedKey("warning.unfinishedlanguage.message", null),
             [
                 {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
-            ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+            ], false, "", false, FlxPoint.weak(0, 0)
         );
         openSubState(popup);
     }
@@ -189,14 +188,9 @@ class OptionsMenuSubstate extends FlxUISubState{
     private var shadersCheck:FlxUICheckBox;
     private function createGraphicsUI() {
         shadersCheck=new FlxUICheckBox(5, 5, null, null, "Shaders", 100, null, ()->{
-            #if(windows||hl)
-                Main.saveFile.set("preferences", "shaders", shadersCheck.checked); //auto-saves
-            #else
-                Main.saveFile.data.shaders=shadersCheck.checked;
-                Main.saveFile.flush(); //automatically save the update
-            #end
+            Main.saveFile.set("preferences", "shaders", shadersCheck.checked); //auto-saves
         }); 
-        shadersCheck.checked = #if(windows||hl)Main.saveFile.data.preferences.shaders??false #else Main.saveFile.data.shaders??false #end; //if null, default to false. else pull the value from the save file.
+        shadersCheck.checked = Main.saveFile.data.preferences.shaders??false; //if null, default to false. else pull the value from the save file.
 
         
         graphics.add(shadersCheck);
@@ -208,27 +202,11 @@ class OptionsMenuSubstate extends FlxUISubState{
     private var audioTrackDropdown:FlxUIDropDownMenu;
     private var autoPauseCheck:FlxUICheckBox;
     private function createGeneralUI() {
-        #if (html5)
-            final availableLanguages:Array<String>=[
-                "EN_US", "JP"
-            ];
-            final availableLanguagesLables:Array<String>=[
-                "English (US)", "Japanese"
-            ];
-        #end
         var languages:Array<StrNameLabel>=[];
-        #if (hl||windows)
-            for(file in FileSystem.readDirectory('assets/lang')) {
-                #if(debug) Main.Trace(INFO, 'found lang file $file'); #end
-                languages.push(new StrNameLabel(file.split('.')[0].toUpperCase(), Language.getLanguageLable(file.split('.')[0])));
-            }
-        #else
-            for(language in 0...availableLanguages.length) {
-                if(Assets.exists('assets/lang/${availableLanguages[language]}.lang', AssetType.TEXT)) //validate that the assets for the language exist before even THINKING of adding them to the selectable dropdown.
-                    languages.push(new StrNameLabel(availableLanguages[language], availableLanguagesLables[language]));
-                else Main.showError("MISSINGFONTORLANGUAGEASSET", availableLanguages[language], null, haxe.CallStack.toString(haxe.CallStack.callStack()));
-            }
-        #end
+        for(file in FileSystem.readDirectory('assets/lang')) {
+            #if(debug) Main.Trace(INFO, 'found lang file $file'); #end
+            languages.push(new StrNameLabel(file.split('.')[0].toUpperCase(), Language.getLanguageLable(file.split('.')[0])));
+        }
         var languageLabel:FlxUIText=new FlxUIText(5, 5, 0, "", 12, true);
         languageLabel.text = Language.getTranslatedKey("menu.settings.general.language", languageLabel);
         labels.push(languageLabel);
@@ -268,7 +246,7 @@ class OptionsMenuSubstate extends FlxUISubState{
                     [
                         {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
                     ],
-                false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0));
+                false, "", false, FlxPoint.weak(0, 0));
                 openSubState(popup);
             }
         });
@@ -433,7 +411,7 @@ private final class ControlsAssinmentKeyPressSubState extends Popup {
     private var ob:ControlsAssignmentObject;
     private var ind:Int=0;
     public function new(object:ControlsAssignmentObject, index:Int) {
-        super("", "", [], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0));
+        super("", "", [], false, "", false, FlxPoint.weak(0, 0));
         ob = object;
         background.visible=background2.visible=header.visible=body.visible=false;
         for(butt in butts) butt.visible=butt.active=false;

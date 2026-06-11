@@ -39,30 +39,8 @@ class Player extends FlxSprite {
 
     public function SAVED() {
         SLS=0;
-        #if(windows||hl)
-
-        #else
-            var curSaveFile:SaveFile = Save.readSaveFile(Main.FILE);
-            curSaveFile.position = {x:this.x,y:this.y};
-            curSaveFile.health = this.health;
-            curSaveFile.stamina = this.stamina;
-            curSaveFile.xp = this.xp;
-            curSaveFile.inventory=this.inventory.inventory;
-            curSaveFile.meta = {
-                name: this.name,
-                playtime:{
-                    H: ((elapsedTimeSeconds/60)/60).floor(),
-                    M: (elapsedTimeSeconds/60).floor(),
-                    s: elapsedTimeSeconds.floor()
-                },
-                difficulty: instance.difficulty,
-                depth: instance.depth,
-                level: instance.level,
-                money: instance.money
-            };
-            Save.writeSaveFile(); //flush to the save file (EG, actually save stuff.)
-            if(onPlayerSave!=null) onPlayerSave();
-        #end
+        //TODO: actually save.
+        if(onPlayerSave!=null) onPlayerSave();
     }
 
     public var curHotbarSlot(default, set):Int=0;
@@ -237,7 +215,7 @@ class Player extends FlxSprite {
 
 
         
-        curHotbarSlot+=Math.floor(FlxG.mouse.wheel#if(html5).clamp(-1, 1)#end); //so windows doesnt require normailzation, but html5 does. wtf.
+        curHotbarSlot+=Math.floor(FlxG.mouse.wheel);
         curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);
         curHotbarSlot=curHotbarSlot.clamp(0, 9); //actually 1-10;
         for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)

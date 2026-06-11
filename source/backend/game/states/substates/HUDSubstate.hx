@@ -154,9 +154,9 @@ class InventorySlot extends FlxTypedSpriteGroup<FlxSprite> {
         );
     }
     private function loadItemGraphic(item:String) {
-        var file:#if(html5)BitmapData#else String#end = Paths.image('ui/items', item);
-        if(#if(html5)file==null#else !FileSystem.exists(file)#end) file = Paths.image('items/images', item); //fallback check.
-        if(#if(html5)file!=null#else FileSystem.exists(file)#end) {
+        var file:String = Paths.image('ui/items', item);
+        if(!FileSystem.exists(file)) file = Paths.image('items/images', item); //fallback check.
+        if(FileSystem.exists(file)) {
             if(object==null) object = new FlxSprite(0, 0);
             object.loadGraphic(file);
             object.visible=true;
@@ -382,7 +382,7 @@ class HUDSubstate extends FlxSubState {
             if(Main.heldItemGraphic==null) {
                 Main.heldItemGraphic = new FlxSprite(FlxG.mouse.viewX, FlxG.mouse.viewY);
                 #if(debug) Main.Trace(DEBUG, Main.curHeldItem); #end
-                if(#if (html5) Paths.image('ui/items', Main.curHeldItem.item)!=null #else FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))#end) {
+                if(FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))) {
                     Main.heldItemGraphic.loadGraphic(Paths.image('ui/items', Main.curHeldItem.item));
                     Main.heldItemGraphic.setGraphicSize(32, 32);
                     Main.heldItemGraphic.updateHitbox();

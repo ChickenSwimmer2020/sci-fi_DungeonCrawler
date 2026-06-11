@@ -30,7 +30,7 @@ class SoundTray extends FlxSoundTray {
         _timeText.x = _bg.width-60;
 
 		record = new Sprite();
-			var bitmap = new Bitmap(#if(html5)Paths.image('ui', 'musicpopup')#else BitmapData.fromFile(Paths.image('ui', 'musicpopup'))#end);
+			var bitmap = new Bitmap(BitmapData.fromFile(Paths.image('ui', 'musicpopup')));
 			bitmap.scaleX = 1.75;
 			bitmap.scaleY = 1.75;
 			bitmap.x = -bitmap.width / 2;

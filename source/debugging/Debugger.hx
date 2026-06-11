@@ -133,7 +133,6 @@ class SaveDebuggerWindow extends haxe.ui.containers.windows.Window {
             #end
             for(field in Reflect.fields(targetSave)) { //maps are handled WAY differently between HTML5 and windows.
                 switch(field) {
-                    #if(html5)case "maps": properties.addNode({text: 'maps => ${if(targetSave.maps!=null)"populated"else"empty"}'});   #end
                     default: properties.addNode({text: '$field => ${Reflect.getProperty(targetSave, field)}'});
                 }
             }

@@ -3,8 +3,8 @@ package backend.game.objects.tiles;
 class Breaker extends SpecialTile {
     var loopedMusicObject:FlxSound;
     var screenShakeShader:ScreenShake;
-    public function new(x:Int,y:Int, tiles:Array<Array<Tile>>) {
-        super(x,y, tiles);
+    public function new(x:Int,y:Int) {
+        super(x,y);
         tileName = "Breaker";
         options = [
             Language.getTranslatedKey("game.specialtile.generic.options.inspect", null)=>()->{

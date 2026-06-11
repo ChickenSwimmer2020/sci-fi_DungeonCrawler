@@ -72,7 +72,7 @@ class PauseMenu extends FlxSubState {
                                     FlxG.switchState(MainMenuState.new);
                                 }, c:true},
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
-                            ], false, #if(html5)null#else""#end, false, FlxPoint.weak(0, 0)
+                            ], false, "", false, FlxPoint.weak(0, 0)
                         );
                         openSubState(popup);
                     }

@@ -9,8 +9,8 @@ class SpecialTile extends Tile {
 
     private var rightclickOptionsOpen:Bool=true;
     private static var specialTileTextHoverbox:FlxText;
-    public function new(x:Int,y:Int,tiles:Array<Array<Tile>>) {
-        super(x, y, tiles, "");
+    public function new(x:Int,y:Int) {
+        super(x, y, "");
     }
 
     override public function update(elapsed:Float) {

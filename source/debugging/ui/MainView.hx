@@ -13,6 +13,7 @@ package debugging.ui;
                 <menu id="errorMenu" text="Error"/>
                 <button id="mapEditorOpen" height="100%" text="Map" />
                 <button id="cutsceneEditorOpen" height="100%" text="Cutscene" />
+                <button id="testingStateOpen" height="100%" text="TestingState" />
             </menubar>
             <window-list id="windowListA" width="50%" height="30" /> <!--beacuse we use windows for basically everything >:3-->
         </hbox>
@@ -45,6 +46,9 @@ class DebuggerMainView extends VBox {
         SVE_Reader.onClick = (_:MouseEvent)->saveReader();
         SVE_Writer.onClick = (_:MouseEvent)->saveWriter();
         ALP_Viewer.onClick = (_:MouseEvent)->alphabetViewer();
+        testingStateOpen.onClick=(_:MouseEvent)->{
+            FlxG.switchState(()->new TestingState(false));
+        };
     }
     var commandJustRan:Bool=false;
     override public function update(elapsed:Float) {

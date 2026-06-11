@@ -37,11 +37,11 @@ class ScrollableArea extends ExtendedCamera {
 
                 if(FlxG.keys.pressed.SHIFT) {
                     if(sidewaysScrollingAllowed){
-                        scrollIndex.x-=(FlxG.mouse.wheel*10#if(html5)*elapsed#end); //soooo elapsed only fixes the html5 build, but breaks others. lovely.
+                        scrollIndex.x-=(FlxG.mouse.wheel*10);
                         scroll.x=scrollIndex.x;
                     }
                 }else{
-                    scrollIndex.y-=(FlxG.mouse.wheel*10#if(html5)*elapsed#end); //soooo elapsed only fixes the html5 build, but breaks others. lovely.
+                    scrollIndex.y-=(FlxG.mouse.wheel*10);
                     if(scrollIndex.y<0) scrollIndex.y=0;
                     else scroll.y=scrollIndex.y;
                 }
