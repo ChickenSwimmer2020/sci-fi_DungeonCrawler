@@ -1,87 +1,169 @@
 package debugging;
 
+import backend.game.Player;
 #if (debug)
 class MapDebugger extends FlxUIState{
-    var widthStepper:FlxUINumericStepper;
-    var heightStepper:FlxUINumericStepper;
-    var GenerateButton:FlxUIButton;
+    var mainView:MapEditorView;
+    var map:GameMap;
+    var uiCam:ExtendedCamera;
+
+    var posText:FlxText;
+    var MapPreview:FlxRect;
+
+    var crosshair:FlxText;
     public function new() {
         super();
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("debugger.genericexit", null, ["[EXITKEY]"=>"BACKSPACE"]), 24, true);
-        add(text);
+        GameState.generateCameras(); //give us the Main.camGame cameras access so that we can actually do testing of the map without worrying about cameras failure.
+        Main.camGame.width = Main.camHUD.width = Main.camOther.width = (FlxG.width.getPercentage(75)).floor();
+        Main.camGame.x = Main.camHUD.x = Main.camOther.x = (FlxG.width.getPercentage(25));
+        Main.camGame.bgColor = 0x59FF00FF;
+        uiCam = new ExtendedCamera(0, 0, (FlxG.width.getPercentage(25)).floor(), FlxG.height, 1);
+        FlxG.cameras.add(uiCam, false);
+        add(mainView = new MapEditorView());
+        mainView.camera = uiCam;
+        MapPreview = new FlxRect(Main.camGame.x, Main.camGame.y, Main.camGame.width, Main.camGame.height);
 
-        // Define the tabs:
-		var tabs = [
-			{name: "tab_1", label: Language.getTranslatedKey("debugger.map.generatemenu", null)},
-		];
-
-		// Make the tab menu itself:
-		var tab_menu = new FlxUITabMenu(null, tabs, true);
-		tab_menu.y = 40;
-
-        var tab_group_1 = new FlxUI(null, tab_menu, null);
-		tab_group_1.name = "tab_1";
-
-        tab_menu.addGroup(tab_group_1);
-        add(tab_menu);
-
-        widthStepper = new FlxUINumericStepper(5, 5, 1, 50, 3, 100, 0, 0);
-        heightStepper = new FlxUINumericStepper(5+widthStepper.width, 5, 1, 50, 3, 100, 0, 0);
-        tab_group_1.add(widthStepper);
-        tab_group_1.add(heightStepper);
-
-        GenerateButton = new FlxUIButton(5 + (widthStepper.width + heightStepper.width), 5, Language.getTranslatedKey("debugger.map.generate", null), ()->{
-            #if(debug) Main.Trace(DEBUG, 'generate map'); #end
-        });
-        tab_group_1.add(GenerateButton);
-
-		// Now make some content for it:
-
-		/***TAB GROUP 1***/
-	    //tabs_radio_1 = new FlxUIRadioGroup(10, 10, ["HEALTH", "STAMINA", "XP", "INVENTORY", "OTHER"], [
-		//	Language.getTranslatedKey("debugger.save.radio.Health"),
-		//	Language.getTranslatedKey("debugger.save.radio.Stamina"),
-		//	Language.getTranslatedKey("debugger.save.radio.Experience"),
-		//	Language.getTranslatedKey("debugger.save.radio.Inventory"),
-        //    Language.getTranslatedKey("debugger.save.radio.Custom")
-		//]);
-        //READING_button_read = new FlxUIButton(0, 0, Language.getTranslatedKey("debugger.save.parse"), ()->{
-        //    returnText.text='${Language.getTranslatedKey("debugger.save.returned")}: ${Save.readFieldFromSave(READING_saveDropdown.selectedId, tabs_radio_1.selectedId, READING_textInputOther.text)}';
-        //});
-//
-        //returnText = new FlxUIText(0, 0, 0, Language.getTranslatedKey("debugger.save.returned"), 8, true);
-//
-        //var dropdownList:Array<StrNameLabel>=[];
-        //for(save in Main.saveFiles) {
-        //    dropdownList.push(new StrNameLabel(save.remove('.sav'), save));
-        //}
-//
-        //
-//
-        //READING_saveDropdown = new FlxUIDropDownMenu(0, 0, dropdownList??[new StrNameLabel("", Language.getTranslatedKey("debugger.save.nosaves"))]);
-        //
-
-//
-		//tab_group_1.add(tabs_radio_1);
-		//tab_group_1.add(READING_button_read);
-        //READING_textInputOther = new FlxUIInputText(0, 0, Math.floor(tabs_radio_1.width), "", 12);
-		//tab_group_1.add(READING_textInputOther);
-		//tab_group_1.add(READING_saveDropdown);
-        //tab_group_1.add(returnText);
-//
-//
+        Main.Trace(DEBUG, 'Main.camGame: ${Main.camGame.width}/${Main.camGame.height} -- ${Main.camGame.x}/${Main.camGame.y}');
+        Main.Trace(DEBUG, 'Main.camHUD: ${Main.camHUD.width}/${Main.camHUD.height} -- ${Main.camHUD.x}/${Main.camHUD.y}');
+        Main.Trace(DEBUG, 'Main.camOther: ${Main.camOther.width}/${Main.camOther.height} -- ${Main.camOther.x}/${Main.camOther.y}');
         
 
-        //READING_button_read.setPosition(tab_menu.x + (tab_menu.width-READING_button_read.width), tab_menu.y + (tab_menu.height-READING_button_read.height));
-        //READING_textInputOther.setPosition(tabs_radio_1.x, tabs_radio_1.y+tabs_radio_1.height);
-        //READING_saveDropdown.setPosition(tab_menu.x+tab_menu.width-READING_saveDropdown.width,tab_menu.y+20);
-        //returnText.setPosition(tab_menu.x,tab_menu.y+(tab_menu.height-returnText.height));
+        map = new GameMap(null);
+        map.camera = Main.camGame;
+        add(map);
+
+        mainView.focusonplr.onClick = (_)->Main.camGame.focusOn(FlxPoint.weak(map.plr.x, map.plr.y));
+
+        mainView.generate_btn.onClick = (_)->{
+            try{
+                remove(map);
+                map.destroy();
+                map = MapGenerator.createMap(null, MapGenerator.generateMap(mainView.wstepper.value, mainView.hstepper.value, 0, true), true);
+                add(map);
+                Player.instance.testingMode = true;
+                crosshair.x = ((((FlxG.width.getPercentage(75).floor()))/2)-(crosshair.width/2));
+                crosshair.y = ((FlxG.height/2)-(crosshair.height/2));
+            }catch(e) {
+                trace(e.stack);
+            }
+        };
+
+        posText = new FlxText(0, 0, 0, "X/Y: [X], [Y]");
+        add(posText);
+        posText.camera = Main.camOther;
+
+        crosshair = new FlxText(0, 0, 15, "+", 8, true);
+        crosshair.camera = Main.camOther;
+        crosshair.x = ((((FlxG.width.getPercentage(75).floor()))/2)-(crosshair.width/2));
+        crosshair.y = ((FlxG.height/2)-(crosshair.height/2));
+        add(crosshair);
+        Main.Trace(INFO, 'crosshair: ${crosshair.x}/${crosshair.y}');
     }
+    private var offsetX:Float = 0;
+    private var offsetY:Float = 0;
+    private var isDragging:Bool = false;
     override public function update(elapsed:Float) {
         super.update(elapsed);
         //READING_textInputOther.visible = READING_textInputOther.active = (tabs_radio_1.selectedId=="OTHER"||tabs_radio_1.selectedId=="INVENTORY");
+        if (Main.camGame != null && (FlxG.mouse.justPressed && MapPreview.containsPoint(FlxG.mouse.getPosition()))) 
+        {
+            isDragging = true;
+            offsetX = FlxG.mouse.viewX;
+            offsetY = FlxG.mouse.viewY;
+        }
+        crosshair.visible = mainView.editor_crosshair_toggle.selected;
+        // Stop dragging
+        if (FlxG.mouse.justReleased) isDragging = false;
+
+        if (isDragging) {
+            var dx = FlxG.mouse.viewX - offsetX;
+            var dy = FlxG.mouse.viewY - offsetY;
+
+            Main.camGame.scroll.x -= dx / Main.camGame.zoom;
+            Main.camGame.scroll.y -= dy / Main.camGame.zoom;
+
+            offsetX = FlxG.mouse.viewX;
+            offsetY = FlxG.mouse.viewY;
+        }
+
+        
+        Main.camGame.follow(mainView.editor_camera_followplayer.selected?map.plr:null, LOCKON);
+        Main.camGame.zoom+=(FlxG.mouse.wheel/10); //mouse wheel zoom control.
+        Main.camGame.zoom = ((Main.camGame.zoom/100)*100); //floating point precision fix.
+
+        posText.text = 'X/Y: ${Main.camGame.scroll.x}, ${Main.camGame.scroll.y}\nOFFSET: $offsetX, $offsetY\nZOOM: ${Main.camGame.zoom}';
+        
 
         if(FlxG.keys.justPressed.BACKSPACE) FlxG.switchState(Debugger.new);
+    }
+
+    override public function destroy() {
+        FlxG.cameras.remove(uiCam);
+        Player.instance.testingMode = false; //since it wants to be dumb.
+        GameState.degenerateCameras();
+        super.destroy();
+    }
+}
+@:xml('
+    <hbox width="25%" height="100%">
+        <vbox width="100%" height="100%">
+            <hbox width="100%" height="5%">
+                <label style="font-size:20px;" id="labelText" width="85%"/>
+                <button width="15%" height="100%" id="helpBtn" text="?"/>
+            </hbox>
+            <label style="font-size:20px;" id="leaveText" width="100%"/>
+
+            <frame text="Camera" collapsible="true" width="100%" height="5%">
+                <hbox width="100%" height="100%">
+                    <button width="100%" height="100%" id="focusonplr" text="focus on player"/>
+                </hbox>
+            </frame>
+            <frame text="Generation" width="100%" collapsible="true" height="10%">
+            <vbox width="100%" height="100%">
+                <hbox width="100%" height="50%">
+                    <number-stepper id="wstepper" pos="30" width="33%" height="100%"/>
+                    <number-stepper id="hstepper" pos="30" width="33%" height="100%"/>
+                    <button id="generate_btn" text="generate" width="33%" height="100%"/>
+                </hbox> 
+
+                <hbox width="100%" height="50%">
+                    <label text="width: [NUM]" width="33%" height="100%"/>
+                    <label text="height: [NUM]" width="33%" height="100%"/>
+                    <label text="tiles: [NUM]" width="33%" height="100%"/>
+                </hbox> 
+            </vbox>
+
+
+            </frame>
+            <frame text="Settings" width="100%" collapsible="true" height="90%">
+                <vbox width="100%" height="100%">
+                    <frame text="Editor" collapsible="true" width="100%" height="50%">
+                        <vbox width="100%" height="100%">
+                            <checkbox id="editor_crosshair_toggle" text="CrossHair" selected="true" tooltip="Toggle wether to show the crosshair.\nHelps with zooming the map preview."/>
+                            <checkbox id="editor_camera_followplayer" text="Follow Player" tooltip="Toggle wether the camera should follow the player."/>
+                            <checkbox text="Checkbox 3A"/>
+                            <checkbox text="Checkbox 4A"/>
+                        </vbox>
+                    </frame>
+                    <frame text="Generator" collapsible="true" width="100%" height="50%">
+                        <vbox width="100%" height="100%">
+                            <checkbox text="Checkbox 1B"/>
+                            <checkbox text="Checkbox 2B"/>
+                            <checkbox text="Checkbox 3B"/>
+                            <checkbox text="Checkbox 4B"/>
+                        </vbox>
+                    </frame>
+                </vbox> 
+            </frame>
+        </vbox>
+    </hbox>
+')
+private class MapEditorView extends HBox {
+    public function new() {
+        super();
+
+        labelText.text = Language.getTranslatedKey("debugger.map.title", null, []);
+        leaveText.text = Language.getTranslatedKey("debugger.genericexit", null, ["[EXITKEY]"=>"BACKSPACE"]);
     }
 }
 #end

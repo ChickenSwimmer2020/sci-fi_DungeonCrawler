@@ -5,7 +5,7 @@ import backend.extensions.ExtendedCamera;
 class GameState extends FlxState {
     public static var inGame:Bool=false; //for disabling changing difficulty settings in-game.
 
-    public var generatedCameras:Bool=false;
+    public static var generatedCameras:Bool=false;
     public static var securitySystemActivated:Bool=false;
     public static var timeLeftUntilSecuritySystemActive:Float=0;
     public static var pulledBreaker(default, set):Bool=false;
@@ -53,7 +53,7 @@ class GameState extends FlxState {
         DynamicMusic.playDynamicMusic('SubLayers', "default", "piano");
     }
 
-    public function generateCameras() {
+    public static function generateCameras() {
         if(Main.camGame!=null){
             Main.camGame.destroy();
             Main.camGame = null;
@@ -96,6 +96,7 @@ class GameState extends FlxState {
             Main.camOther.destroy();
             Main.camOther = null;
         }
+        generatedCameras=false;
     }
 
     //reset all the static varibles n shit.

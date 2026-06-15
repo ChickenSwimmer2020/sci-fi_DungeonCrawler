@@ -10,6 +10,7 @@ class Player extends FlxSprite {
     public static var onPlayerSave:Void->Void;
     public static var instance:Player;
 
+    public var testingMode:Bool=false;
     public var health:Float = 100;
     public var stamina:Float = 100;
     public var xp:Float = 0;
@@ -166,12 +167,12 @@ class Player extends FlxSprite {
         if(inventory==null) {
             inventory=new HUDSubstate();
             FlxG.state.persistentUpdate=true;
-            FlxG.state.openSubState(inventory); //open the inventory. (which is also technically the hotbar)
+            if(!testingMode) FlxG.state.openSubState(inventory); //open the inventory. (which is also technically the hotbar)
         }
         if(weapon==null) {
             weapon=new Weapon(0, 0, null); //we dont want to parse a weapon yet, idk if this will crash.
             weapon.camera=camera; //move the weapn to the player camera;
-            FlxG.state.add(weapon);
+            if(!testingMode) FlxG.state.add(weapon);
             weapon.setActions(
                 ()->{weapon.shoot();},
                 ()->{}
@@ -199,13 +200,15 @@ class Player extends FlxSprite {
                 weapon.angle = Math.atan2(mousePosition.y-weapon.y, mousePosition.x-weapon.x) * 180 / Math.PI;
             }
         }
-        Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
+        if(!testingMode) Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
 
         #if(debug)
-            if(inventory.subState==null && FlxG.keys.justPressed.SLASH) {
-                inventory.openSubState(new GameDebugger(Main.camHUD));
-            }else{
-                if(FlxG.keys.justPressed.SLASH && GameDebugger.isOpen) GameDebugger.instance.close();
+            if(!testingMode){
+                if(inventory.subState==null && FlxG.keys.justPressed.SLASH) {
+                    inventory.openSubState(new GameDebugger(Main.camHUD));
+                }else{
+                    if(FlxG.keys.justPressed.SLASH && GameDebugger.isOpen) GameDebugger.instance.close();
+                }
             }
         #end
 
@@ -214,25 +217,26 @@ class Player extends FlxSprite {
         }
 
 
-        
-        curHotbarSlot+=Math.floor(FlxG.mouse.wheel);
-        curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);
-        curHotbarSlot=curHotbarSlot.clamp(0, 9); //actually 1-10;
-        for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)
-            if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
-                curHotbarSlot=i;
-                break;
-            }else continue;
+        if(!testingMode){
+            curHotbarSlot+=Math.floor(FlxG.mouse.wheel);
+            curHotbarSlot = FlxMath.wrap(curHotbarSlot, 0, 9);
+            curHotbarSlot=curHotbarSlot.clamp(0, 9); //actually 1-10;
+            for (i in 0...[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO].length)
+                if(FlxG.keys.anyJustPressed([[ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,ZERO][i]])){
+                    curHotbarSlot=i;
+                    break;
+                }else continue;
 
-        //HORRIBLE way to do it, but good enough.
-        if(inventory.weaponText.text!=weaponTextTextTarget) inventory.weaponText.text=weaponTextTextTarget;
+            //HORRIBLE way to do it, but good enough.
+            if(inventory.weaponText.text!=weaponTextTextTarget) inventory.weaponText.text=weaponTextTextTarget;
+        }
         
         if(canMove) velocity.x = ((velocity.x = (velocity.x.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.x+(axis(ctrlRight, ctrlLeft) * MOVE_SPEED)))); //add kickback on-top of the normal velocity based movement
         if(canMove) velocity.y = ((velocity.y = (velocity.y.clampf(-MAX_MOVE_SPEED, MAX_MOVE_SPEED)) += (weaponKickback.y+(axis(ctrlDown, ctrlUp) * MOVE_SPEED))));    //make sure to clamp these to the maximum move speed or else it just speeds up infinitely
-        if(!overrideCameraZoom && canZoom) Main.targetCamGameZoom = (Main.targetCamGameZoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
-        if(!overrideCameraZoom && canZoom) Main.camGame.zoom = Main.targetCamGameZoom+Main.camGameZoomIncrement;
+        if(!testingMode) if(!overrideCameraZoom && canZoom) Main.targetCamGameZoom = (Main.targetCamGameZoom + axis(ctrlZoomIn, ctrlZoomOut) * 0.25).clampf(MIN_ZOOM, MAX_ZOOM);
+        if(!testingMode) if(!overrideCameraZoom && canZoom) Main.camGame.zoom = Main.targetCamGameZoom+Main.camGameZoomIncrement;
 
-        if (canOpenInventory && Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
+        if(!testingMode) if (canOpenInventory && Functions.checkJustPressedSafe(ctrlInv)) inventory.fullOpen = !inventory.fullOpen;
     }
     inline function axis(pos:Array<FlxKey>, neg:Array<FlxKey>):Float return (Functions.checkPressedSafe(pos)?1:0)-(Functions.checkPressedSafe(neg)?1:0);
 }

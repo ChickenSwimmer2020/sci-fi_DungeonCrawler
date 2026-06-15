@@ -125,13 +125,12 @@ class SaveDebuggerWindow extends haxe.ui.containers.windows.Window {
             Main.Trace(INFO, 'Selected: ${savesDropdown.selectedItem}');
             properties.clearNodes();
 
-            var targetSave:SaveFile;
-            #if(windows||hl)
-                targetSave = Main.saveFile.data;
-            #else
-                targetSave = (Main.saveFile.data.saves:Map<String,SaveFile>).get(savesDropdown.selectedItem);
-            #end
+            var targetSave:SaveFile = Main.saveFile.data;
             for(field in Reflect.fields(targetSave)) { //maps are handled WAY differently between HTML5 and windows.
+                if(field == "maps"){
+                    properties.addNode({text: '$field => ${(Reflect.getProperty(targetSave, field):Array<Dynamic>).length>0?"populated (this is good)":"[] (this is bad.)"}'});
+                    continue; //skip it.
+                }
                 switch(field) {
                     default: properties.addNode({text: '$field => ${Reflect.getProperty(targetSave, field)}'});
                 }

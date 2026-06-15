@@ -162,7 +162,7 @@
             "allsymbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ \n abcdefghijklmnopqrstuvwxyz \n 0123456789 \n ~!@#$%^&*()_+{}|:\"<>? \n `-=[]\\;',./"
         },
         "map": {
-            "title": "Map",
+            "title": "Map Debugger",
             "generate": "Generate",
             "generatemenu": "Generation"
         },

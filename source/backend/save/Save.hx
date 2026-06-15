@@ -32,7 +32,7 @@ typedef SaveFile = {
     };
     var inventory:Array<OneOfTwo<String, Item>>; //Items are a typedef, we can save these here!
     var preferences:Prefs;
-    var maps:Array<String>;
+    var maps:Array<MapFile>;
 }
 
 class Save {
@@ -42,14 +42,10 @@ class Save {
         Main.Trace(INFO, 'save init!');
         Main.Trace(WARN, 'dont forget to call `readSaveFile` to prevent null access!!');
         
-        #if(windows||hl)
-            if(!FileSystem.exists('assets/saves')){
-                FileSystem.createDirectory('assets/saves');
-                Main.Trace(DEBUG, 'created `assets/saves` because it didnt exist\n(exists? : ${FileSystem.exists('assets/saves')})');
-            }
-        #else
-            //we DO actually have to do this slightly differently since we dont have FileSystem on HTML5
-        #end
+        if(!FileSystem.exists('assets/saves')){
+            FileSystem.createDirectory('assets/saves');
+            Main.Trace(DEBUG, 'created `assets/saves` because it didnt exist\n(exists? : ${FileSystem.exists('assets/saves')})');
+        }
         //data = SaveReader.getSaveFile(Flags.DEFAULT_SAVE);
     }
 
@@ -189,9 +185,9 @@ class Save {
     }
 
     private function buildMapsJson():Dynamic {
-        var obj = {};
+        var obj:Dynamic = {};
         for(map in data.maps) {
-            Reflect.setField(obj, Reflect.getProperty(map, "name"), true); // just mark existence, same as how parseMaps reads it
+            Reflect.setProperty(obj, Reflect.getProperty(map, "name"), map); // just mark existence, same as how parseMaps reads it
         }
         return obj;
     }
@@ -253,15 +249,17 @@ class Save {
     }
 
     public function getMap(map:String):GameMap {
-        if(Main.saveFile.data.maps.indexOf(map)!=-1) {
-            var mapsFile:Dynamic = SaveReader.readMapsFile(Main.FILE);
-            for(m in Reflect.fields(mapsFile)) {
-                if(m == map) {
-                    Main.Trace(INFO, 'found $map in ${Main.FILE}\'s maps.json file');
-                    return MapGenerator.createMap(null); //for now, just generate nothing.
-                }
+        var mapsFile:Dynamic = SaveReader.readMapsFile(Main.FILE);
+        if(mapsFile == null) {
+            Main.Trace(ERROR, 'Tried to get map $map but it doesnt exist in ${Main.FILE}!');
+            return null;
+        }
+        for(m in Reflect.fields(mapsFile)) {
+            if(m == map) {
+                Main.Trace(INFO, 'found $map in ${Main.FILE}\'s maps.json file');
+                return MapGenerator.createMap(null); //for now, just generate nothing.
             }
-        }else Main.Trace(ERROR, 'Tried to get map $map but it doesnt exist in ${Main.FILE}!');
+        }
         return null;
     }
 
@@ -275,21 +273,19 @@ class Save {
     //static stuff.
     public static function findSaves() {
         Main.saveFiles = []; //empty the array to prevent errors.
-        #if(windows||hl)
-            for(file in FileSystem.readDirectory('assets/saves')) {
-                Main.Trace(DEBUG, 'found $file in assets/saves');
-                if(file.endsWith('/') || file.indexOf('.')==-1){
-                    Main.Trace(WARN, 'found a folder in assets/saves, ignoring...');
-                    continue;
-                }
-                var f:String = file.split('.')[0]; //NO EXTENSION.
-                Main.Trace(INFO, 'Found `assets/saves/$f (${file.split('.')[1]})`, checking validity...');
-                if(exists(f) && isValid(f)){
-                    Main.Trace(INFO, '$f has been pushed to `Main.saveFiles`!');
-                    Main.saveFiles.push(f);
-                }else Main.Trace(WARN, '$f has been found to be invalid, or not exist.');
+        for(file in FileSystem.readDirectory('assets/saves')) {
+            Main.Trace(DEBUG, 'found $file in assets/saves');
+            if(file.endsWith('/') || file.indexOf('.')==-1){
+                Main.Trace(WARN, 'found a folder in assets/saves, ignoring...');
+                continue;
             }
-        #end
+            var f:String = file.split('.')[0]; //NO EXTENSION.
+            Main.Trace(INFO, 'Found `assets/saves/$f (${file.split('.')[1]})`, checking validity...');
+            if(exists(f) && isValid(f)){
+                Main.Trace(INFO, '$f has been pushed to `Main.saveFiles`!');
+                Main.saveFiles.push(f);
+            }else Main.Trace(WARN, '$f has been found to be invalid, or not exist.');
+        }
         return null;
     }
 
@@ -309,9 +305,13 @@ class Save {
             }
         }
         for(thingy in saveData.maps){
-            if(thingy is String){
-                Main.Trace(INFO, '$thingy in $save\'s map is String');
-                continue;
+            if(thingy is Dynamic){
+                Main.Trace(INFO, '${thingy.name} in $save\'s map is Dynamic, checking values...');
+                if(mapValid(thingy)) continue;
+                else{
+                    Main.Trace(ERROR, '$save is invalid! (map "${thingy.name}" has invalid data...)');
+                    return false;
+                }
             }else{
                 Main.Trace(ERROR, '$save is invalid! (maps contains non String object(s)...)');
                 return false;
@@ -403,6 +403,39 @@ class Save {
         return true;
     }
 
+    public static function mapValid(map:MapFile):Bool {
+        var mapName:String = ((map.name is String)?map.name:"[INVALID MAP NAME DATA]");
+        if(!(map.name is String)){
+            Main.Trace(ERROR, '$mapName is invalid! (map name is not a String...)');
+            return false;
+        }
+        if(!(map.size.w is Int) || !(map.size.h is Int)){
+            Main.Trace(ERROR, '$mapName is invalid! (Player size data is invalid...)');
+            return false;
+        }
+        if(!(map.spawn.x is Int) || !(map.spawn.y is Int)){
+            Main.Trace(ERROR, '$mapName is invalid! (Player spawn location is invalid...)');
+            return false;
+        }
+        if(!(map.tiles is Array)){
+            Main.Trace(ERROR, '$mapName is invalid! (Map Tile Data has wrong format...)');
+            return false;
+        }
+        if(!(map.objects is Array)){
+            Main.Trace(ERROR, '$mapName is invalid! (Map Objects Data has wrong format...)');
+            return false;
+        }
+        if(!(map.enemies is Array)){
+            Main.Trace(ERROR, '$mapName is invalid! (Map Enemies Data has wrong format...)');
+            return false;
+        }
+        if(!(map.npcs is Array)){
+            Main.Trace(ERROR, '$mapName is invalid! (Map Npcs Data has wrong format...)');
+            return false;
+        }
+        return true;
+    }
+
     public static function deleteSave(save:String):Bool {
         return false;
     }
@@ -411,10 +444,7 @@ class Save {
      * @param save file to find
      * @return Bool if the save exists
      */
-    public static inline function exists(save:String):Bool{
-        #if(windows||hl) return FileSystem.exists(Paths.save(save));
-        #else return (InstanceData!=null); #end
-    }
+    public static inline function exists(save:String):Bool return FileSystem.exists(Paths.save(save));
 }
 
 class SaveReader { //okay, its a zip file. fine.
@@ -431,58 +461,53 @@ class SaveReader { //okay, its a zip file. fine.
     }
 
     public static function readMapsFile(file:String):Dynamic {
-        #if(windows||hl)
-            if(FileSystem.exists(Paths.save(file))) {
-                var r:Reader = new Reader(new BytesInput(File.getBytes(Paths.save(file))));
-                var entries:List<Entry> = r.read();
-                for(entry in entries) {
-                    if(entry.fileName == "maps.json") {
-                        Main.Trace(INFO, 'Located maps.json in $file');
-                        return Json.parse(((entry.compressed)?Reader.unzip(entry):entry.data).toString());
-                    }
+        if(FileSystem.exists(Paths.save(file))) {
+            var r:Reader = new Reader(new BytesInput(File.getBytes(Paths.save(file))));
+            var entries:List<Entry> = r.read();
+            for(entry in entries) {
+                if(entry.fileName == "maps.json") {
+                    Main.Trace(INFO, 'Located maps.json in $file');
+                    return Json.parse(((entry.compressed)?Reader.unzip(entry):entry.data).toString());
                 }
-                return null;
-            }else{
-                Main.showError("SAVENOTCACHED", file, null, "");
-                return null;
             }
-        #else
-
-        #end
+            return null;
+        }else{
+            Main.showError("SAVENOTCACHED", file, null, "");
+            return null;
+        }
         return null;
     }
 
     public static function getSaveFile(file:String):SaveFile {
-        #if(windows||hl)
-            if(FileSystem.exists(Paths.save(file))) {
-                Main.FILE = file; //should work?
-                var out:SaveFile = Flags.DEFAULT_SAVEFILE;
-                var r:Reader = new Reader(new BytesInput(File.getBytes(Paths.save(file))));
-                var entries:List<Entry> = r.read();
-                for(entry in entries) {
-                    if(entry.fileName.endsWith(".txt") || (entry.fileName.endsWith(".json") || (entry.fileName.endsWith('.xml') || entry.fileName.endsWith('.ini')))) {
-                        var data:String = ((entry.compressed)?Reader.unzip(entry):entry.data).toString(); //boom.
+        if(FileSystem.exists(Paths.save(file))) {
+            Main.FILE = file; //should work?
+            var out:SaveFile = Flags.DEFAULT_SAVEFILE;
+            var r:Reader = new Reader(new BytesInput(File.getBytes(Paths.save(file))));
+            var entries:List<Entry> = r.read();
+            for(entry in entries) {
+                if(entry.fileName.endsWith(".txt") || (entry.fileName.endsWith(".json") || (entry.fileName.endsWith('.xml') || entry.fileName.endsWith('.ini')))) {
+                    var data:String = ((entry.compressed)?Reader.unzip(entry):entry.data).toString(); //boom.
 
-                        if(data.contains('[ROOT]')) { //meaning its an ini file.
-                            out.meta = parseMeta(data);
-                            out.playerState = parsePlayerstate(data);
-                            out.preferences = parsePrefs(data);
-                        }else if(data.startsWith('{')) { //meaning its the maps.json file
-                            out.maps = parseMaps(data);
-                        }else if(data.startsWith('<inventory')) {
-                            Main.Trace(DEBUG, 'inventory XML, lets do this shite.');
-                            out.inventory = parseInv(data);
-                        }
-                    }else Main.Trace(WARN, 'unexpected file in save! ${entry.fileName}');
-                }
-                return out;
-            }else{
-                Main.showError("SAVENOTCACHED", file, null, "");
-                return null;
+                    if(data.contains('[ROOT]')) { //meaning its an ini file.
+                        out.meta = parseMeta(data);
+                        out.playerState = parsePlayerstate(data);
+                        out.preferences = parsePrefs(data);
+                    }else if(data.startsWith('{')) { //meaning its the maps.json file
+                        var mapsOut:Array<MapFile> = ([]:Array<MapFile>);
+                        var dataOut:Array<Dynamic> = parseMaps(data);
+                        for(entry in dataOut) mapsOut.push(Functions.dynamicToMapFile(entry));
+                        out.maps = mapsOut;
+                    }else if(data.startsWith('<inventory')) {
+                        Main.Trace(DEBUG, 'inventory XML, lets do this shite.');
+                        out.inventory = parseInv(data);
+                    }
+                }else Main.Trace(WARN, 'unexpected file in save! ${entry.fileName}');
             }
-        #else
-
-        #end
+            return out;
+        }else{
+            Main.showError("SAVENOTCACHED", file, null, "");
+            return null;
+        }
         return null;
     }
 
@@ -653,12 +678,12 @@ class SaveReader { //okay, its a zip file. fine.
         Main.Trace(DEBUG, 'got inventory: $out from "${Main.FILE}".');
         return out;
     }
-    private static function parseMaps(dat:String):Array<String> {
+    private static function parseMaps(dat:String):Array<Dynamic> {
         var data:Dynamic = Json.parse(dat);
         var out:Array<String>=[];
         for(object in Reflect.fields(data)) {
             Main.Trace(DEBUG, 'found "$object" in map file for ${Main.FILE}. Pushed to array.');
-            out.push(object);
+            out.push(Reflect.getProperty(data, object));
         }
         return out;
     }

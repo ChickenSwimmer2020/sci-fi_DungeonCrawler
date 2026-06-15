@@ -27,23 +27,15 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         deleteButton=new FlxUIButton(BG.width-105, BG.height-25, "", ()->{
             if(FlxG.keys.pressed.SHIFT){ //just straight up delete the save if you hold shift.
                 onSaveDestroyed(text.text.split('-')[0].trim());
-                #if(windows||hl)
-                    Save.deleteSave(text.text.split('-')[0].trim());
-                #else
-                    (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
-                #end
-                Main.Trace(INFO, 'attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${#if(windows||hl)Save.exists(text.text.split('-')[0].trim())#else(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())#end} (this should be null.)');
+                Save.deleteSave(text.text.split('-')[0].trim());
+                Main.Trace(INFO, 'attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${Save.exists(text.text.split('-')[0].trim())} (this should be null.)');
             }else{
                 requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
                     {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
                     {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
                         onSaveDestroyed(text.text.split('-')[0].trim());
-                        #if(windows||hl)
-                            Save.deleteSave(text.text.split('-')[0].trim());
-                        #else
-                            (Main.saveFile.data.saves:Map<String,SaveFile>).remove(text.text.split('-')[0].trim());
-                        #end
-                        Main.Trace(INFO, 'attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${#if(windows||hl)Save.exists(text.text.split('-')[0].trim())#else(Main.saveFile.data.saves:Map<String,SaveFile>).get(text.text.split('-')[0].trim())#end} (this should be null.)');
+                        Save.deleteSave(text.text.split('-')[0].trim());
+                        Main.Trace(INFO, 'attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${Save.exists(text.text.split('-')[0].trim())} (this should be null.)');
                     }, c:true}
                 ]);
             }
@@ -73,17 +65,10 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
     }
 
     public function setData(save:SaveFile) {
-        #if(windows||hl)
-            text.text = '${save.meta.name} - ${save.meta.difficulty}\n${save.meta.playTime.H}:${save.meta.playTime.M}:${save.meta.playTime.S} || ${save.meta.depth}\n${save.meta.level}';
-            healthBar.value = save.playerState.health;
-            staminaBar.value = save.playerState.stamina;
-            xpBar.value = save.playerState.xp;
-        #else
-            text.text = '${save.meta.name} - ${save.meta.difficulty}\n${save.meta.playtime.H}:${save.meta.playtime.M}:${save.meta.playtime.s} || ${save.meta.depth}\n${save.meta.level}';
-            healthBar.value = save.health;
-            staminaBar.value = save.stamina;
-            xpBar.value = save.xp;
-        #end
+        text.text = '${save.meta.name} - ${save.meta.difficulty}\n${save.meta.playTime.H}:${save.meta.playTime.M}:${save.meta.playTime.S} || ${save.meta.depth}\n${save.meta.level}';
+        healthBar.value = save.playerState.health;
+        staminaBar.value = save.playerState.stamina;
+        xpBar.value = save.playerState.xp;
     }
 
     override public function update(elapsed:Float) {
@@ -120,61 +105,32 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
         Main.addCameraToGame(scrollCam, "loadGameScroller");
     
 
-        #if(windows||hl)
-            for(save in Main.saveFiles) {
-                if(Save.isValid(save)) {
-                    #if(debug) Main.Trace(INFO, 'valid save file, ${save} loading...'); #end
-                    var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
-                    add(box);
-                    saveBoxes.push(box);
-                    box.setData(SaveReader.getSaveFile(save));
-                    loadedSaves++;
-                    box.onSaveDestroyed = (saveName:String)->{
-                        var destroyedBox:Int = saveBoxes.indexOf(box);
-                        //box.destroy();
-                        remove(box, true);
-                        for(furtherBox in destroyedBox...saveBoxes.length) {
-                            saveBoxes[furtherBox].y-=(5+saveBoxes[furtherBox].height);
-                        }
-                    };
-                    box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
-                        var popup:Popup = new Popup(
-                            title, message, buttons, false, "", false, FlxPoint.weak(0, 0)
-                        );
-                        openSubState(popup);
+        for(save in Main.saveFiles) {
+            if(Save.isValid(save)) {
+                #if(debug) Main.Trace(INFO, 'valid save file, ${save} loading...'); #end
+                var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
+                add(box);
+                saveBoxes.push(box);
+                box.setData(SaveReader.getSaveFile(save));
+                loadedSaves++;
+                box.onSaveDestroyed = (saveName:String)->{
+                    var destroyedBox:Int = saveBoxes.indexOf(box);
+                    //box.destroy();
+                    remove(box, true);
+                    for(furtherBox in destroyedBox...saveBoxes.length) {
+                        saveBoxes[furtherBox].y-=(5+saveBoxes[furtherBox].height);
                     }
-                }else{
-                    Main.Trace(WARN, 'found an invalid save file in saves folder! (should be deleted)');
+                };
+                box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
+                    var popup:Popup = new Popup(
+                        title, message, buttons, false, "", false, FlxPoint.weak(0, 0)
+                    );
+                    openSubState(popup);
                 }
+            }else{
+                Main.Trace(WARN, 'found an invalid save file in saves folder! (should be deleted)');
             }
-        #else
-            for(save in (Main.saveFile.data.saves:Map<String,SaveFile>)??([]:Map<String,SaveFile>)) {
-                if(Save.isValid(save)) {
-                    #if(debug) Main.Trace(INFO, 'valid save file, ${save?.meta?.name} loading...'); #end
-                    var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
-                    add(box);
-                    saveBoxes.push(box);
-                    box.setData(save);
-                    loadedSaves++;
-                    box.onSaveDestroyed = (saveName:String)->{
-                        var destroyedBox:Int = saveBoxes.indexOf(box);
-                        //box.destroy();
-                        remove(box, true);
-                        for(furtherBox in destroyedBox...saveBoxes.length) {
-                            saveBoxes[furtherBox].y-=(5+saveBoxes[furtherBox].height);
-                        }
-                    };
-                    box.requestSubstateOpen = (title:String, message:String, buttons:Array<{l:String,?f:Void->Void,c:Bool}>)->{
-                        var popup:Popup = new Popup(
-                            title, message, buttons, false, "", false, FlxPoint.weak(0, 0)
-                        );
-                        openSubState(popup);
-                    }
-                }else{
-                    Main.Trace(WARN, 'attempted to load invalid save "${save?.meta?.name}". skipping...'); //this shouldnt happen but just in case.
-                }
-            }
-        #end
+        }
     }
 
     override public function update(elapsed:Float) {

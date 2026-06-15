@@ -18,21 +18,25 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     public var plr:Player;
     public var enemies:Array<BaseEnemy>=[];
    
-    
-    public function new(file:MapFile) {
+    public static var file:MapFile;
+    public function new(f:MapFile) {
         super();
+        file = f;
         instance=this;
         if(file!=null) tiles = file.tiles;
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
-    public function generate(?testingState:Bool=false){
-        for(tile in tiles) add(generateObjectViaTile(tile));
+    public function generate(testingState:Bool=false){
+        for(tile in tiles){
+            add(generateObjectViaTile(tile));
+        }
 
 
-        GameState.inGame=true;
+        GameState.inGame=!testingState;
         add(plr = new Player());
         plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
         plr.camera = Main.camGame;
+        plr.testingMode = testingState;
         Player.onDeath = ()->{
             Conductor.bopCamera=false;
             isDying=true;
@@ -65,7 +69,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
 
             Music.doDeathGlitch();
 
-            if(#if(windows||hl)Main.saveFile.data.preferences.shaders#else Main.saveFile.data.shaders#end){
+            if(Main.saveFile.data.preferences.shaders){
                 for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                     cam.filters.push(new ShaderFilter(new Invert()));
                 }
@@ -116,7 +120,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     var tileToBeAdded:Tile;
     private inline function generateObjectViaTile(type:TileData):Tile{
         if(type==null) { //:3
-            tileObjects[tileObjects.length-1]=null;
+            tileObjects[(tileObjects.length==0)?0:tileObjects.length-1]=null;
             return null;
         }
         tileToBeAdded = new Tile(0 + (TILE_SIZE*type.pos.row), 0+(TILE_SIZE*type.pos.colum), type.set);
@@ -132,7 +136,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 case WALKABLEAREA: #if (debug) tileToBeAdded.color = 0xFF00FF00; #end
                 case BREAKER:
                     tileToBeAdded = new Breaker(0+(TILE_SIZE*type.pos.row), 0+(TILE_SIZE*type.pos.colum));
-                    tileObjects[tileObjects.length-1] = tileToBeAdded;
+                    tileObjects[(tileObjects.length==0)?0:tileObjects.length-1] = tileToBeAdded;
                     tileToBeAdded.immovable = true;
                     tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
                     tileToBeAdded.camera=Main.camGame;
@@ -142,7 +146,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         tileToBeAdded.immovable = true;
         tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
         if(tileToBeAdded.allowCollisions==NONE) tileToBeAdded.alpha = 0.25;
-        tileObjects[tileObjects.length-1]=tileToBeAdded;
+        tileObjects[(tileObjects.length==0)?0:tileObjects.length-1]=tileToBeAdded;
         tileToBeAdded.camera=Main.camGame;
         return tileToBeAdded;
     }

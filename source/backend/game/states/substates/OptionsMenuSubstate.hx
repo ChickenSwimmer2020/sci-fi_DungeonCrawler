@@ -214,7 +214,7 @@ class OptionsMenuSubstate extends FlxUISubState{
 
         languageDropdown=new FlxUIDropDownMenu(5, 30, languages, (_)->{
             Main.curLanguage=_; //Lang in Language is a string, so this should work.
-            #if(windows||hl)Main.saveFile.data.preferences.language=Main.curLanguage#else Main.saveFile.data.language=Main.curLanguage#end;
+            Main.saveFile.data.preferences.language=Main.curLanguage;
             Application.current.window.title = Language.languageInformation.get(Main.curLanguage).get('application_title'); //change application title to match with the new language setting.
             Main.saveFile.flush(); //upload new default language to save file.
             #if(debug) Main.Trace(INFO, 'Attempting to index language $_ and change game target LANG file'); #end
@@ -276,26 +276,16 @@ class OptionsMenuSubstate extends FlxUISubState{
             //new StrNameLabel("R", "Remaster")
         ], (_)->{
             #if(debug) Main.Trace(INFO, 'Changing music postfix to $_ and flushing to save file'); #end
-            #if(windows||hl)
-                Main.saveFile.set("preferences", "musicPF", _);
-            #else
-                Main.saveFile.data.musicPF = _;
-                Main.saveFile.flush();
-            #end
+            Main.saveFile.set("preferences", "musicPF", _);
             Main.musicPostfix = _;
         });
         general.add(audioTrackDropdown);
 
         autoPauseCheck=new FlxUICheckBox(245, 5, null, null, Language.getTranslatedKey("menu.settings.general.autopause", autoPauseCheck), 100, null, ()->{
-            #if(windows||hl)
-                Main.saveFile.set("preferences", "autoPause", autoPauseCheck.checked);
-            #else
-                Main.saveFile.data.autoPause=autoPauseCheck.checked;
-                Main.saveFile.flush(); //automatically save the update
-            #end
+            Main.saveFile.set("preferences", "autoPause", autoPauseCheck.checked);
             FlxG.autoPause = autoPauseCheck.checked; //immediately update the auto-pause setting without needing to restart the game.
         }); 
-        autoPauseCheck.checked = #if(windows||hl)Main.saveFile.data.preferences.autoPause??false #else Main.saveFile.data.autoPause??false #end; //if null, default to false. else pull the value from the save file.
+        autoPauseCheck.checked = Main.saveFile.data.preferences.autoPause??false; //if null, default to false. else pull the value from the save file.
         general.add(autoPauseCheck);
     }
 
@@ -324,12 +314,7 @@ class OptionsMenuSubstate extends FlxUISubState{
             Main.Trace(INFO, 'Added: "{c:${ReadObject.text.text}, keys: [$key0, $key1]}" to `controlsUpload`');
         }
         Main.Trace(DEBUG, controlsUpload);
-        #if(windows||hl)
-            Main.saveFile.set("preferences", "controls", controlsUpload);
-        #else
-            Main.saveFile.data.controls=controlsUpload;
-            Main.saveFile.flush();
-        #end
+        Main.saveFile.set("preferences", "controls", controlsUpload);
         //no more middleman from Save.
         Main.controls = Functions.convertFromControlsArray(controlsUpload); //WHOOPS. kinda gotta re-call this each time.
         reloadControls();

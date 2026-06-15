@@ -118,6 +118,92 @@ final class Functions {
         for(entry in i) out.set(entry.c, entry.keys);
         return out;
     }
+
+    /**
+     * convert a dynamic object into a map file.
+     * @param d 
+     * @return MapFile
+     */
+    public static function dynamicToMapFile(d:Dynamic):MapFile {
+        var map:MapFile;
+
+        function getTiles(d:Array<Dynamic>):Array<TileData> {
+            var t:Array<TileData> = [];
+            for(obj in 0...d.length) {
+                var point:Dynamic = d[obj];
+                t.push({
+                    set: Reflect.getProperty(point, "set")??"DEBUG",
+                    forcedIndex: Reflect.getProperty(point, "forcedIndex")??-1,
+                    pos: {
+                        row: Reflect.getProperty(Reflect.getProperty(point, "pos"), "row")??0,
+                        colum: Reflect.getProperty(Reflect.getProperty(point, "pos"), "colum")??0
+                    },
+                    collides: Reflect.getProperty(point, "collides")??false,
+                    isSpecial: Reflect.getProperty(point, "isSpecial")??false,
+                    specialType: Reflect.getProperty(point, "specialType")??-1
+                });
+            }
+            return t;
+        }
+        function getObjects(d:Dynamic):Array<ObjectData> {
+            var o:Array<ObjectData> = [];
+
+            function getAnims(d:Array<Dynamic>):Array<{name:String, frames:Array<Int>, fps:Int, flipX:Bool, flipY:Bool}> {
+                var a:Array<{name:String, frames:Array<Int>, fps:Int, flipX:Bool, flipY:Bool}> = [];
+
+                for(anim in 0...(d:Array<Dynamic>).length) {
+                    var an:Dynamic = (d:Array<Dynamic>)[anim];
+                    a.push({
+                        name: Reflect.getProperty(an, "name")??"ERROR",
+                        frames: (Reflect.getProperty(an, "frames"):Array<Int>)??[0],
+                        fps: Reflect.getProperty(an, "fps")??30,
+                        flipX: Reflect.getProperty(an, "flipX")??false,
+                        flipY: Reflect.getProperty(an, "flipY")??false
+                    });
+                }
+
+                return a;
+            }
+
+            for(obj in 0...(d:Array<Dynamic>).length) {
+                var point:Dynamic = (d:Array<Dynamic>)[obj];
+
+                o.push({
+                    object: Reflect.getProperty(point, "object")??"FALLBACK",
+                    size: {
+                        w: Reflect.getProperty(Reflect.getProperty(point, "size"), "w")??1,
+                        h: Reflect.getProperty(Reflect.getProperty(point, "size"), "h")??1
+                    },
+                    pos: {
+                        x: Reflect.getProperty(Reflect.getProperty(point, "pos"), "x")??0,
+                        y: Reflect.getProperty(Reflect.getProperty(point, "pos"), "y")??0
+                    },
+                    isAnimated: Reflect.getProperty(point, "isAnimated"),
+                    animations: getAnims((Reflect.getProperty(d, "animations"):Array<Dynamic>))
+                });
+            }
+
+            return o;
+        }
+
+        map = {
+            name: Reflect.getProperty(d, "name")??"ERROR",
+            size: {
+                w: Reflect.getProperty(Reflect.getProperty(d, "size"), "w")??0,
+                h: Reflect.getProperty(Reflect.getProperty(d, "size"), "h")??0
+            },
+            spawn: {
+                x: Reflect.getProperty(Reflect.getProperty(d, "spawn"), "x")??0,
+                y: Reflect.getProperty(Reflect.getProperty(d, "spawn"), "y")??0
+            },
+            tiles: getTiles(Reflect.getProperty(d, "tiles")??[]),
+            objects: getObjects(Reflect.getProperty(d, "objects")),
+            enemies: [], //TBA
+            npcs: [] //TBA
+        };
+
+        return map;
+    }
 }
 final class Additions{
     private static final fileExtensionsList:Array<String>=[
@@ -305,10 +391,10 @@ final class Additions{
     }
 
     //actual objects.
-    public static function center(spr:FlxSprite, on:FlxObject, ?offs:FlxPoint):FlxSprite {
+    public static function center(spr:FlxSprite, on:OneOfTwo<FlxObject, ExtendedCamera>, ?offs:FlxPoint):FlxSprite {
         if(offs==null) offs=FlxPoint.weak(0, 0);
-        spr.x = (on.x+on.width/2-spr.width/2)+(offs.x);
-        spr.y = (on.y+on.height/2-spr.height/2)+(offs.y);
+        spr.x = (Reflect.getProperty(on, "x")+Reflect.getProperty(on, "width")/2-spr.width/2)+(offs.x);
+        spr.y = (Reflect.getProperty(on, "y")+Reflect.getProperty(on, "height")/2-spr.height/2)+(offs.y);
         return spr;
     }
 }

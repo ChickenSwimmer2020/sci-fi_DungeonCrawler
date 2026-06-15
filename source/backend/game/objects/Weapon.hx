@@ -169,7 +169,7 @@ class Weapon extends FlxSprite{
                     railFireShader=new RailFire();
                     railFireShader.intensity.value=[0.01];
                     railFireShader.speed.value=[120.0];
-                    if(#if(windows||hl)Main.saveFile.data.preferences.shaders #else Main.saveFile.data.shaders#end){
+                    if(Main.saveFile.data.preferences.shaders){
                         for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                             cam.filters??[];
                             for(shader in [railFireShader]) {
@@ -182,7 +182,7 @@ class Weapon extends FlxSprite{
                     fire(power/100);
                     power=0;
                     fireTimers.set("railgun", Functions.wait(shoot_time, (_)->{
-                        if(#if(windows||hl)Main.saveFile.data.preferences.shaders #else Main.saveFile.data.shaders#end){
+                        if(Main.saveFile.data.preferences.shaders){
                             for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                                 for(filter in cam.filters) {
                                     Main.Trace(DEBUG, filter.getClassName(true));

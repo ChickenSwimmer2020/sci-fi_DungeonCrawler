@@ -39,7 +39,7 @@ class MapGenerator {
     public static final HALLWAY_MAX_LENGTH:Int = 16;
     public static final HALLWAY_HEIGHT:Int=3;
 
-    public static function generateMap(width:Int, height:Int, depth:Int) {
+    public static function generateMap(width:Int, height:Int, depth:Int, r:Bool=false):MapFile {
         #if(debug) Main.Trace(DEBUG, 'Attempting to generate a ${width}x$height map at depth $depth...'); #end
         var outputTiles:Array<TileData>=[];
         var toMapFile:MapFile = {
@@ -64,22 +64,25 @@ class MapGenerator {
                 collides: FlxG.random.bool(50),
                 isSpecial: false,
                 pos: {
-                    colum: index,
-                    row: ((index%width).floor())
+                    colum: (index%width).floor(),
+                    row: ((index/width).floor())
                 }
             }:null);
         }
         #if(debug) Main.Trace(DEBUG, 'placed spawn tile at center of map. tiles: ${outputTiles.length}'); #end
         //force override tile 0, 0 with the breaker for testing.
         toMapFile.tiles = outputTiles;
-        Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${Main.saveFile.get("", "maps")}');
-        //! TEMP DISABLED TO PREVENT CRASHES WHILE MESSING WITH MAP GENERATION.
-        Main.saveFile.set("", "maps", (Main.saveFile.get("", "maps"):Array<MapFile>).combine([toMapFile])); //boom.
+        if(!r){
+            Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${(Main.saveFile.get("", "maps"):Array<MapFile>).length}');
+            Main.saveFile.set("", "maps", (Main.saveFile.get("", "maps"):Array<MapFile>).combine([toMapFile])); //boom.
+            Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${(Main.saveFile.get("", "maps"):Array<MapFile>).length} after adding map ${toMapFile.name}');
+        }
+        return toMapFile;
     }
 
 
-    public static function createMap(file:String):GameMap {
-        var hasMap:Bool=false;
+    public static function createMap(file:String, ?mf:MapFile, ds:Bool=false):GameMap {
+        var hasMap:Bool=(mf!=null)?true:false;
         var save:SaveFile;
         save = Main.saveFile.data;
         for(map in 0...save.maps.length){
@@ -89,7 +92,7 @@ class MapGenerator {
         }
         
         if(hasMap) {
-            var internalMap:Null<MapFile>=null;
+            var internalMap:Null<MapFile>=mf??null;
 
             //TODO: this
             //for(possibleMap in 0...save.maps.length) {
@@ -103,7 +106,7 @@ class MapGenerator {
             //    }
             //}
             var returnMap:GameMap = new GameMap(internalMap);
-            returnMap.generate();
+            returnMap.generate(ds);
             
             #if (debug)
                 Functions.wait(1, (_)->{
