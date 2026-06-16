@@ -26,10 +26,14 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         if(file!=null) tiles = file.tiles;
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
+
+    var gameFlash:FlxSprite;
     public function generate(testingState:Bool=false){
         for(tile in tiles){
             add(generateObjectViaTile(tile));
         }
+
+        
 
 
         GameState.inGame=!testingState;
@@ -67,19 +71,27 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 }
             }
 
-            Music.doDeathGlitch();
-
             if(Main.saveFile.data.preferences.shaders){
                 for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                     cam.filters.push(new ShaderFilter(new Invert()));
                 }
             }
+            Music.doDeathGlitch();
 
-            Functions.wait(0.5, (_)->{ //wait for two times the thing, this is for the death sound :3
-                Player.overrideCameraZoom=true;
-                Music.stopMusic();
-                Music.stopLoops(true);
-                FlxG.switchState(DeathState.new);
+            gameFlash = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+            add(gameFlash);
+            gameFlash.camera = Main.camOther;
+            gameFlash.alpha = 0.2;
+
+            Functions.wait(0.1, (_)->{
+                gameFlash.destroy();
+                
+                Functions.wait(0.5, (_)->{ //wait for two times the thing, this is for the death sound :3
+                    Player.overrideCameraZoom=true;
+                    Music.stopMusic();
+                    Music.stopLoops(true);
+                    FlxG.switchState(DeathState.new);
+                });
             });
         };
         if(testingState){
@@ -109,18 +121,18 @@ class GameMap extends FlxTypedGroup<Dynamic> {
 
             //test pickup for consumables and right clickable items.
             add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y, {type: CONSUMABLE, item: "DEBUGCONSUMABLE", consumable: true, consumableType: CRUMB}));
-
         }
 
-        //for(tile in tileObjects) {
-        //    if(tile==null) continue;
-        //    else @:privateAccess tile.checkNeighbors();
-        //}
+        for(t in tileObjects){
+            if(t==null) continue; //skip over null entries.
+            t.checkNeighbors();
+            if(testingState) t.editorMode(); //allow to click for information.
+        }
     }
     var tileToBeAdded:Tile;
     private inline function generateObjectViaTile(type:TileData):Tile{
         if(type==null) { //:3
-            tileObjects[(tileObjects.length==0)?0:tileObjects.length-1]=null;
+            tileObjects[tileObjects.length]=null;
             return null;
         }
         tileToBeAdded = new Tile(0 + (TILE_SIZE*type.pos.row), 0+(TILE_SIZE*type.pos.colum), type.set);
@@ -136,7 +148,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 case WALKABLEAREA: #if (debug) tileToBeAdded.color = 0xFF00FF00; #end
                 case BREAKER:
                     tileToBeAdded = new Breaker(0+(TILE_SIZE*type.pos.row), 0+(TILE_SIZE*type.pos.colum));
-                    tileObjects[(tileObjects.length==0)?0:tileObjects.length-1] = tileToBeAdded;
+                    tileObjects[tileObjects.length] = tileToBeAdded;
                     tileToBeAdded.immovable = true;
                     tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
                     tileToBeAdded.camera=Main.camGame;
@@ -146,7 +158,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         tileToBeAdded.immovable = true;
         tileToBeAdded.allowCollisions = type.collides?ANY:NONE;
         if(tileToBeAdded.allowCollisions==NONE) tileToBeAdded.alpha = 0.25;
-        tileObjects[(tileObjects.length==0)?0:tileObjects.length-1]=tileToBeAdded;
+        tileObjects[tileObjects.length]=tileToBeAdded;
         tileToBeAdded.camera=Main.camGame;
         return tileToBeAdded;
     }

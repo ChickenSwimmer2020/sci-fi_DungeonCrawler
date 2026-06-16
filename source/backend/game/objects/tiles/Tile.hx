@@ -1,8 +1,12 @@
 package backend.game.objects.tiles;
-
+import haxe.ui.util.Timer;
+import haxe.ui.notifications.Notification;
+import haxe.ui.notifications.NotificationManager;
+import haxe.ui.notifications.NotificationType;
 class Tile extends FlxSprite {
+    public var checkedNeighbors:Bool=false;
     public var bulletCollisionRect:FlxRect;
-    public static var curImage:String="";
+    public var curImage:String="";
     final mapTiles:Map<String, Map<String, Int>> = [
         "fuck" => [
             "debug"=>0,
@@ -30,13 +34,90 @@ class Tile extends FlxSprite {
             "right"=>15,
         ]
     ];
+
+    private var inEditorMode:Bool = false;
+    public inline function editorMode() inEditorMode = !inEditorMode;
     public function new(x:Int, y:Int, tileMap:String) {
         super(x, y);
         makeGraphic(1, 1, 0x00FFFFFF); //forgot to make the graphic before overriding it.
         if(tileMap!=null && tileMap!="") initTileGraphic(tileMap); //just dont make any graphic if its empty, because it probably gets overridden with a proper graphic somewhere else
     }
-    private function checkNeighbors() {
-        //donothing for now. TODO: make this work
+    public function checkNeighbors() {
+        var allTiles:Array<Tile> = GameMap.instance.tileObjects;
+
+        function solid(x:Int, y:Int):Bool {
+            var allTiles = GameMap.instance.tileObjects;
+            var mapW = GameMap.file.size.w;
+            var mapH = GameMap.file.size.h;
+
+            // Compute this tile's grid position from world position
+            var col = Std.int(this.x / GameMap.TILE_SIZE);
+            var row = Std.int(this.y / GameMap.TILE_SIZE);
+
+            var newCol = col + x;
+            var newRow = row + y;
+
+            // Bounds check
+            if (newCol < 0 || newCol >= mapW) return false;
+            if (newRow < 0 || newRow >= mapH) return false;
+
+            // Convert back to index
+            var newIndex = newRow * mapW + newCol;
+
+            var neighbor = allTiles[newIndex];
+
+            // Only connect to same-type tiles
+            return neighbor != null && neighbor.curImage == this.curImage;
+        }
+
+
+        var k:String = '${(solid(0, -1)?"U":"")}${(solid(0, 1)?"D":"")}${(solid(-1, 0)?"L":"")}${(solid(1, 0)?"R":"")}';
+        Main.Trace(INFO, 'tile at index ${allTiles.indexOf(this)} surround key: $k');
+        var suround:String = switch(k) {
+            case "UDLR": "all";
+            case "U": "up";
+            case "L": "left";
+            case "R": "right";
+            case "D": "down";
+            case "LR": "left/right";
+            case "UD": "up/down";
+            case "DL": "left/down";
+            case "DR": "right/down";
+            case "UL": "left/up";
+            case "UR": "right/up";
+            case "ULR": "left/right/up";
+            case "DLR": "left/right/down";
+            case "UDL": "up/down/left";
+            case "UDR": "up/down/right";
+            default: "none";
+        }
+        animation.add(k, [mapTiles.get(curImage==""?"placeholder":curImage).get(suround??"none")], 30);
+        animation.play(k);
+        checkedNeighbors = true;
+    }
+
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
+
+        if(inEditorMode) {
+            if(FlxG.mouse.overlaps(this, Main.camGame) && FlxG.mouse.justPressed) {
+                Functions.wait(0.25, (_)->{
+                    if(FlxG.mouse.pressed) return; //cancel because the camera is being panned.
+                    var myNotif:Notification = new Notification();
+                    myNotif.notificationData = {
+                        title: "Info",
+                        body: 'Tile at X/Y ${x}/${y} with surround: ${animation.name}',
+                        type: NotificationType.Info,
+                        expiryMs: 3000
+                    };
+                    @:privateAccess NotificationManager.instance.pushNotification(myNotif);
+                    Timer.delay(function () {
+                        myNotif.left = 20;
+                        myNotif.top = (Screen.instance.height-20) - myNotif.height;
+                    }, 15);
+                });
+            }
+        }
     }
     
     private function initTileGraphic(image:String) {
