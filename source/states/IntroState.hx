@@ -2,11 +2,11 @@ package states;
 
 class IntroState extends FlxState {
     var onBeat:(Int)->Void;
-    var cinematicGoesHereText:FlxText;
+    var cinematicGoesHereText:ExtendedText;
     public function new() {
         super();
         onBeat = (c)->bth(c);
-        cinematicGoesHereText = new FlxText(0, 0, 0, 'CINEMATICS\nYEAHHHHHHH', 24, true);
+        cinematicGoesHereText = new ExtendedText(0, 0, 0, 'CINEMATICS\nYEAHHHHHHH', 24, true);
         add(cinematicGoesHereText);
         cinematicGoesHereText.visible=false;
         cinematicGoesHereText.screenCenter();
@@ -23,7 +23,7 @@ class IntroState extends FlxState {
             case 0: cinematicGoesHereText.visible=true;
             case 8:
                 cinematicGoesHereText.visible=false;
-                var madePossibleByHeader:FlxText = new FlxText(0, 0, Language.getTranslatedKey('game.intro.credits.header', null), 12, true);
+                var madePossibleByHeader:ExtendedText = new ExtendedText(0, 0, Language.getTranslatedKey('game.intro.credits.header', null), 12, true);
                 add(madePossibleByHeader);
                 madePossibleByHeader.screenCenter(X);
                 //TODO: show credits.

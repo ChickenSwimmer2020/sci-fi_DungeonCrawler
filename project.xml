@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
-    <meta version="0.04" build-number="4" company="ChickenSwimmer2020" package="com.chickenswimmer2020.scifidungeoncrawler" description="description. does this show up in windows file explorer?" title="Sublevel Atlas-Zero"/>
+    <meta version="0.04.1.03" build-number="4" company="ChickenSwimmer2020" package="com.chickenswimmer2020.scifidungeoncrawler" description="description. does this show up in windows file explorer?" title="Sublevel Atlas-Zero"/>
     <app preloader="flixel.system.FlxPreloader" Path="export" file="Sublevel Atlas-Zero" main="Main"/>
     <window orientation="landscape" width="0" height="0" fps="60" antialiasing="0" background="0xFF000000"/> 
 

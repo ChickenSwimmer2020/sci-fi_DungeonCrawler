@@ -18,7 +18,7 @@ class ShaderCache extends FlxState{
     public function new() {
         super();
 
-        add(new FlxText(((FlxG.width/2)-(200)), 0, 400, "Preloading shaders, please wait.", 24, true));
+        add(new ExtendedText(((FlxG.width/2)-(200)), 0, 400, "Preloading shaders, please wait.", 24, true));
 
         for(i in 0...4) {
             var testSprite:FlxSprite = new FlxSprite(0+(37*i), ((i%(FlxG.width/(25)))+(20*i))).loadGraphic(Paths.image('items/images', "DEBUGCONSUMABLE"));

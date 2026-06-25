@@ -8,7 +8,7 @@ class SpecialTile extends Tile {
     public var options:Map<String, Void->Void>=[];
 
     private var rightclickOptionsOpen:Bool=true;
-    private static var specialTileTextHoverbox:FlxText;
+    private static var specialTileTextHoverbox:ExtendedText;
     public function new(x:Int,y:Int) {
         super(x, y, "");
     }
@@ -18,7 +18,7 @@ class SpecialTile extends Tile {
         optionsMenuOpenOnAnyTile = rightclickOptionsOpen;
 
         if(specialTileTextHoverbox == null && FlxG.state!=null) {
-            specialTileTextHoverbox = new FlxText(0, 0, 0, "", 12, true);
+            specialTileTextHoverbox = new ExtendedText(0, 0, 0, "", 12, true);
             specialTileTextHoverbox.setBorderStyle(OUTLINE, 0xFF000000, 1, 1);
             specialTileTextHoverbox.visible=false;
             specialTileTextHoverbox.camera = Main.camOther;

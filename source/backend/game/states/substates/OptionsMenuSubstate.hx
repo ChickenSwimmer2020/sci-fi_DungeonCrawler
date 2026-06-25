@@ -2,6 +2,7 @@ package backend.game.states.substates;
 
 import flixel.addons.ui.interfaces.IFlxUIButton;
 
+//TODO: make this into a haxeui window.
 class OptionsMenuSubstate extends FlxUISubState{
     private var total_Controls:Int=0;
     var tab_menu:FlxUITabMenu;
@@ -159,7 +160,7 @@ class OptionsMenuSubstate extends FlxUISubState{
         }
 
         if(ControlObjects.length==0) {
-            var pulsingErrorText:FlxText = new FlxText(0, 0, 0, "", 12, true);
+            var pulsingErrorText:ExtendedText = new ExtendedText(0, 0, 0, "", 12, true);
             pulsingErrorText.text = Language.getTranslatedKey("menu.settings.controls.nocontrols", pulsingErrorText);
             pulsingErrorText.alignment=CENTER;
             pulsingErrorText.applyMarkup(pulsingErrorText.text, [
@@ -239,7 +240,7 @@ class OptionsMenuSubstate extends FlxUISubState{
             }
             if(Language.languageInformation.get("WIPLanguages").contains(_)) {
                 var popup:Popup = new Popup(
-                    Language.getTranslatedKey("warning.unfinishedlanguage", null),
+                    Language.getTranslatedKey("warning.unfinishedlanguage.title", null),
                     Language.getTranslatedKey("warning.unfinishedlanguage.message", null),
                     [
                         {l: Language.getTranslatedKey("warning.unfinishedlanguage.continue", null), c:true}
@@ -327,13 +328,13 @@ private final class ControlsAssignmentObject extends FlxTypedSpriteContainer<Dyn
     public var clearButton:FlxUIButton;
     public var reassignButton1:FlxUIButton;
     public var clearButton1:FlxUIButton;
-    public var text:FlxText;
+    public var text:ExtendedText;
     public var input0:FlxInputText;
     public var input1:FlxInputText;
 
     public function new(x:Float,y:Float, controlName:String, controlKeys:Array<FlxKey>) {
         super(x, y);
-        text = new FlxText(0, 0, 142, controlName, 12, true);
+        text = new ExtendedText(0, 0, 142, controlName, 12, true);
 
         var inputText0:String = controlKeys[0]=="null"?"":controlKeys[0];
         var inputText1:String = controlKeys[1]=="null"?"":controlKeys[1];
@@ -398,12 +399,12 @@ private final class ControlsAssinmentKeyPressSubState extends Popup {
         ob = object;
         background.visible=background2.visible=header.visible=body.visible=false;
         for(butt in butts) butt.visible=butt.active=false;
-        var text:FlxText = new FlxText(0, 0, 0, Language.getTranslatedKey("menu.settings.controls.reassigncontrol", null, ["[INDEX]"=>'$index', "[CONTROL]"=>'${object.text.text}']), 24);
+        var text:ExtendedText = new ExtendedText(0, 0, 0, Language.getTranslatedKey("menu.settings.controls.reassigncontrol", null, ["[INDEX]"=>'$index', "[CONTROL]"=>'${object.text.text}']), 24);
         text.screenCenter();
         text.alignment=CENTER;
         addT(text);
 
-        var text2:FlxText = new FlxText(text.x, text.y+text.height, 0, Language.getTranslatedKey("menu.settings.controls.reassigncontrolexitmsg", null), 8);
+        var text2:ExtendedText = new ExtendedText(text.x, text.y+text.height, 0, Language.getTranslatedKey("menu.settings.controls.reassigncontrolexitmsg", null), 8);
         text2.alignment=LEFT;
         addT(text2);
     }

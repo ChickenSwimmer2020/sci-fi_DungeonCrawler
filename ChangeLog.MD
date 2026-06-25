@@ -1,5 +1,21 @@
 # ChangeLog
 
+## Prototype Update 0.04.1.03 (language improvements)
+
+> Tried to improve some language stuff, most of it doesnt work annoyingly, gonna need a lot of ui overhauling.
+
+* Japanese Translation is FINALLY updated, needs checking on if its accurate though.
+* Added `ExtendedText` which can automatically update its font and rerender when needed
+* Almost Every instance of FlxText was replaced with ExtendedText.
+* Loading a save now sets it as the last loaded save, making that save auto-load on game startup.
+* Added TODO to OptionsMenuSubstate to remind us to change it into a HaxeUI window.
+* `MapGenerator` no longer crashes game on startup if a save file isnt loaded.
+* Added ability to override language per key-attain in getTranslatedKey.
+* Alphabet Debugger is functional again, finally.
+* Updated uPrefs defaults to include `lastLoadedSave` field.
+* Removed TODO pertaining to sprint bug on web.
+* Finally bumped `project.xml` game version.
+
 ## Prototype Update 0.04.1.02 (Shader Compiler)
 
 > basic changes i guess, trying to make stuff work i suppose.

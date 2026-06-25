@@ -45,7 +45,7 @@ class Cutscene extends FlxSubState {
             var built:Dynamic = null;
             switch(o.type) {
                 case "Text":
-                    var t = new FlxText(
+                    var t = new ExtendedText(
                         Std.parseFloat(o.attrs.get("x") ?? "0") ?? 0,
                         Std.parseFloat(o.attrs.get("y") ?? "0") ?? 0,
                         Std.parseInt(o.attrs.get("width") ?? "0") ?? 0,

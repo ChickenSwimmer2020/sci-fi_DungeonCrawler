@@ -1,47 +1,323 @@
 {
-    "TODO": "THIS",
+    "warning": {
+        "unfinishedlanguage":{
+            "title": "!未完成の言語!",
+            "continue": "了解",
+            "message": "選択された言語ファイルの翻訳は未完成です。\n今後更新される予定です。\n\n正しく適用するには、ゲームを再起動してください。"
+        }
+    },
+    "pause": {
+        "resume": "再開",
+        "settings": "設定",
+        "exit": "終了",
+        "exitnosave":{
+            "title": "終了（保存なし）",
+            "popup": {
+                "title": "注意！",
+                "message": "今終了すると、進行状況が保存されません！\n続行しますか？",
+                "options": {
+                    "exitunsafe": "終了",
+                    "exit": "保存",
+                    "cancel": "キャンセル"
+                }
+            }
+        },
+        "debug": {
+            "exittestingstate": "テスト終了"
+        }
+    },
+    "game": {
+        "specialtile":{
+            "generic": {
+                "options": {
+                    "inspect": "調べる"
+                }
+            },
+            "breaker": {
+                "interact": "引く",
+                "title": "ブレーカーボックス",
+                "message": "「古いブレーカーボックス…」\n「何に電力を供給しているのだろう？」\n\n\n\n\n\n\n電力を復元し、降下を可能にする。\n長く忘れられていた防衛機能が起動するかもしれない…"
+            }
+        },
+        "inspect": {
+            "popup": {
+                "close": "閉じる"
+            }
+        },
+        "debugger":{
+            "label": "デバッグメニュー",
+            "create": {
+                "pickup": {
+                    "title": "新しいピックアップを作成",
+                    "button": "挿入"
+                },
+                "hint": {
+                    "pickupname": "ピックアップ名",
+                    "pickuptype": "ピックアップタイプ",
+                    "pickuppotiontype": "ポーションタイプ",
+                    "pickupguntype": "銃タイプ",
+                    "pickupispotion": "ポーションですか？（自明）",
+                    "pickupdurability": "耐久度",
+                    "pickupweapontype": "武器タイプ",
+                    "pickupmagictype": "魔法タイプ",
+                    "pickupconsumabletype": "消耗品タイプ",
+                    "insert": "ゲームマップにピックアップを挿入"
+                }
+            }
+        },
+        "death": {
+            "consolemessage": "「[SAVEFILE]」のユニットインデックスが応答しません。                \n再接続できません。            \nユニットシステムのシャットダウンを確認しました。入力待ち。\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n再展開しますか？[Y/N]"
+        }
+    },
+    "menu": {
+        "settings": {
+            "tabs": {
+                "controls": "操作設定",
+                "save": {
+                    "flush": "保存"
+                },
+                "difficulty": "難易度",
+                "general": "一般",
+                "graphics": "グラフィック",
+                "graphicsEG": "グラフィック"
+            },
+            "general": {
+                "language": "言語",
+                "audiotrack": "オーディオバージョン",
+                "autopause": "自動一時停止"
+            },
+            "controls": {
+                "nocontrols": "操作設定が見つかりません\n**[これは重大な問題です。絶対に表示されるべきではありません]**",
+                "reassigncontrol": "キーを押して [CONTROL][[INDEX]] を再割り当て",
+                "reassigncontrolexitmsg": "キャンセルするにはどこかをクリック。",
+                "exitreassignment": "キャンセル"
+            },
+            "clear": {
+                "button": "設定をクリア",
+                "message": "グローバル設定をクリアしようとしています。\nこの操作は元に戻せません。\nセーブデータ、言語設定、最後に読み込んだセーブは保持されます。\n続行しますか？"
+            }
+        },
+        "save": {
+            "loadsave": "セーブをロード",
+            "delete": {
+                "popup": {
+                    "message": "「SVE」を削除しようとしています！\nこの操作は取り消せません！！\n\n\n続行しますか？",
+                    "title": "警告！",
+                    "options": {
+                        "cancel": "キャンセル",
+                        "delete": "削除"
+                    }
+                }
+            }
+        },
+        "newgame": "新しいゲーム",
+        "loadgame": "ゲームをロード",
+        "config": "設定",
+        "art": "ギャラリー",
+        "awards": "実績",
+        "quit": "終了",
+        "debug": {
+            "debugger": "デバッガー"
+        }
+    },
+    "debugger": {
+        "title":"デバッガーシステム",
+        "genericexit": "[EXITKEY] を押して終了",
 
-    "warning.unfinishedlanguage": "「！みかんせいのげんご！」",
-    "warning.unfinishedlanguage.continue": "つづける",
-    "warning.unfinishedlanguage.message": "「せんたくされたげんごファイルのほんやくはみかんせいです。\nしょうらいてきにこうしんされるよていです。\n\nせいじょうにはんえいされるためにはゲームをさいきどうしてください。」",
-
-    "menu.options.tab.controls": "そうさせってい",
-    "menu.options.tab.difficulty": "なんいど",
-    "menu.options.tab.general": "いっぱんせってい",
-    "menu.options.tab.graphics": "グラフィックせってい",
-    "menu.options.tab.graphicsEG": "グラプチスせってい",
-
-    "menu.new_game": "あたらしいゲーム",
-    "menu.load_game": "ロードゲーム",
-    "menu.config": "せってい",
-    "menu.art": "ギャラリー",
-    "menu.awards": "アチーブメント",
-    "menu.quit": "やめる",
-    "menu.debug.debugger": "デバッガー",
-    
-    "debugger.save": "セーブデバッガー",
-    "debugger.save.exit": "バックスペースをおしてもどる",
-    "debugger.save.readmenu": "よむ",
-    "debugger.save.radio.Health": "たいりょく",
-    "debugger.save.radio.Stamina": "スタミナ",
-    "debugger.save.radio.Experience": "けいけん",
-    "debugger.save.radio.Inventory": "インベントリー",
-    "debugger.save.radio.Custom": "カスタム",
-    "debugger.save.parse": "パース",
-    "debugger.save.returned": "かえりち：",
-    "debugger.save.nosaves": "セーブなし",
-
-
-    "error.nullitem": "Null Item Exception",
-    "error.nullitem.message": "An Pickup attempted to load with null data. it has been removed.\n\nTHIS ERROR IS NOT FATAL.",
-    "error.renderfailure": "Engine Render Failure",
-    "error.renderfailure.message": "A graphic({OBJ}) could not be loaded.\n\nTHIS ERROR IS NOT FATAL.",
-    "error.nullio": "Null I/O Exception",
-    "error.nullio.message": "The object {OBJ} couldnt be loaded.",
-    "error.cachefault": "Save Cache Fault",
-    "error.cachefault.message": "The save file {OBJ} could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game.",
-    "error.languagemissing": "Language Fault",
-    "error.languagemissing.mesage": "The language file for {OBJ} could not be loaded.\nLanguage files are essential for game execution.\nThe program will close shortly.[SHUTDOWN]",
-    "error.mapnotfound": "Map read Failure",
-    "error.mapnotfound.message": "The map file {OBJ} could not be loaded. This error is not fatal, and you will be returned to the main menu.[MENU]"
+        "windows": {
+            "save": {
+                "reader": "セーブリーダー",
+                "editor": "セーブエディター"
+            },
+            "alphabet": {
+                "title": "文字ビューアー",
+                "charmap": "TODO"
+            }
+        },
+        "notif": {
+            "error": {
+                "title": "エラー！",
+                "nullerr": "エラータイプ「[T]」は存在しません。\nこれは非常に深刻な問題です。\nこのエラーは表示されるべきではありません。"
+            }
+        },
+        "menubar":{
+            "mapeditor": "マップ",
+            "cutsceneeditor": "カットシーン",
+            "alphabet": "文字",
+            "error": {
+                "menutitle": "エラー",
+                "reftext": "参照",
+                "followtags": "タグをフォロー"
+            },
+            "save": {
+                "menutitle": "セーブ",
+                "reader": "リーダー",
+                "writer": "ライター"
+            }
+        },
+        "testing": "テストステート",
+        "alphabet": {
+            "title": "フォント",
+            "allsymbols": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょゎゐゑ\nアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポァィゥェォッャュョヮヰヱヴヵヶ\n一二三四五六七八九十百千万円年月日時分秒人口大小中上下左右前後東西南北春夏秋冬山川海空火水木金土心手目口耳足気力男女子親友学校会社国家言語文字読書食飲見聞話走歩来行帰入出買売使作持知思考感動笑泣好嫌好悪新古高安長短多少強弱早遅明暗良悪美醜\n０１２３４５６７８９\n。、・「」『』【】〔〕（）｛｝〈〉《》「」〜…―‥・：；！？"
+        },
+        "map": {
+            "title": "マップデバッガー",
+            "generate": "生成",
+            "generatemenu": "生成メニュー"
+        },
+        "save": {
+            "title": "セーブ",
+            "readmenu": "読み込み",
+            "parse": "解析",
+            "returned": "返り値",
+            "nosaves": "セーブなし",
+            "radio": {
+                "health": "体力",
+                "stamina": "スタミナ",
+                "experience": "経験値",
+                "inventory": "インベントリ",
+                "custom": "カスタム"
+            }
+        },
+        "error": {
+            "title": "エラー",
+            "labels": {
+                "test": "テスト",
+                "io": "汎用エラー",
+                "render": "グラフィック不足",
+                "cache": "セーブ不足",
+                "lang": "言語不足",
+                "item": "ヌルピックアップ",
+                "map": "マップ不足"
+            }
+        },
+        "cutscenemaker": {
+            "menubar": {
+                "play": "再生",
+                "test": "テスト",
+                "file": {
+                    "title": "ファイル",
+                    "newcutscene": "新規カットシーン",
+                    "loadcutscene": "カットシーンを読み込む",
+                    "savecutscene": "カットシーンを保存",
+                    "savecutsceneas": "名前を付けて保存...",
+                    "quiteditor": "終了"
+                },
+                "meta": {
+                    "title": "メタ",
+                    "fps": "フレームレート",
+                    "tf": "総フレーム数"
+                },
+                "onionskinning": {
+                    "title": "オニオンスキニング",
+                    "enabled": "有効",
+                    "preframes": "前フレーム",
+                    "postframes": "後フレーム"
+                },
+                "view": {
+                    "title": "表示",
+                    "tdarkmode": "ダークモード"
+                }
+            },
+            "objects": {
+                "frame": {
+                    "label": "オブジェクト",
+                    "button": "新規追加..."
+                }
+            },
+            "timeline": {
+                "label": "タイムライン"
+            },
+            "preview": {
+                "hint": "プレビュー実行中  —  ESCで停止",
+                "stop": "■ 停止"
+            },
+            "typepicker": {
+                "title": "アクションタイプを選択"
+            },
+            "filedialog": {
+                "save": "保存先パス：",
+                "load": "読み込みパス：",
+                "cancel": "キャンセル",
+                "ok": "OK",
+                "HTML5_hint": "HTML5ではファイルI/Oが使用できません。\n保存するには以下のXMLをコピーするか、XMLを貼り付けてロードを押してください：",
+                "HTML5_loadpaste": "貼り付けから読み込む",
+                "HTML5_done": "完了"
+            },
+            "properties": {
+                "header": "プロパティ：[NODE_TYPE]"
+            },
+            "nodelist": {
+                "header": "ノード（[NUM]）"
+            },
+            "toolbar": {
+                "add": "追加",
+                "addchild": "子を追加",
+                "delete": "削除 [DEL]",
+                "preview": "> プレビュー",
+                "fulltest": ">> フルテスト",
+                "load": "読み込み",
+                "save": "保存 [C+S]",
+                "saveas": "名前を付けて保存",
+                "undo": "元に戻す [C+Z]",
+                "back": "< 戻る"
+            },
+            "statusbar": {
+                "init": "準備完了",
+                "default": "カットシーンエディター  |  CTRL+S 保存  |  CTRL+Z 元に戻す  |  ESC プレビュー停止",
+                "selected": "選択中：<NODE>",
+                "undo": "元に戻す",
+                "added": "追加：<NODE>",
+                "deleted": "ノードを削除しました。",
+                "preview": "プレビュー実行中  |  ESCまたはSTOPで終了",
+                "fulltest": "フルテスト実行中  |  ESCまたはSTOPで終了",
+                "previewstopped": "プレビュー停止",
+                "saved": "<PATH> に保存しました",
+                "loaded": "読み込み：<PATH>",
+                "HTML5_pastesuccess": "貼り付けから読み込みました"
+            },
+            "error": {
+                "title": "エラー",
+                "dismiss": "閉じる",
+                "xmlbuild": "XMLビルドエラー：\n<ERROR>",
+                "parse": "カットシーン解析エラー：\n<ERROR>",
+                "save": "保存エラー：\n<ERROR>",
+                "load": "読み込みエラー：\n<ERROR>"
+            }
+        }
+    },
+    "weapon": {
+        "pistol": "グロック17",
+        "shotgun": "スパス12",
+        "rifle": "M16AR",
+        "burstgun": "バーストガン",
+        "railgun": "レールガン",
+        "minigun": "M134"
+    },
+    "error": {
+        "nullitem": {
+            "title": "ヌルアイテム例外",
+            "message": "ピックアップ「{OBJ}」がヌルデータで読み込まれようとしました。削除されました。\n\nこのエラーは致命的ではありません。{STK}"
+        },
+        "renderfailure": {
+            "title": "エンジンレンダリング失敗",
+            "message": "グラフィック「{OBJ}」を読み込めませんでした。\n\nこのエラーは致命的ではありません。{STK}"
+        },
+        "nullio": {
+            "title": "ヌルI/O例外",
+            "message": "オブジェクト「{OBJ}」を読み込めませんでした。{STK}"
+        },
+        "cachefault": {
+            "title": "セーブキャッシュ障害",
+            "message": "セーブファイル「{OBJ}」はメモリに見つからなかったため読み込めませんでした。\nこのエラーを修正するには、.SAVファイルをassets/savesに配置して\nゲームを再起動してください。{STK}"
+        },
+        "languagemissing": {
+            "title": "言語ファイル障害",
+            "message": "「{OBJ}」の言語ファイルを読み込めませんでした。\n言語ファイルはゲーム実行に必須です。\nまもなくプログラムが終了します。[SHUTDOWN]{STK}"
+        },
+        "mapnotfound": {
+            "title": "マップ読み込み失敗",
+            "message": "マップファイル「{OBJ}」を読み込めませんでした。このエラーは致命的ではなく、メインメニューに戻ります。\nセーブデータが破損しています。削除してください。[MENU]{STK}"
+        }
+    }
 }

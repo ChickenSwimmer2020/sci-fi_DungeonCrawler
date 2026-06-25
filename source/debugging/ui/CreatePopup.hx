@@ -14,7 +14,7 @@ class CreatePopup extends Popup {
     var consumableTypeDropdown:FlxUIDropDownMenu;
     var createButton:FlxButton;
     var scrolling:ScrollableArea;
-    var hintText:FlxText;
+    var hintText:ExtendedText;
     public function new() {
         super(Language.getTranslatedKey("game.debugger.create.pickup.title", null), "", [], false, "", false, FlxPoint.weak(0, 0), true);
         body.visible=body.active=false; //no body text, because everything is getting moved around n shtuff.
@@ -27,7 +27,7 @@ class CreatePopup extends Popup {
         add(blurDarkenSprite);
 
 
-        hintText=new FlxText(5, background2.y+background2.height, 0, "HINT", 8, true);
+        hintText=new ExtendedText(5, background2.y+background2.height, 0, "HINT", 8, true);
         hintText.color = 0xFF000000;
         group.add(hintText);
 

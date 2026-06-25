@@ -19,6 +19,8 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         text=new FlxUIText(100, 5, BG.width-105, '{NAME} - {DIFFICULTY}\n{H}:{M}:{S} || {DEPTH}\n{LEVEL}', 14, true);
         loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave", loadButton), ()->{
             Main.FILE=text.text.split('-')[0].trim(); //should work?
+            Main.Trace(INFO, 'main file: ${Main.FILE}');
+            Preferences.setPref("lastLoadedSave", Main.FILE); //boom.
             FlxG.switchState(()->new GameState(true, false, Main.FILE)); //should work?
         }, false);
         loadButton.loadGraphic("flixel/images/ui/button.png", true, 80, 20);

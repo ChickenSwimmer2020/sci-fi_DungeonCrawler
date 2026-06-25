@@ -36,10 +36,10 @@ class Language {
 
         return null;
     }
-    public static function getTranslatedKey(key:String, object:Null<Dynamic>, ?overrides:Map<String,String>):String {
+    public static function getTranslatedKey(key:String, object:Null<Dynamic>, ?overrides:Map<String,String>, ?overrideLanguage:String=""):String {
         if(disabledKeys.indexOf(key)!=-1)return ""; //ignore disabled keys.
-        if(FileSystem.exists(Paths.lang(Main.curLanguage))) {
-            var lang:Dynamic=Json.parse(File.getContent(Paths.lang(Main.curLanguage)));
+        if(FileSystem.exists(Paths.lang(overrideLanguage==""?Main.curLanguage:overrideLanguage))) {
+            var lang:Dynamic=Json.parse(File.getContent(Paths.lang(overrideLanguage==""?Main.curLanguage:overrideLanguage)));
             var targetString:String = "";
             if(object!=null && activeLanguageObject.get(key)==null){
                 activeLanguageObject.set(key, object);

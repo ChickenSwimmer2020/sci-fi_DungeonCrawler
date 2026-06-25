@@ -7,13 +7,13 @@ class DeathState extends FlxState {
     var labBG:FlxSprite;
     var consoleGroup:FlxSpriteGroup;
     var consoleWindow:FlxSprite;
-    var text:FlxText;
+    var text:ExtendedText;
     var cursor:FlxSprite;
 
     var RFEG:Bool=false; //Relocation_Failed Easter Egg (somewhat replaces the death screen with that of Relocation_Failed)
     var RFGradient:FlxSprite;
-    var RFCLText:FlxText;
-    var RFCLText2:FlxText;
+    var RFCLText:ExtendedText;
+    var RFCLText2:ExtendedText;
 
     var RFEGbeatHit:(Int)->Void;
     public function new() {
@@ -33,7 +33,7 @@ class DeathState extends FlxState {
         consoleWindow=new FlxSprite(0, 0).loadGraphic(Paths.image('ui/death', 'screen'));
         consoleGroup.add(consoleWindow); 
 
-        text = new FlxText(64, 48, 640, "", 12, true);
+        text = new ExtendedText(64, 48, 640, "", 12, true);
         consoleGroup.add(text);
         
         consoleGroup.screenCenter();
@@ -57,13 +57,13 @@ class DeathState extends FlxState {
                     RFGradient.y=0;
                 };
                 Conductor.onBeatHit.push(RFEGbeatHit);
-                RFCLText = new FlxText(0, 0, FlxG.width, 'RECONNECTING', 86, false);
+                RFCLText = new ExtendedText(0, 0, FlxG.width, 'RECONNECTING', 86, false);
 		        RFCLText.setFormat('assets/fonts/terminus.ttf', 86, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.NONE, 0x00000000, true);
                 RFCLText.screenCenter(Y);
                 RFCLText.setFormat('assets/fonts/terminus.ttf', 86, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.NONE, 0x00000000, true);
                 RFCLText.text = 'CONNECTION';
                 add(RFCLText);
-                RFCLText2 = new FlxText(0, 0, FlxG.width, '', 74, false);
+                RFCLText2 = new ExtendedText(0, 0, FlxG.width, '', 74, false);
                 RFCLText2.setFormat('assets/fonts/terminus.ttf', 74, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.NONE, 0x00000000, true);
                 RFCLText2.y = RFCLText.y + 58;
                 RFCLText2.setFormat('assets/fonts/terminus.ttf', 74, 0xFFFF0000, CENTER, FlxTextBorderStyle.NONE, 0x00000000, true);

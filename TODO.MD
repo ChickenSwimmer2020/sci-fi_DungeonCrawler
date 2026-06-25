@@ -19,7 +19,6 @@
 * elevator [GameMap.hx](source\backend\game\GameMap.hx#L122)
 * bullets clipping through walls [GameMap.hx](source\backend\game\GameMap.hx#L178)
 * better detection [Music.hx](source\backend\Music.hx#L265)
-* add sprinting in a way thats ACTUALLY functional on web. [Player.hx](source/backend/game/Player.hx#L233)
 * graphics system [Weapon.hx](source/backend/game/objects/Weapon.hx#L22)
 * somehow load from inventory save file. (NOT SEPRATE) [Weapon.hx](source/backend/game/objects/Weapon.hx#L226)
 * somehow load from inventory save file. [Weapon.hx](source/backend/game/objects/Weapon.hx#L230)

@@ -37,7 +37,7 @@ class MainMenuState extends FlxState {
 
 
 
-        var vText:FlxText = new FlxText(0, 0, 0, '${Flags.VERSION_PREFIX}${Application.current.meta.get('version')}', 12, true);
+        var vText:ExtendedText = new ExtendedText(0, 0, 0, '${Flags.VERSION_PREFIX}${Application.current.meta.get('version')}', 12, true);
         add(vText);
         vText.setPosition(FlxG.width-vText.width, FlxG.height-vText.height);
 

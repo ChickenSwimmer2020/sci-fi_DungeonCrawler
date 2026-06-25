@@ -311,7 +311,7 @@ class HealthFlask extends FlxTypedSpriteContainer<FlxSprite> {
 class HUDSubstate extends FlxSubState {
     public static var instance:HUDSubstate;
     public var healthFlask:HealthFlask;
-    public var weaponText:FlxText;
+    public var weaponText:ExtendedText;
     public var fullOpen:Bool=false; //so that we can have the hotbar
     private static final MAX_SLOTS:Int = 10;
     public var inventory:Null<Array<OneOfTwo<String, Item>>>;
@@ -356,7 +356,7 @@ class HUDSubstate extends FlxSubState {
 
         //PotionType.getPotionEffect(PotionType.HEALTH);
 
-        weaponText=new FlxText(0+(InventorySlot.SIZE*index), 0, 0, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
+        weaponText=new ExtendedText(0+(InventorySlot.SIZE*index), 0, 0, "[WEAPONNAME]\n{C}/{M}|{P}", 12);
         add(weaponText);
         weaponText.camera=Main.camHUD;
         

@@ -129,6 +129,7 @@ class MapGenerator {
 
     public static inline function mapExists(name:String):Bool return Main.foundMaps.contains(name);
     public static inline function findMaps(){
+        if(Main.saveFile.data==null) return; //dont even try if its null.
         if(Main.saveFile.data.maps!=null) {
             var allMaps:Dynamic = SaveReader.readMapsFile(Main.FILE); //finally properly reads maps!
             if(allMaps==null) {

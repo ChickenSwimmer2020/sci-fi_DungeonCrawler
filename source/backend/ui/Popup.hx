@@ -8,8 +8,8 @@ class Popup extends FlxSubState {
     public var background2:FlxUI9SliceSprite;
     public var background3:FlxUI9SliceSprite;
     public var butts:Array<FlxUIButton>=[];
-    public var header:FlxText;
-    public var body:FlxText;
+    public var header:ExtendedText;
+    public var body:ExtendedText;
     public var group:FlxSpriteGroup;
 
     public var popupCam:ExtendedCamera;
@@ -38,11 +38,11 @@ class Popup extends FlxSubState {
 
 
 
-        header = new FlxText(2, 0, background.width, title, 12); //8
+        header = new ExtendedText(2, 0, background.width, title, 12); //8
         header.setBorderStyle(OUTLINE, 0xFF000000, 1, 1);
         header.alignment=CENTER;
 
-        body=new FlxText(5, background2.y, background2.width, b, 12);
+        body=new ExtendedText(5, background2.y, background2.width, b, 12);
         group.add(background);
         group.add(background2);
         if(itemPreview) { //to mimic the add order of bg3.

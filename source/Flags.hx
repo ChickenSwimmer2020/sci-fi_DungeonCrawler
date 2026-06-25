@@ -8,7 +8,8 @@ class Flags {
     "shaders": true,
     "controls": [],
     "language": "EN_US",
-    "precacheShaders": false
+    "precacheShaders": false,
+    "lastLoadedSave": ""
 }';
 
 

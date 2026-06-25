@@ -239,8 +239,36 @@ class SaveDebuggerWindow extends haxe.ui.containers.windows.Window {
     </window>
 ')
 class AlphabetViewerWindow extends haxe.ui.containers.windows.Window {
+    var targetFont(default, set):String = FlxAssets.FONT_DEFAULT;
+    var targetLang:String = "EN_US";
+    function set_targetFont(s:String):String {
+        targetFont = s;
+
+        var i:Int = 0;
+        var t:String = Language.getTranslatedKey("debugger.windows.alphabet.charmap", null, null, targetLang);
+        var tt:String="";
+
+        final CHARSPERLINE:Int=26;
+        for(c in 0...t.length){
+            var char:String = t.charAt(c);
+            tt+=char;
+            if(i==CHARSPERLINE-1){
+                tt+='\n';
+                i=0;
+            }else i++;
+        }
+        fontShower.getTextDisplay().tf.font = targetFont;
+        fontShower.text=tt;
+
+        return s;
+    }
+
     public function new() {
         super();
+        this.onMouseOver = (_)->{ //the text font should ALWAYS go back to target.
+            fontShower.getTextDisplay().tf.font = targetFont;
+        };
+
         title = Language.getTranslatedKey("debugger.windows.alphabet.title", null);
         final availableLanguages:Array<String>=[ //yeah we're just gonna do it like this regardless of platform, unlike how the settings substate does it.
             "EN_US", "JP"
@@ -251,33 +279,20 @@ class AlphabetViewerWindow extends haxe.ui.containers.windows.Window {
         for(lang in availableLanguagesLables){
             langdropdown.dataSource.add(lang);
         }
-        var targetFont:String=FlxAssets.FONT_DEFAULT;
+
         langdropdown.onChange = (e:UIEvent)->{
             fontShower.text="";
             Main.Trace(INFO, 'Chose Language: ${langdropdown.dataSource.get(langdropdown.selectedIndex)}');
             switch(langdropdown.dataSource.get(langdropdown.selectedIndex)) {
-                case "English (US)": targetFont=FlxAssets.FONT_DEFAULT; //should load default flixl font?
-                case "Japanese": targetFont=Paths.font('k8x12L.ttf');
+                case "English (US)":
+                    targetLang = "EN_US";
+                    targetFont=FlxAssets.FONT_DEFAULT; //should load default flixl font?
+                case "Japanese":
+                    targetLang = "JP";
+                    targetFont=Paths.font('k8x12L.ttf');
                 default: //donothing.
             }
             //fontShower.getTextDisplay().tf.font = targetFont; //should actually hopefully work.
-            var i:Int = 0;
-            var t:String = Language.getTranslatedKey("debugger.windows.alphabet.charmap", null);
-            var tt:String="";
-
-            final CHARSPERLINE:Int=26;
-            for(c in 0...t.length){
-                var char:String = t.charAt(c);
-                tt+=char;
-                if(i==CHARSPERLINE-1){
-                    tt+='\n';
-                    i=0;
-                }else i++;
-            }
-            fontShower.applyStyle({
-                fontName: targetFont
-            });
-            fontShower.text=tt;
         }
     }
 }

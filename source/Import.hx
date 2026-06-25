@@ -106,6 +106,7 @@ import backend.parsing.Json; //dont use *, we cant include File since thats a sy
 import backend.generation.MapGenerator;
 import backend.game.states.substates.OptionsMenuSubstate;
 import backend.extensions.ExtendedCamera;
+import backend.extensions.ExtendedText;
 import backend.Language;
 import backend.game.states.substates.HUDSubstate;
 import states.MainMenuState;

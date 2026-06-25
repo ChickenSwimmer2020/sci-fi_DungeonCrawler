@@ -1,5 +1,6 @@
 package;
 
+import backend.extensions.ExtendedText;
 import backend.Preferences;
 import flixel.util.typeLimit.NextState.InitialState;
 import haxe.PosInfos;
@@ -57,17 +58,16 @@ class Main extends openfl.display.Sprite {
                 Application.current.window.alert(errorMessage, "Unexpected Error");
             });
         #end
-        
-        saveFile.readSaveFile("testSave");
         Preferences.readPrefsFile();
 
+        if(FileSystem.exists(Paths.save(Preferences.getPref("lastLoadedSave")))) {
+            saveFile.readSaveFile(Preferences.getPref("lastLoadedSave"));
+        }
+        
+        curLanguage = Preferences.getPref('language');
         musicPostfix = Preferences.getPref('musicPF');// saveFile.data.preferences.musicPF??"D"; //default to default if the musicPF is null.
         Application.current.window.title = Language.languageInformation.get(curLanguage).get("application_title");
-        FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
-            case EN_US: "Nokia Cellphone FC Small";
-            case JP: "assets/fonts/k8x12L.ttf";
-            case ES: "Nokia Cellphone FC Small";
-        }
+        
 
         addEventListener(Event.ENTER_FRAME, (_)->{
             Music.manualUpdate(FlxG.elapsed??0);
@@ -83,7 +83,6 @@ class Main extends openfl.display.Sprite {
         });
 
         Save.findSaves(); //find the save files within SAVES
-        //ShaderCache.preload(); //preload shaders before loading everything to HOPEFULLY make the game run faster when shaders compile.
         MapGenerator.findMaps(); //find the maps within SAVES
         var startState:InitialState = IntroState;
         //by not compiling during runtime.
@@ -234,40 +233,12 @@ class Main extends openfl.display.Sprite {
 
     public static function set_curLanguage(value:Lang) {
         curLanguage = value;
-
-        for(key => object in Language.activeLanguageObject) {
-            Trace(DEBUG, Type.getClass(object));
-            //if(Std.isOfType(object, FlxText) || Std.isOfType(object, FlxUIText)) {
-            //    var textObject:FlxText = cast object;
-            //    textObject.text = Language.getTranslatedKey(key, null);
-            //    textObject.font = switch(curLanguage){
-            //        case EN_US: "Nokia Cellphone FC Small";
-            //        case JP: "assets/fonts/k8x12L.ttf";
-            //        case ES: "Nokia Cellphone FC Small";
-            //    }
-            //}else if(Std.isOfType(object, FlxUIButton)) {
-            //    var buttonObject:FlxButton = cast object;
-            //    buttonObject.text = Language.getTranslatedKey(key, null);
-            //    buttonObject.label.font = switch(curLanguage){
-            //        case EN_US: "Nokia Cellphone FC Small";
-            //        case JP: "assets/fonts/k8x12L.ttf";
-            //        case ES: "Nokia Cellphone FC Small";
-            //    }
-            //}else if(Std.isOfType(object, FlxButton)) {
-            //    var buttonObject:FlxButton = cast object;
-            //    buttonObject.text = Language.getTranslatedKey(key, null);
-            //    buttonObject.label.font = switch(curLanguage){
-            //        case EN_US: "Nokia Cellphone FC Small";
-            //        case JP: "assets/fonts/k8x12L.ttf";
-            //        case ES: "Nokia Cellphone FC Small";
-            //    }
-            //}
-            //if(Std.isOfType(object, FlxText) || (Reflect.hasField(object, "text") || (Reflect.hasField(object, "text") && Reflect.hasField(object.text, "text")))) { //if it has a text field, we can assume its a FlxText or something similar and update the text.
-            //    trace(Type.getClass(object));
-            //    var textObject:FlxText = cast object;
-            //    textObject.text = Language.getTranslatedKey(key, null);
-            //}
+        FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
+            case EN_US: "Nokia Cellphone FC Small";
+            case JP: "assets/fonts/k8x12L.ttf";
+            case ES: "Nokia Cellphone FC Small";
         }
+        ExtendedText.globalFont = FlxAssets.FONT_DEFAULT;
 
         return value;
     }
