@@ -25,6 +25,9 @@ class Conductor {
     public static var stepCrochet(get, never):Float;
     public static function get_stepCrochet() return ((15000/BPM)/pitch); //does dividing by pitch work?
 
+
+    public static var needsToShutTheFuckUpAboutInaccessableMusicObjectOnGameStartup:String = "nope";
+
     public static var curMeasure:Int=0;
     public static var lastMeasure:Int=-1;
     public static var curBeat:Int=0;
@@ -48,7 +51,10 @@ class Conductor {
     public static function update(elapsed:Float) {
         if(targetAudioObject==null) {
             if(FlxG.sound.music==null) {
-                Main.Trace(WARN, 'Conductor attempted to init with inaccessable music object target!!');
+                if(needsToShutTheFuckUpAboutInaccessableMusicObjectOnGameStartup != "SHUT THE FUCK UP CONDUCTOR"){
+                    Main.Trace(WARN, 'Conductor attempted to init with inaccessable music object target!!');
+                    needsToShutTheFuckUpAboutInaccessableMusicObjectOnGameStartup = "SHUT THE FUCK UP CONDUCTOR";
+                }
             }else targetAudioObject=FlxG.sound.music;
         }
         pitch = Math.round(pitch * 100)/100;

@@ -6,15 +6,6 @@ import haxe.zip.Entry;
 import haxe.io.BytesInput;
 import haxe.zip.Reader;
 
-typedef Prefs = {
-    var autoPause:Bool;
-    var musicPF:String;
-    var flashingLights:Bool;
-    var shaders:Bool;
-    var controls:Array<{c:String, keys:Array<FlxKey>}>;
-    var language:String;
-    var precacheShaders:Bool;
-}
 typedef SaveFile = {
     var meta:{
         name:String,
@@ -31,16 +22,17 @@ typedef SaveFile = {
         position:{x:Float, y:Float, level:String},
     };
     var inventory:Array<OneOfTwo<String, Item>>; //Items are a typedef, we can save these here!
-    var preferences:Prefs;
     var maps:Array<MapFile>;
 }
 
 class Save {
     public var data:Null<SaveFile>;
     public static var InstanceData:Null<SaveFile>;
+    public static var instance:Save;
     public function new() {
         Main.Trace(INFO, 'save init!');
         Main.Trace(WARN, 'dont forget to call `readSaveFile` to prevent null access!!');
+        instance = this;
         
         if(!FileSystem.exists('assets/saves')){
             FileSystem.createDirectory('assets/saves');
@@ -55,26 +47,6 @@ class Save {
         data = SaveReader.getSaveFile(name);
         InstanceData = data;
         return data!=null;
-    }
-
-    public function initDefaults() {//ig just force them since we cant check if their null?
-        data.preferences.flashingLights=true;
-        data.preferences.shaders=true;
-        data.preferences.autoPause=true;
-        data.preferences.precacheShaders=false;
-        data.preferences.controls=([
-            {c:"moveUP", keys:["UP", "W"]},
-            {c:"moveDOWN", keys:["DOWN", "S"]},
-            {c:"moveRIGHT", keys:["RIGHT", "D"]},
-            {c:"moveLEFT", keys:["LEFT", "A"]},
-            {c:"zoomIN", keys:["PLUS", "NONE"]},
-            {c:"zoomOUT", keys:["MINUS", "NONE"]},
-            {c:"pause", keys:["ESCAPE", "BACKSPACE"]},
-            {c:"inventory", keys:["I", "NONE"]},
-            {c:"interact", keys:["E", "ENTER"]},
-            {c:"sprint", keys:["SHIFT", "NONE"]}
-        ]:Array<{c:String, keys:Array<FlxKey>}>); //default init.
-        data.preferences.language="EN_US";
     }
     /**
      * save the data to the .sf
@@ -96,7 +68,7 @@ class Save {
         for(entry in entries) {
             if(entry.fileName.endsWith('.ini')) {
                 // rebuild the ini from current data
-                var newData = Bytes.ofString(buildIni());
+                var newData = Bytes.ofString(buildIni(data));
                 newEntries.add({
                     fileName: entry.fileName,
                     fileSize: newData.length,
@@ -108,7 +80,7 @@ class Save {
                     extraFields: entry.extraFields
                 });
             } else if(entry.fileName.endsWith('.json')) {
-                var newData = Bytes.ofString(Json.stringify(buildMapsJson()));
+                var newData = Bytes.ofString(Json.stringify(buildMapsJson(data)));
                 newEntries.add({
                     fileName: entry.fileName,
                     fileSize: newData.length,
@@ -120,7 +92,7 @@ class Save {
                     extraFields: entry.extraFields
                 });
             } else if(entry.fileName.endsWith('.xml')) {
-                var newData = Bytes.ofString(buildInvXml());
+                var newData = Bytes.ofString(buildInvXml(data));
                 newEntries.add({
                     fileName: entry.fileName,
                     fileSize: newData.length,
@@ -145,58 +117,46 @@ class Save {
         return true;
     }
 
-    private function buildIni():String {
+    /**
+     * erase all the current data stored for the currently loaded save file, then load a default one or make a new one if this was the last save we had.
+     * @return Bool
+     */
+    public function erase():Bool {
+        return false;
+    }
+
+    public static function buildIni(dat:Dynamic):String {
         var buf = new StringBuf();
         buf.add('[ROOT]\n');
-        buf.add('name="${data.meta.name}"\n');
-        buf.add('difficulty="${data.meta.difficulty}"\n');
-        buf.add('depth=${data.meta.depth}\n');
-        buf.add('level=${data.meta.level}\n');
-        buf.add('money=${data.meta.money}\n');
-        buf.add('playTime=${data.meta.playTime.H},${data.meta.playTime.M},${data.meta.playTime.S};\n');
+        buf.add('name="${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "name")}"\n');
+        buf.add('difficulty="${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "difficulty")}"\n');
+        buf.add('depth=${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "depth")}\n');
+        buf.add('level=${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "level")}\n');
+        buf.add('money=${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "money")}\n');
+        buf.add('playTime=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "meta"), "playTime"), "H")},${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "meta"), "playTime"), "M")},${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "meta"), "playTime"), "S")};\n');
 
         buf.add('\n[PLAYERSTATE]\n');
-        buf.add('health=${data.playerState.health}\n');
-        buf.add('stamina=${data.playerState.stamina}\n');
-        buf.add('xp=${data.playerState.xp}\n');
-        buf.add('posX=${data.playerState.position.x}\n');
-        buf.add('posY=${data.playerState.position.y}\n');
-
-        buf.add('\n[PREFERENCES]\n');
-        buf.add('autoPause=${data.preferences.autoPause}\n');
-        buf.add('musicPF=${data.preferences.musicPF}\n');
-        buf.add('flashingLights=${data.preferences.flashingLights}\n');
-        buf.add('shaders=${data.preferences.shaders}\n');
-        buf.add('language=${data.preferences.language}\n');
-        buf.add('precacheShaders=${data.preferences.precacheShaders}\n');
-        
-
-        // write controls key list then each control's keys
-        var controlNames:Array<String> = [];
-        for(name => keys in Main.controls) {
-            controlNames.push(name); //get the name from the controls.
-        }
-        buf.add('controlsKEYS=${controlNames.toString()}\n');
-        buf.add('\n[controls]\n');
-        for(name => controls in Main.controls) {
-            buf.add('$name=${controls.toString()}\n');
-        }
+        buf.add('health=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "health")}\n');
+        buf.add('stamina=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "stamina")}\n');
+        buf.add('xp=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "xp")}\n');
+        buf.add('posX=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "x")}\n');
+        buf.add('posY=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "y")}\n');
         return buf.toString();
     }
 
-    private function buildMapsJson():Dynamic {
+    public static function buildMapsJson(dat:Dynamic):Dynamic {
         var obj:Dynamic = {};
-        for(map in data.maps) {
+        for(map in (Reflect.getProperty(dat, "maps"):Array<Dynamic>)) {
             Reflect.setProperty(obj, Reflect.getProperty(map, "name"), map); // just mark existence, same as how parseMaps reads it
         }
         return obj;
     }
 
-    private function buildInvXml():String {
+    public static function buildInvXml(dat:Dynamic):String {
         var buf = new StringBuf();
-        buf.add('<inventory slots="${data.inventory.length}">\n');
-        for(i in 0...data.inventory.length) {
-            var slot = data.inventory[i];
+        buf.add('<inventory slots="${(Reflect.getProperty(dat, "inventory"):Array<Dynamic>).length}">\n');
+        for(i in 0...(Reflect.getProperty(dat, "inventory"):Array<Dynamic>).length) {
+            var slot = (Reflect.getProperty(dat, "inventory"):Array<Dynamic>)[i];
             if(slot is String) continue; // covers "EMPTY" and any other string placeholders
             var item:Item = cast slot;
             buf.add('  <item name="${item.item}" x="${i % 10}" y="${Math.floor(i / 10)}" />\n');
@@ -263,13 +223,6 @@ class Save {
         return null;
     }
 
-    /**
-     * returns wether the save was deleted successfully.
-     * @return Bool
-     */
-    public function erase():Bool {
-        return false;
-    }
     //static stuff.
     public static function findSaves() {
         Main.saveFiles = []; //empty the array to prevent errors.
@@ -314,41 +267,6 @@ class Save {
                 }
             }else{
                 Main.Trace(ERROR, '$save is invalid! (maps contains non String object(s)...)');
-                return false;
-            }
-        }
-
-        //prefs
-        if(!(saveData.preferences.autoPause is Bool)){
-            Main.Trace(ERROR, '$save is invalid! (preferences.autoPause is not a Bool...)');
-            return false;
-        }
-        if(!(saveData.preferences.musicPF is String)){
-            Main.Trace(ERROR, '$save is invalid! (preferences.musicPF is not a String...)');
-            return false;
-        }
-        if(!(saveData.preferences.flashingLights is Bool)){
-            Main.Trace(ERROR, '$save is invalid! (preferences.flashingLights is not a Bool...)');
-            return false;
-        }
-        if(!(saveData.preferences.shaders is Bool)){
-            Main.Trace(ERROR, '$save is invalid! (preferences.shaders is not a Bool...)');
-            return false;
-        }
-        if(!(saveData.preferences.language is String)){
-            Main.Trace(ERROR, '$save is invalid! (preferences.language is not a String...)');
-            return false;
-        }
-        if(!(saveData.preferences.precacheShaders is Bool)) {
-            Main.Trace(ERROR, '$save is invalid! (preferences.precacheShaders is not a Bool...)');
-            return false;
-        }
-        for(thingy in saveData.preferences.controls) {
-            if((thingy.c is String) || (thingy.keys is Array)){
-                Main.Trace(INFO, '$thingy is a valid controls object.');
-                continue;
-            }else{
-                Main.Trace(ERROR, '$save is invalid! (controls array contains malformed data...)');
                 return false;
             }
         }
@@ -437,6 +355,16 @@ class Save {
     }
 
     public static function deleteSave(save:String):Bool {
+        for(file in FileSystem.readDirectory("assets/saves/")) {
+            trace(file);
+            if(!file.contains('.') || !file.endsWith('.sf')) continue; //ignore anything thats a folder.
+            if(file.contains(save)) {
+                FileSystem.deleteFile(Paths.save(save));
+                return !FileSystem.exists(Paths.save(save));
+            }
+        }
+
+        //meaning the deletion failed
         return false;
     }
     /**
@@ -457,6 +385,63 @@ class SaveReader { //okay, its a zip file. fine.
      */
 
     public static function createSave(name:String, ?data:Null<SaveFile>, ?onComplete:Void->Void):Bool {
+        var path = Paths.save(name);
+        if(!FileSystem.exists(path)) File.saveContent(path, "TEST STRING, this gets overwritten lol."); //make an empty file.
+
+        // output to new save file.
+        var newEntries = new List<Entry>();
+
+        var time:Date = Date.now();
+
+        //meta
+        var iniData:Bytes = Bytes.ofString(Save.buildIni(data));
+        newEntries.add({
+            fileName: "meta.ini",
+            fileSize: iniData.length,
+            fileTime: time,
+            compressed: false,
+            dataSize: iniData.length,
+            data: iniData,
+            crc32: haxe.crypto.Crc32.make(iniData),
+            extraFields: null
+        });
+
+        //maps
+        var mapsData:Bytes = Bytes.ofString(Json.stringify(Save.buildMapsJson(data)));
+        newEntries.add({
+            fileName: "maps.json",
+            fileSize: mapsData.length,
+            fileTime: time,
+            compressed: false,
+            dataSize: mapsData.length,
+            data: mapsData,
+            crc32: haxe.crypto.Crc32.make(mapsData),
+            extraFields: null
+        });
+
+        //inventory
+        var invData:Bytes = Bytes.ofString(Save.buildInvXml(data));
+        newEntries.add({
+            fileName: "inventory.xml",
+            fileSize: invData.length,
+            fileTime: time,
+            compressed: false,
+            dataSize: invData.length,
+            data: invData,
+            crc32: haxe.crypto.Crc32.make(invData),
+            extraFields: null
+        });
+
+        var out = new haxe.io.BytesOutput();
+        var writer = new haxe.zip.Writer(out);
+        writer.write(newEntries);
+        File.saveBytes(Paths.save(name), out.getBytes());
+
+        if(FileSystem.exists(Paths.save(name))) {
+            Save.instance.readSaveFile(name);
+            return true; //autoload the file so that it doesnt get like, overriden with other stuff i think.
+        }
+
         return false;
     }
 
@@ -491,7 +476,6 @@ class SaveReader { //okay, its a zip file. fine.
                     if(data.contains('[ROOT]')) { //meaning its an ini file.
                         out.meta = parseMeta(data);
                         out.playerState = parsePlayerstate(data);
-                        out.preferences = parsePrefs(data);
                     }else if(data.startsWith('{')) { //meaning its the maps.json file
                         var mapsOut:Array<MapFile> = ([]:Array<MapFile>);
                         var dataOut:Array<Dynamic> = parseMaps(data);
@@ -509,76 +493,6 @@ class SaveReader { //okay, its a zip file. fine.
             return null;
         }
         return null;
-    }
-
-    private static function parsePrefs(dat:String):Prefs {
-        var p:Prefs = {
-            autoPause: false,
-            musicPF: "",
-            flashingLights: false,
-            shaders: false,
-            controls: [], //Array<{c:String, keys:Array<FlxKey>}>,
-            language: "",
-            precacheShaders: false
-        };
-        var keys:Array<{c:String, keys:Array<FlxKey>}>=[];
-
-        var controlsArrayIndex:Int=0;
-
-        var lines:Array<String> = dat.split('\n');
-        
-        var keysBeingSearchedFor:Array<String>=[];
-        for(line in lines) {
-            if(line.contains('[controls]')) {
-                Main.Trace(INFO, 'Found the pointer for controls keys at ${lines.indexOf(line)}');
-                controlsArrayIndex = lines.indexOf(line);
-            }
-
-            if(line.startsWith('autoPause')) {
-                p.autoPause= line.split('=')[1].trim().toBool();
-            }else if(line.startsWith('musicPF')) {
-                p.musicPF = line.split('=')[1].trim();
-            }else if(line.startsWith('flashingLights')) {
-                p.flashingLights = line.split('=')[1].trim().toBool();
-            }else if(line.startsWith('shaders')) {
-                p.shaders = line.split('=')[1].trim().toBool();
-            }else if(line.startsWith('language')) {
-                p.language = line.split('=')[1].trim();
-            }else if(line.startsWith('controlsKEYS')) {
-                //oh boy here we go.
-                var sepArray:String = line.split('=')[1].trim();
-                keysBeingSearchedFor = sepArray.remove('[').remove(']').remove('"').split(',');
-                Main.Trace(INFO, 'Searching for keys: $keysBeingSearchedFor');
-            }
-        }
-        for(i in 0...lines.length) {
-            if(i<controlsArrayIndex) continue;
-            else { //actually read the controls and stuff to populate the array
-                var line:String = lines[i];
-                for(k in keysBeingSearchedFor) {
-                    if(line.startsWith(k)) {
-                        Main.Trace(INFO, 'Found target controls array for "$k"');
-                        if(line.indexOf('=')==-1) {
-                            Main.Trace(ERROR, 'KEYS IN SAVE FILE ARE NULL, DEFAULTING TO DEFAULT KEYBINDS TO PREVENT CRASH');
-                            for(title => ks in Flags.DEFAULT_CONTROLS) {
-                                keys.push({c: title, keys: ks});
-                            }
-                        }else{
-                            var key:Array<FlxKey>=[];
-                            var strArray:String = line.split('=')[1].trim();
-                            var keysStr:Array<String> = strArray.remove('[').remove(']').remove('"').split(',');
-                            for(y in keysStr) {
-                                key.push(FlxKey.fromString(y.trim()));
-                            }
-                            keys.push({c: k, keys: key});
-                            Main.Trace(INFO, keys);
-                        }
-                    }else continue;
-                    break;
-                }
-            }
-        }
-        return p;
     }
     private static function parsePlayerstate(dat:String):{health:Float,stamina:Float,xp:Float,position:{x:Float, y:Float, level:String}} {
         var o:{health:Float,stamina:Float,xp:Float,position:{x:Float, y:Float, level:String}} =
@@ -645,7 +559,6 @@ class SaveReader { //okay, its a zip file. fine.
         Main.Trace(DEBUG, 'Returned metadata "$o" from "${Main.FILE}"');
         return o;
     }
-
     private static function parseInv(dat:String):Array<OneOfTwo<String, Item>> {
         var xml:Xml = Xml.parse(dat);
         var total:Int = xml.firstElement().get('slots').toInt()??Player.INVENTORY_SLOTS; //default to the default inventory slots if we cant find the slots pointer.

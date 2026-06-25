@@ -29,7 +29,7 @@ class GameState extends FlxState {
         if(!generatedCameras) generateCameras();
 
         if(LoadingFromSave!=true){
-            Save.createNewFile("fucker", null, ()->{
+            Save.createNewFile("fucker", Flags.DEFAULT_SAVEFILE, ()->{
                 MapGenerator.generateMap(100, 100, 0);
                 add(MapGenerator.createMap('depth_0'));
             });

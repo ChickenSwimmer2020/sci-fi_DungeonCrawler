@@ -1,5 +1,51 @@
 # ChangeLog
 
+## Prototype Update 0.04.1.02 (Shader Compiler)
+
+> basic changes i guess, trying to make stuff work i suppose.
+
+* Finally Bumped `ChangeLog.MD` up to proper version (0.04->0.04.1.02)
+* Save now correctly generates save files.
+* Conductor will now shut the fuck up if it cant init after one warning message
+* Preferences are now stored globally instead of per-save.
+* 75% of all 4 shaders were converted to FlxRuntimeShaders over FlxShader for better paremeter setting.
+* New Preferences System
+* Shader Cache is FINALLY functional after being implemented all the way back in 0.03
+* Added new flag for default preferences
+
+## Prototype Update 0.04.1.01
+
+> nothing notable really.
+
+* Death sequence is slightly different
+* Tile Connection was somewhat fixed.
+
+## Prototype Update 0.04.1 (Map Debugger implementation)
+
+> FINALLY the map debugger works.
+
+* Updated `debugger.map.title` EN_US language key.
+* `TestingState` should read maps properly now.
+* Added `DynamicToMapFle` to `Additions`.
+* `GameMap` now "generates" maps correctly.
+* `Player` has new varible to disable many controls in the Map Debugger
+* `generatedCameras` and `generateCameras` in `GameState` are now static.
+* `MapGenerator` now properly loads map files.
+* `Save` now CORRECTLY checks save file validity.
+* Removed `AlphabetDebugger`.
+* Save Reader Debugger no longer outputs the entire array of maps files in the window.
+* `MapDebugger` was overhauled and now functional
+* Updated `MainMenuState` new menu layout.
+
+## Prototype Update 0.04.01
+
+> no more html, we need to focus on windows.
+
+* Added error to trying to build html5
+* Removed html5 compile support
+* Updated `ShaderCache` slightly, trying to make it functional.
+* Removed Tiles ability to connect to others for the time being.
+
 ## Prototype Update_MAJOR 0.04 (Overhaul of a bunch of shit)
 
 > Saves are getting rewritten for specifically windows and hashlink, because FlxSave is a slow grandma.
@@ -39,7 +85,6 @@
 * * Schematic editor
 * New tileset system via `assets/maps/tilesets` including `.set` files with info about the tileset
 * * Map specific tilesets
-
 
 ## Prototype Update 0.03.8 (Autobuild and UI)
 

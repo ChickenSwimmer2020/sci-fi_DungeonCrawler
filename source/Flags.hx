@@ -1,6 +1,17 @@
 package;
 import openfl.filesystem.File as OpenFLFile;
 class Flags {
+    public static final DEFAULT_PREFERENCES_FILE:String = '{
+    "autoPause": true,
+    "musicPF": "D",
+    "flashingLights": true,
+    "shaders": true,
+    "controls": [],
+    "language": "EN_US",
+    "precacheShaders": false
+}';
+
+
     public static final DIFFSPECS:Map<String, Dynamic>=[
         "HARDMODE"=>{
             CONSUMABLEHEALTHGAIN: 1.0
@@ -71,15 +82,6 @@ class Flags {
             stamina: 0,
             xp: 0,
             position:{x:0, y:0, level: ""},
-        },
-        preferences: {
-            autoPause: true,
-            musicPF: "D",
-            flashingLights: true,
-            shaders: true,
-            controls: [],
-            language: "EN_US",
-            precacheShaders: false,
         },
         inventory: [],
         maps: [],

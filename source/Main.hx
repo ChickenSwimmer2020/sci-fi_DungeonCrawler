@@ -1,5 +1,6 @@
 package;
 
+import backend.Preferences;
 import flixel.util.typeLimit.NextState.InitialState;
 import haxe.PosInfos;
 import haxe.CallStack;
@@ -58,8 +59,9 @@ class Main extends openfl.display.Sprite {
         #end
         
         saveFile.readSaveFile("testSave");
+        Preferences.readPrefsFile();
 
-        musicPostfix = saveFile.data.preferences.musicPF??"D"; //default to default if the musicPF is null.
+        musicPostfix = Preferences.getPref('musicPF');// saveFile.data.preferences.musicPF??"D"; //default to default if the musicPF is null.
         Application.current.window.title = Language.languageInformation.get(curLanguage).get("application_title");
         FlxAssets.FONT_DEFAULT=switch(curLanguage){ //automatically switch the default font depending on language setting.
             case EN_US: "Nokia Cellphone FC Small";
@@ -86,7 +88,7 @@ class Main extends openfl.display.Sprite {
         var startState:InitialState = IntroState;
         //by not compiling during runtime.
         var game:flixel.FlxGame;
-        if(saveFile.data.preferences.precacheShaders) startState = ShaderCache;
+        if(Preferences.getPref("precacheShaders")) startState = ShaderCache;
         game = new flixel.FlxGame(0, 0, startState, 60, 60, false, false);
         @:privateAccess game._customSoundTray = SoundTray;
         addChild(game);
@@ -94,10 +96,9 @@ class Main extends openfl.display.Sprite {
             //discord = new Discord("1487613766077120724"); //TODO: fix this.
             //discord.setActivity("IPC RICH PRESENCE TEST 01");
         #end
-        initDefaultSaveParemeters();
         #if (debug) initDebugWindows(); #end
 
-        FlxG.autoPause = saveFile.data.preferences.autoPause??true;
+        FlxG.autoPause = Preferences.getPref('autoPause')??true;
     }
     //CAMERA STUFF
     public static var cameras:Map<String,ExtendedCamera>=[];
@@ -114,7 +115,7 @@ class Main extends openfl.display.Sprite {
     }
     public static inline function clearCameraFilters(cam:FlxCamera) if(cam!=null && cam.filters!=null) for(filter in cam.filters) cam.filters.remove(filter);
     public static inline function clearAllCameraFilters() for(cam in FlxG.cameras.list) if(cam.filtersEnabled) clearCameraFilters(cam);
-    public static inline function flashCameras(color:Int, time:Float) for(cam in FlxG.cameras.list) if(saveFile.data.preferences.flashingLights) cam.flash(color, time);
+    public static inline function flashCameras(color:Int, time:Float) for(cam in FlxG.cameras.list) if(Preferences.getPref('flashingLights')) cam.flash(color, time);
 
     //DEBUGGING
     #if (debug)
@@ -325,17 +326,6 @@ class Main extends openfl.display.Sprite {
     public static var camGameZoomIncrement:Float=0.0;
     public static var discord:Discord;
     public static function resetGlobalSettings() {
-        for(setting in Reflect.fields(saveFile.data)) {
-            switch(setting) {
-                case "saves","lastLoadedSave","language","controls": //donothing
-                default: Reflect.setField(saveFile.data, setting, null);
-            }
-        }
-        initDefaultSaveParemeters();
+        return false; //TODO: this
     }
-    /**
-     * alias for saveFile.initDeaults.
-     * @return saveFile.initDefaults()
-     */
-    private static inline function initDefaultSaveParemeters() saveFile.initDefaults();
 }

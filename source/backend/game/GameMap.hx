@@ -71,7 +71,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 }
             }
 
-            if(Main.saveFile.data.preferences.shaders){
+            if(Preferences.getPref("shaders")){
                 for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                     cam.filters.push(new ShaderFilter(new Invert()));
                 }

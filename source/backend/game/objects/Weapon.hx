@@ -167,9 +167,10 @@ class Weapon extends FlxSprite{
                 if(power < (POWER_MAX*0.25))justShotFail=true; //failure if under 25% of max power.
                 else{
                     railFireShader=new RailFire();
-                    railFireShader.intensity.value=[0.01];
-                    railFireShader.speed.value=[120.0];
-                    if(Main.saveFile.data.preferences.shaders){
+                    railFireShader.setFloat("intensity", 0.01);
+                    railFireShader.setFloat("speed", 120.0);
+
+                    if(Preferences.getPref("shaders")){
                         for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                             cam.filters??[];
                             for(shader in [railFireShader]) {
@@ -182,7 +183,7 @@ class Weapon extends FlxSprite{
                     fire(power/100);
                     power=0;
                     fireTimers.set("railgun", Functions.wait(shoot_time, (_)->{
-                        if(Main.saveFile.data.preferences.shaders){
+                        if(Preferences.getPref("shaders")){
                             for(cam in [Main.camGame, Main.camHUD, Main.camOther]) {
                                 for(filter in cam.filters) {
                                     Main.Trace(DEBUG, filter.getClassName(true));
@@ -207,8 +208,8 @@ class Weapon extends FlxSprite{
         }
         if(railFireShader!=null){
             shaderTime+=FlxG.elapsed;
-            railFireShader.iTime.value = [shaderTime];
-            railFireShader.intensity.value=[FlxMath.lerp(0.0, railFireShader.intensity.value[0], Math.exp(-elapsed * 3.125 * 1 * 1))];
+            railFireShader.setFloat('iTime', shaderTime);
+            railFireShader.setFloat("intensity", FlxMath.lerp(0.0, railFireShader.getFloat("intensity"), Math.exp(-elapsed * 3.125 * 1 * 1)));
         }
 
         FlxG.watch.addQuick("cooldown timer", coolDownTimer.timeLeft);

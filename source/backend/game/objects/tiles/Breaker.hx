@@ -39,8 +39,8 @@ class Breaker extends SpecialTile {
             switch(_) {
                 case "pull":
                     screenShakeShader=new ScreenShake();
-                    screenShakeShader.intensity.value=[0.01];
-                    screenShakeShader.speed.value=[120.0];
+                    screenShakeShader.setFloat("intensity", 0.01);
+                    screenShakeShader.setFloat("speed", 120.0);
                     if(Main.camGame.filters==null)Main.camGame.filters=[];
                     if(Main.camHUD.filters==null)Main.camHUD.filters=[];
                     if(Main.camOther.filters==null)Main.camOther.filters=[];
@@ -88,8 +88,8 @@ class Breaker extends SpecialTile {
         super.update(elapsed);
         if(screenShakeShader!=null && !GameMap.isDying){ //freeze the shader when player dies.
             shaderTime+=FlxG.elapsed;
-            screenShakeShader.iTime.value = [shaderTime];
-            screenShakeShader.intensity.value=[FlxMath.lerp(0.0, screenShakeShader.intensity.value[0], Math.exp(-elapsed * 3.125 * 1 * 0.5))];
+            screenShakeShader.setFloat("iTime", shaderTime);
+            screenShakeShader.setFloat("intensity", FlxMath.lerp(0.0, screenShakeShader.getFloat("intensity"), Math.exp(-elapsed * 3.125 * 1 * 0.5)));
         }
 
         #if debug

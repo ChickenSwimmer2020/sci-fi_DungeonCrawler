@@ -187,10 +187,8 @@ class OptionsMenuSubstate extends FlxUISubState{
     /**GRAPHICS SETTINGS OBJECTS AND FUNCTION**/
     private var shadersCheck:FlxUICheckBox;
     private function createGraphicsUI() {
-        shadersCheck=new FlxUICheckBox(5, 5, null, null, "Shaders", 100, null, ()->{
-            Main.saveFile.set("preferences", "shaders", shadersCheck.checked); //auto-saves
-        }); 
-        shadersCheck.checked = Main.saveFile.data.preferences.shaders??false; //if null, default to false. else pull the value from the save file.
+        shadersCheck=new FlxUICheckBox(5, 5, null, null, "Shaders", 100, null, ()->Preferences.setPref("shaders", shadersCheck.checked)); 
+        shadersCheck.checked = Preferences.getPref("shaders")??false; //if null, default to false. else pull the value from the save file.
 
         
         graphics.add(shadersCheck);
@@ -214,7 +212,7 @@ class OptionsMenuSubstate extends FlxUISubState{
 
         languageDropdown=new FlxUIDropDownMenu(5, 30, languages, (_)->{
             Main.curLanguage=_; //Lang in Language is a string, so this should work.
-            Main.saveFile.data.preferences.language=Main.curLanguage;
+            Preferences.setPref("language", Main.curLanguage);
             Application.current.window.title = Language.languageInformation.get(Main.curLanguage).get('application_title'); //change application title to match with the new language setting.
             Main.saveFile.flush(); //upload new default language to save file.
             #if(debug) Main.Trace(INFO, 'Attempting to index language $_ and change game target LANG file'); #end
@@ -276,16 +274,16 @@ class OptionsMenuSubstate extends FlxUISubState{
             //new StrNameLabel("R", "Remaster")
         ], (_)->{
             #if(debug) Main.Trace(INFO, 'Changing music postfix to $_ and flushing to save file'); #end
-            Main.saveFile.set("preferences", "musicPF", _);
+            Preferences.setPref("musicPF", _);
             Main.musicPostfix = _;
         });
         general.add(audioTrackDropdown);
 
         autoPauseCheck=new FlxUICheckBox(245, 5, null, null, Language.getTranslatedKey("menu.settings.general.autopause", autoPauseCheck), 100, null, ()->{
-            Main.saveFile.set("preferences", "autoPause", autoPauseCheck.checked);
+            Preferences.setPref("autoPause", autoPauseCheck.checked);
             FlxG.autoPause = autoPauseCheck.checked; //immediately update the auto-pause setting without needing to restart the game.
         }); 
-        autoPauseCheck.checked = Main.saveFile.data.preferences.autoPause??false; //if null, default to false. else pull the value from the save file.
+        autoPauseCheck.checked = Preferences.getPref("autoPause")??false; //if null, default to false. else pull the value from the save file.
         general.add(autoPauseCheck);
     }
 
@@ -314,7 +312,7 @@ class OptionsMenuSubstate extends FlxUISubState{
             Main.Trace(INFO, 'Added: "{c:${ReadObject.text.text}, keys: [$key0, $key1]}" to `controlsUpload`');
         }
         Main.Trace(DEBUG, controlsUpload);
-        Main.saveFile.set("preferences", "controls", controlsUpload);
+        Preferences.setPref("controls", controlsUpload);
         //no more middleman from Save.
         Main.controls = Functions.convertFromControlsArray(controlsUpload); //WHOOPS. kinda gotta re-call this each time.
         reloadControls();
