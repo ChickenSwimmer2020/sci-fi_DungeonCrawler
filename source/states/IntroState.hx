@@ -48,12 +48,12 @@ class IntroState extends FlxState {
             case 64:
                 Conductor.onBeatHit.remove(onBeat); //should work better?
                 Main.Trace(DEBUG, Conductor.onBeatHit); //just to make sure its actually clearing properly.
-                FlxG.switchState(MainMenuState.new);
+                FlxG.switchState(()->new MainMenuState(false));
             default: //donothing
         }
         if(cur>=64) { //just as a precaution
             Conductor.onBeatHit.remove(onBeat); //should work better?
-            FlxG.switchState(MainMenuState.new);
+            FlxG.switchState(()->new MainMenuState(false));
         }
     }
 
@@ -64,7 +64,7 @@ class IntroState extends FlxState {
         if(FlxG.keys.anyJustPressed([ANY]) || (FlxG.mouse.justPressed || (FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle))) {
             Music.playMusic("CellCompilation", false, "loop", true, "loop");
             Conductor.onBeatHit.remove(onBeat); //forgot to do this when exiting.
-            FlxG.switchState(MainMenuState.new);
+            FlxG.switchState(()->new MainMenuState(false));
         }
     }
 }

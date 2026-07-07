@@ -1,5 +1,15 @@
 # mechanic ideas
 
+* Subsystems
+* * a secondary "health" bar that is ACTUALLY system status for your cybernetic components
+* * Instead of having to track just one global health value, you have to track one for each limb, AND one for each subsystem
+* * Subsystems can have three types: Critical, Essential, and Non-Essential, Non-Essential subsystems when damaged limit basic things, like:
+* * Movement speed, damage output, etc.
+* * But Essential subsystems control things like weapon usage, healing factor, the ability to move and see, things like that.
+* * If a critical subsystem is damaged, well you die. simple, as critical are limited to keeping the biological side alive.
+* * If a subsystem is either destroyed or damaged too much, you must find a repair kit and repair the subsystem.
+* * If the subsystem was critical though, you die instantly.
+
 * Security system starts up after enabling level power (REQUIRES FUZE (HARDMODE EXCLUSIVE))
 * fog of war
 
@@ -14,9 +24,9 @@
 * * weapons have to be reloaded manually (small popup in bottom right)
 * * enemies do 90% more damage against the player, but the player does 25% less damage to enemies
 * * enemy corpses have a chance to give the player infections that must be treated by using high-level healing items (?)
-* * health items health 50% less health
+* * health items heal 50% less health and heal over time.
 * * save difficulty CAN NOT BE CHANGED EVER. (implement feature that deletes save if modified externally and locks player out of survival)
-* * modifier addicitons persist across death
+* * modifier addictions persist across death
 * * levels are 20% bigger
 * * enemies can be legendary, they drop better loot, but are 200% more tanky
 * * * legendary enemies:
@@ -27,7 +37,7 @@
 * * enemies do not have a confused state and will go straight to angry if they spot player
 * * permadeath (player can not find their corpse and old loot)
 * * * incraesed chance for enemies to spawn with players old loot
-* * Modifiers have a 50% incraesed chance to spawn
+* * Modifiers have a 50% increased chance to spawn
 * * weapons are 75% less likely to spawn with full mags (exceptionally rare)
 * * looted weapons magazines can only be filled to a maximum of 50%
 * * enemies move 50% faster

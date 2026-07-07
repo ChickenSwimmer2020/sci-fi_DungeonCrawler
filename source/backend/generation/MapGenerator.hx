@@ -85,64 +85,44 @@ class MapGenerator {
         var hasMap:Bool=(mf!=null)?true:false;
         var save:SaveFile;
         save = Main.saveFile.data;
-        for(map in 0...save.maps.length){
-            //if(save.maps[map].name==file){ //TODO: scan through maps.json to find if we have the map we are requesting.
-            //    hasMap=true; //check if we have the target map in the save file.
-            //}
+        var index:Int = 0;
+        if(mf==null){
+            for(map in 0...save.maps.length){
+                if(save.maps[map]==null || save.maps[map].name!=file){
+                    if(map == save.maps.length-1) {
+                        Main.Trace(ERROR, 'Map $file not found in save file ${Main.FILE}!');
+                        hasMap = false; //sanity check.
+                        return null;
+                    }else continue;
+                }
+                if(save.maps[map].name==file){
+                    hasMap=true; //check if we have the target map in the save file.
+                    break; //STOP.
+                }
+                index++;
+            }
         }
-        
-        if(hasMap) {
-            var internalMap:Null<MapFile>=mf??null;
 
-            //TODO: this
-            //for(possibleMap in 0...save.maps.length) {
-            //    if(save.maps[possibleMap].name == file){
-            //        internalMap={
-            //            name: save.maps[possibleMap].name??"ERROR",
-            //            width: save.maps[possibleMap].width??0,
-            //            height: save.maps[possibleMap].height??0,
-            //            tiles: save.maps[possibleMap].tiles??([]:Array<Array<TilePointer>>)
-            //        }
-            //    }
-            //}
-            var returnMap:GameMap = new GameMap(internalMap);
-            returnMap.generate(ds);
-            
-            #if (debug)
-                Functions.wait(1, (_)->{
-                    Main.DEBUG_updateMapsInfo(internalMap.size.w, internalMap.size.h, internalMap.tiles);
-                });
-            #end
-            //if im correct, i should be able to override the world bounds to be better!
-            FlxG.worldBounds.set(0, 0, 0+(16*internalMap.size.w), 0+(16*internalMap.size.h));
-            return returnMap;
-        }else{
-            //Save.genereateMapFile shows this error. we dont need to do it twice.
-            //Main.showError("MAPNULL", file); //swapped to new error, same message though.
-            var returnMap:GameMap = new GameMap(null);
-            returnMap.generate();
-            FlxG.worldBounds.set(0, 0, 0+(16*1), 0+(16*1));
-            return returnMap;
-        }
-        return null;
+        var map:GameMap = new GameMap(hasMap?mf??save.maps[index]:null);
+        map.generate(false);
+        return map;
     }
 
     public static inline function mapExists(name:String):Bool return Main.foundMaps.contains(name);
     public static inline function findMaps(){
         if(Main.saveFile.data==null) return; //dont even try if its null.
         if(Main.saveFile.data.maps!=null) {
-            var allMaps:Dynamic = SaveReader.readMapsFile(Main.FILE); //finally properly reads maps!
-            if(allMaps==null) {
+            var allMaps:Array<MapFile> = SaveReader.readMapsFile(Main.FILE); //finally properly reads maps!
+            if(allMaps==null||allMaps.length==0) {
                 Main.Trace(ERROR, 'Unable to read the maps file of ${Main.FILE}, this is a bad thing!');
                 return;
             }else{
-                for(map in Reflect.fields(allMaps)) {
-                    if(Reflect.getProperty(allMaps, map)!=null) {
-                        Main.foundMaps.push(map);
-                    }else{
+                Main.foundMaps.clear();
+                for(map in allMaps) {
+                    if(map==null) { //TODO: add function for checking map validity, and if its invalid just dont use it at all. but of course throw errors.
                         Main.Trace(ERROR, 'Map $map is null in map file for ${Main.FILE}.');
                         continue;
-                    }
+                    }else Main.foundMaps.push(map.name);
                 }
             }
         }else{

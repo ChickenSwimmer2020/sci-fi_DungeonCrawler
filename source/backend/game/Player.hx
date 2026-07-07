@@ -146,7 +146,8 @@ class Player extends FlxSprite {
         }
         if(Main.camGame!=null){
             if(mousePosition==null) mousePosition = new FlxPoint(0, 0); //JUST in-case.
-            FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0);
+            //Hours wasted trying to fix `null acces .x`: 8
+            FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0); //! SOLAR PLEASE FIX THIS STUPID GOD-DAMN ERROR I CANT FOR THE LIFE OF ME GET IT.
         }
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));

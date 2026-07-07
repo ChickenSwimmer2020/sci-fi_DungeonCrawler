@@ -82,7 +82,7 @@ class Flags {
             health: 0,
             stamina: 0,
             xp: 0,
-            position:{x:0, y:0, level: ""},
+            position:{x:0, y:0, curLevel: ""},
         },
         inventory: [],
         maps: [],

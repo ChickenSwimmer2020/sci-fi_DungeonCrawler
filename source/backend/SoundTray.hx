@@ -15,12 +15,6 @@ class SoundTray extends FlxSoundTray {
 		// text.wordWrap = true;
 		_timeText.selectable = false;
 
-		#if flash
-		_timeText.embedFonts = true;
-		_timeText.antiAliasType = AntiAliasType.NORMAL;
-		_timeText.gridFitType = GridFitType.PIXEL;
-		#else
-		#end
 		var dft:TextFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 4, 0xffffff);
 		dft.align = TextFormatAlign.CENTER;
 		_timeText.defaultTextFormat = dft;
@@ -45,8 +39,10 @@ class SoundTray extends FlxSoundTray {
 	var angle:Int = 0;
     override public function update(MS:Float) {
 		if(angle>=360)angle=0;
-		else angle+=8;
-		record.rotation = angle;
+		else angle+=(8*(FlxG.sound.music!=null?FlxG.sound.music.pitch:1)).floor(); //if the music is null, normal speed. otherwise base this on music pitch.
+		if(FlxG.sound.music!=null && FlxG.sound.music.playing) record.rotation = angle;
+		record.alpha = FlxG.save.isBound?(FlxG.save.data.volume):1;
+
 
 		if (_timer > 0){
 			_timer -= (MS / 1000);
@@ -54,25 +50,13 @@ class SoundTray extends FlxSoundTray {
 		}else if (x > -width) {
 			expo+=expo;
 			x += (MS / 1000) * width * expo/4;
-
-			if (x >= FlxG.width + width) {
+			if (x >= FlxG.width) {
 				visible = false;
 				active = false;
-
-				#if FLX_SAVE
-				// Save sound preferences
-				if (FlxG.save.isBound)
-				{
-					FlxG.save.data.mute = FlxG.sound.muted;
-					FlxG.save.data.volume = FlxG.sound.volume;
-					FlxG.save.flush();
-				}
-				#end
 			}
 		}
-
-
-        _timeText.text = '${(FlxG.sound.music.time/1000).formatTime()}/${(FlxG.sound.music.length/1000).formatTime()}';
+		if(FlxG.sound.music!=null) _timeText.text = '${(FlxG.sound.music.time/1000).formatTime()}/${(FlxG.sound.music.length/1000).formatTime()}';
+		else _timeText.text = '';
     }
     function fix() {
         for(bar in 0..._bars.length) {
@@ -98,6 +82,16 @@ class SoundTray extends FlxSoundTray {
         var dtf:TextFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 10, 0xffffff);
 		dtf.align = TextFormatAlign.LEFT;
 		_label.defaultTextFormat = dtf;
+
+		#if FLX_SAVE //fuck it, do it instantly.
+		// Save sound preferences
+		if (FlxG.save.isBound)
+		{
+			FlxG.save.data.mute = FlxG.sound.muted;
+			FlxG.save.data.volume = FlxG.sound.volume;
+			FlxG.save.flush();
+		}
+		#end
 	}
     override public function screenCenter():Void
 	{

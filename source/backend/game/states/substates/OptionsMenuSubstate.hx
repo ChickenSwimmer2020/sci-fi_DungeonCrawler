@@ -187,12 +187,16 @@ class OptionsMenuSubstate extends FlxUISubState{
 
     /**GRAPHICS SETTINGS OBJECTS AND FUNCTION**/
     private var shadersCheck:FlxUICheckBox;
+    private var shaderCacheCheck:FlxUICheckBox;
     private function createGraphicsUI() {
         shadersCheck=new FlxUICheckBox(5, 5, null, null, "Shaders", 100, null, ()->Preferences.setPref("shaders", shadersCheck.checked)); 
         shadersCheck.checked = Preferences.getPref("shaders")??false; //if null, default to false. else pull the value from the save file.
 
-        
+        shaderCacheCheck=new FlxUICheckBox(5, 30, null, null, "Shader Cache", 100, null, ()->Preferences.setPref("precacheShaders", shaderCacheCheck.checked));
+        shaderCacheCheck.checked = Preferences.getPref("precacheShaders")??false; //if null, default to false. else pull the value from the save file.
+
         graphics.add(shadersCheck);
+        graphics.add(shaderCacheCheck);
     }
 
     /**GENERAL SETTINGS OBJECTS AND FUNCTION**/

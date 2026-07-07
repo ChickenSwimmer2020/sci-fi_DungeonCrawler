@@ -43,10 +43,10 @@ class DeathState extends FlxState {
         Music.stopMusic();
         Music.makeSureThatSoundsArentLooping();
         FlxTween.tween(consoleGroup.scale, {x:1,y:1}, 1.25, {ease: FlxEase.expoInOut, startDelay: OFFSET,onStart:(_)->{
-            if(!RFEG) Music.playLoopingMusic('lithiumdegredation'); //!!(OCCASIONAL BUG) MUSIC SOMETIMES DOESNT LOOP
+            if(!RFEG) Music.playLoopingMusic('LithiumDegredation'); //!!(OCCASIONAL BUG) MUSIC SOMETIMES DOESNT LOOP
         }, onComplete:(_)->{
             if(RFEG) {
-                Music.playLoopingMusic('miscalculation');
+                Music.playLoopingMusic('Miscalculation');
                 RFGradient = FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0x00000000, 0xFFFF0000], 1, 90, true);
                 add(RFGradient);
                 Conductor.cameraBopStrength = 0.02;
@@ -112,8 +112,8 @@ class DeathState extends FlxState {
             Conductor.bopCamera=false;
             Conductor.additionalBopOnSection=false;
             Conductor.onBeatHit.remove(RFEGbeatHit); ////TODO: rf's cool fade out thingy.
-            FlxG.switchState(MainMenuState.new);
-        }else FlxG.switchState(MainMenuState.new);
+            FlxG.switchState(()->new MainMenuState(false));
+        }else FlxG.switchState(()->new MainMenuState(false));
         Conductor.reset();
         GameState.reset();
         GameMap.reset();

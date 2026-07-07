@@ -6,13 +6,19 @@ import flixel.util.FlxGradient;
 class MainMenuState extends FlxState {
     var logo:FlxSprite;
     var buttons:Array<FlxButton>=[];
-    public function new() {
+    public function new(fromGallery:Bool=false) {
         super();
+        if(fromGallery) {
+            FlxG.camera.y = -FlxG.height;
+            FlxG.camera.angle = 0;
+            Music.deathFadeIn(1.2);
+            FlxTween.tween(FlxG.camera, {y: 0}, 1.2, {ease: FlxEase.expoOut});
+        }
         final POD_SPACING:Float = 20;
-        var pods:FlxBackdrop = new FlxBackdrop(Paths.image('ui/menu', 'pod'), XY, 0.0, 0.0);
+        var pods:FlxBackdrop = new FlxBackdrop(Paths.image('ui/menu', 'pod'), XY, POD_SPACING, 0.0);
         add(pods);
         pods.velocity.x = -50;
-        var chars:FlxBackdrop = new FlxBackdrop(Paths.image('ui/menu', 'char'), X, (377/2)+80, 50.0);
+        var chars:FlxBackdrop = new FlxBackdrop(Paths.image('ui/menu', 'char'), X, ((377/2)+80)+POD_SPACING, 50.0);
         add(chars);
         chars.velocity.x = -50;
         //for(i in 0...5){
@@ -56,20 +62,23 @@ class MainMenuState extends FlxState {
             },
             ()->{openSubState(new LoadGameSubstate());},
             ()->{openSubState(new OptionsMenuSubstate());},
-            ()->{#if(debug) Main.Trace(DEBUG, 'gallery');#end},
-            ()->{#if(debug) Main.Trace(DEBUG, 'achivements');#end},
+            ()->{
+                Music.deathFadeOut(AwardsGalleryState.GALLERY_TRANSITION_TIME, false); //so, funnily enough, we can use this lol.
+                FlxTween.tween(FlxG.camera, {y: -FlxG.height}, AwardsGalleryState.GALLERY_TRANSITION_TIME, {ease: FlxEase.expoIn, onComplete:(_)->{
+                    FlxG.switchState(AwardsGalleryState.new);
+                }});
+            },
             ()->{Sys.exit(1);}
         ];
         Music.stopLoops(true);
         Music.playMusic("CellCompilation", true, "", true, "loop");
 
-        for(i in 0...6) {
+        for(i in 0...5) {
             var button:FlxButton = new FlxButton(FlxG.width-80, logo.height+(20*i), "", onButtonClicked[i]);
             button.text = [
                 Language.getTranslatedKey("menu.newgame", button),
                 Language.getTranslatedKey("menu.loadgame", button),
                 Language.getTranslatedKey("menu.config", button),
-                Language.getTranslatedKey("menu.art", button),
                 Language.getTranslatedKey("menu.awards", button),
                 Language.getTranslatedKey("menu.quit", button)
             ][i];

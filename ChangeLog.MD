@@ -1,5 +1,54 @@
 # ChangeLog
 
+<!--
+STYLE GUIDE!! (mostly for me) -ChickenSwimmer2020
+**emphasize**
+*enunciate*
+>> comment
+> update notes
+`Class`
+**`VARIABLE`**
+
+start every "*" with a Capital letter, and end with a period
+
+** Prototype Update {add "_MAJOR" or "_HOTFIX" as needed} [VERSION] ([GENERAL NAME])
+-->
+
+## Prototype Update 0.04.1.04 (general fixes & shiz)
+
+> Trying to make a lot of stuff actually work, mostly saves. but yeah its uhhh.
+> fucky to say the least.
+
+* Removed a bunch of traces when validating save files to **hopefully** make validation *slightly* faster.
+* Updated `build.bat` to only install lime 8.3.1, instead of trying to rebuild binaries. since only android would need that, and it breaks trying to build.
+* Added "SUBSYSTEM" mechanic idea to `Mechanics.MD`.
+* Removed AutoBuild system in-favor of `build.bat`.
+* Bumped version.
+* `GameMap.generate()` now returns `GameMap`.
+* GameState logic update.
+* GameState now *trys* to load `depth_0` as a map, or at least the last level of the player.
+* Save now CORRECTLY makes the `curLevel` playerState varible, which still isnt functional.
+* `MapGenerator` now searches for maps correctly, and actually uses `Main.foundMaps`
+* Fixed crash when trying to change volume without music playing.
+* Save generates `curLevel` into meta properly
+* Began adding framework for override popup when making saves with the same name.
+* `Save.readMapsFile` now returns `Array<MapFile>` instead of `Dynamic`
+* Sound Tray Record now responds to music volume(alpha) and music pitch(spins faster).
+* `GameIntroState` now makes a new save file named `Fucker` when finished
+
+>> save *reads* as `testSave` in-game though, gotta find out why the fuck it is.
+
+* Removed some TODO's.
+* `MainMenuState` pods now react to **`POD_SPACING`** variable again.
+* Removed Gallery.
+* Added "Style Guide" to `ChangeLog.MD`.
+* Added `AwardsGallery` placeholder.
+* Map loading works
+* Shader cache screen can FINALLY be toggled on and off
+* MapGenerator works correctly to a degree
+* Added Hall Of Heros song
+* GameIntroState now PROPERLY takes you to game state. correctly.
+
 ## Prototype Update 0.04.1.03 (language improvements)
 
 > Tried to improve some language stuff, most of it doesnt work annoyingly, gonna need a lot of ui overhauling.

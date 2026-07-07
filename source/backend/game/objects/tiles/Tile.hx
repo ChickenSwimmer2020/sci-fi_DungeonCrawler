@@ -91,6 +91,15 @@ class Tile extends FlxSprite {
             case "UDR": "up/down/right";
             default: "none";
         }
+
+        if(mapTiles.get(curImage)==null) {
+            Main.Trace(ERROR, 'tile at index ${allTiles.indexOf(this)} has no tile map for image $curImage');
+            animation.add(k, [mapTiles.get("placeholder").get("none")], 30);
+            animation.play(k);
+            checkedNeighbors = true;
+            return;
+        }
+
         animation.add(k, [mapTiles.get(curImage==""?"placeholder":curImage).get(suround??"none")], 30);
         animation.play(k);
         checkedNeighbors = true;

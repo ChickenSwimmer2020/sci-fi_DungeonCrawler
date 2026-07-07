@@ -19,7 +19,7 @@ typedef SaveFile = {
         health:Float,
         stamina:Float,
         xp:Float,
-        position:{x:Float, y:Float, level:String},
+        position:{x:Float, y:Float, curLevel:String},
     };
     var inventory:Array<OneOfTwo<String, Item>>; //Items are a typedef, we can save these here!
     var maps:Array<MapFile>;
@@ -141,6 +141,7 @@ class Save {
         buf.add('xp=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "xp")}\n');
         buf.add('posX=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "x")}\n');
         buf.add('posY=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "y")}\n');
+        buf.add('curLevel=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "curLevel")}\n'); //WHOOPS I FORGOT THIS TOTALLY OH MY GOD.
         return buf.toString();
     }
 
@@ -209,18 +210,26 @@ class Save {
     }
 
     public function getMap(map:String):GameMap {
-        var mapsFile:Dynamic = SaveReader.readMapsFile(Main.FILE);
-        if(mapsFile == null) {
+        var mapsFile:Array<MapFile> = SaveReader.readMapsFile(Main.FILE);
+        var mapFile:Null<MapFile> = null;
+        if(mapsFile==null || mapsFile.length==0) {
             Main.Trace(ERROR, 'Tried to get map $map but it doesnt exist in ${Main.FILE}!');
             return null;
         }
-        for(m in Reflect.fields(mapsFile)) {
-            if(m == map) {
-                Main.Trace(INFO, 'found $map in ${Main.FILE}\'s maps.json file');
-                return MapGenerator.createMap(null); //for now, just generate nothing.
-            }
+
+        for(mf in mapsFile) { //mf is mapfile, not motherf*cker.
+            if(mf.name==map) {
+                Main.Trace(INFO, 'found $map in ${Main.FILE}\'s maps.json file, initilizing...');
+                mapFile = mf;
+                break;
+            }else continue;
         }
-        return null;
+
+        if(mapFile==null) return null;
+        var map:GameMap = new GameMap(mapFile);
+        map.generate(false); //generate the map without editor mode.
+        //shoulnt ever reach here, but yeah X3
+        return map;
     }
 
     //static stuff.
@@ -248,10 +257,7 @@ class Save {
         var saveData:SaveFile = SaveReader.getSaveFile(save);
         //inv and maps.
         for(thingy in saveData.inventory){
-            if(thingy is String || thingy is Dynamic){
-                Main.Trace(INFO, '$thingy in $save\'s inventory is Dynamic, or String.');
-                continue;
-            }
+            if(thingy is String || thingy is Dynamic) continue;
             else{
                 Main.Trace(ERROR, '$save is invalid! (inventory contains non String||Dynamic object(s)...)');
                 return false;
@@ -259,7 +265,6 @@ class Save {
         }
         for(thingy in saveData.maps){
             if(thingy is Dynamic){
-                Main.Trace(INFO, '${thingy.name} in $save\'s map is Dynamic, checking values...');
                 if(mapValid(thingy)) continue;
                 else{
                     Main.Trace(ERROR, '$save is invalid! (map "${thingy.name}" has invalid data...)');
@@ -355,15 +360,10 @@ class Save {
     }
 
     public static function deleteSave(save:String):Bool {
-        for(file in FileSystem.readDirectory("assets/saves/")) {
-            trace(file);
-            if(!file.contains('.') || !file.endsWith('.sf')) continue; //ignore anything thats a folder.
-            if(file.contains(save)) {
-                FileSystem.deleteFile(Paths.save(save));
-                return !FileSystem.exists(Paths.save(save));
-            }
+        if(FileSystem.exists(Paths.save(save))) {
+            FileSystem.deleteFile(Paths.save(save));
+            return !FileSystem.exists(Paths.save(save));
         }
-
         //meaning the deletion failed
         return false;
     }
@@ -384,9 +384,15 @@ class SaveReader { //okay, its a zip file. fine.
      *     inventory.xml
      */
 
-    public static function createSave(name:String, ?data:Null<SaveFile>, ?onComplete:Void->Void):Bool {
+    public static function createSave(name:String, ?dat:Null<SaveFile>, ?onComplete:Void->Void, ?forceOverwrite:Bool=true):Bool {//! forceOverwrite SHOULD DEFAULT TO FALSE, its only true while i test and get everything working. this message also shouldnt be seen ever, so hi!
         var path = Paths.save(name);
         if(!FileSystem.exists(path)) File.saveContent(path, "TEST STRING, this gets overwritten lol."); //make an empty file.
+        else {
+            //TODO: ask if you would like to overwrite the save file.
+            //TODO: find way to make this NOT overflow the stack because thats a uhhhh, really bad thing.
+            //if(forceOverwrite) return createSave(name, dat, onComplete, true); //exit the block, by just running internally and forcing :3 
+            
+        }
 
         // output to new save file.
         var newEntries = new List<Entry>();
@@ -394,7 +400,7 @@ class SaveReader { //okay, its a zip file. fine.
         var time:Date = Date.now();
 
         //meta
-        var iniData:Bytes = Bytes.ofString(Save.buildIni(data));
+        var iniData:Bytes = Bytes.ofString(Save.buildIni(dat));
         newEntries.add({
             fileName: "meta.ini",
             fileSize: iniData.length,
@@ -407,7 +413,7 @@ class SaveReader { //okay, its a zip file. fine.
         });
 
         //maps
-        var mapsData:Bytes = Bytes.ofString(Json.stringify(Save.buildMapsJson(data)));
+        var mapsData:Bytes = Bytes.ofString(Json.stringify(Save.buildMapsJson(dat)));
         newEntries.add({
             fileName: "maps.json",
             fileSize: mapsData.length,
@@ -420,7 +426,7 @@ class SaveReader { //okay, its a zip file. fine.
         });
 
         //inventory
-        var invData:Bytes = Bytes.ofString(Save.buildInvXml(data));
+        var invData:Bytes = Bytes.ofString(Save.buildInvXml(dat));
         newEntries.add({
             fileName: "inventory.xml",
             fileSize: invData.length,
@@ -439,20 +445,30 @@ class SaveReader { //okay, its a zip file. fine.
 
         if(FileSystem.exists(Paths.save(name))) {
             Save.instance.readSaveFile(name);
+            if(onComplete!=null) onComplete();
             return true; //autoload the file so that it doesnt get like, overriden with other stuff i think.
         }
 
         return false;
     }
 
-    public static function readMapsFile(file:String):Dynamic {
+    private static function mapsDynamicParseToArrayOfMapsFile(da:Dynamic):Array<MapFile> {
+        var out:Array<MapFile> = ([]:Array<MapFile>);
+        for(m in Reflect.fields(da)) {
+            var map:MapFile = Functions.dynamicToMapFile(Reflect.getProperty(da, m));
+            out.push(map);
+        }
+        return out;
+    }
+
+    public static function readMapsFile(file:String):Array<MapFile> {
         if(FileSystem.exists(Paths.save(file))) {
             var r:Reader = new Reader(new BytesInput(File.getBytes(Paths.save(file))));
             var entries:List<Entry> = r.read();
             for(entry in entries) {
                 if(entry.fileName == "maps.json") {
                     Main.Trace(INFO, 'Located maps.json in $file');
-                    return Json.parse(((entry.compressed)?Reader.unzip(entry):entry.data).toString());
+                    return mapsDynamicParseToArrayOfMapsFile(Json.parse(((entry.compressed)?Reader.unzip(entry):entry.data).toString()));
                 }
             }
             return null;
@@ -494,29 +510,24 @@ class SaveReader { //okay, its a zip file. fine.
         }
         return null;
     }
-    private static function parsePlayerstate(dat:String):{health:Float,stamina:Float,xp:Float,position:{x:Float, y:Float, level:String}} {
-        var o:{health:Float,stamina:Float,xp:Float,position:{x:Float, y:Float, level:String}} =
-        {health:0,stamina:0,xp:0,position:{x:0, y:0, level:""}};
+    private static function parsePlayerstate(dat:String):{health:Float,stamina:Float,xp:Float,position:{x:Float, y:Float, curLevel:String}} {
+        var o:{health:Float,stamina:Float,xp:Float,position:{x:Float, y:Float, curLevel:String}} =
+        {health:0,stamina:0,xp:0,position:{x:0, y:0, curLevel:""}};
 
         var active:Bool=false;
-        var posY:String = "";
-        var posX:String = "";
-        var lvl:String = "";
         for(line in dat.split('\n')) {
             if(!active){
                 if(!line.startsWith("[PLAYERSTATE]")) continue;
                 else active=true;
             }else{
-
-                if(line.contains('[PREFERENCES]')) break; //stop at next section.
                 if(line.startsWith('health')) {
                     o.health = line.split('=')[1].trim().toFloat();
                 }else if(line.startsWith('stamina')) {
                     o.stamina = line.split('=')[1].trim().toFloat();
                 }else if(line.startsWith('xp')) {
                     o.xp = line.split('=')[1].trim().toFloat();
-                }else if(line.startsWith('level')){
-                    o.position.level = line.split('=')[1].trim();
+                }else if(line.startsWith('curLevel')){
+                    o.position.curLevel = line.split('=')[1].trim();
                 }else if(line.startsWith('posX')) { //auto scans for posY
                     o.position.x = line.split('=')[1].trim().toFloat();
                 }else if(line.startsWith('posY')) { //auto scans for posY

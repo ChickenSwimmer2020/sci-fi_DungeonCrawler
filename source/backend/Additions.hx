@@ -132,7 +132,7 @@ final class Functions {
             for(obj in 0...d.length) {
                 var point:Dynamic = d[obj];
                 t.push({
-                    set: Reflect.getProperty(point, "set")??"DEBUG",
+                    set: Reflect.getProperty(point, "set")??"placeholder",
                     forcedIndex: Reflect.getProperty(point, "forcedIndex")??-1,
                     pos: {
                         row: Reflect.getProperty(Reflect.getProperty(point, "pos"), "row")??0,

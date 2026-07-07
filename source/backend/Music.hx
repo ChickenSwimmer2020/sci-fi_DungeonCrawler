@@ -43,6 +43,15 @@ class Music {
      * Heres a little reminder, dont include the song postfix within the path, as the game engine AUTOMATICALLY swaps it to what we want at runtime.
      */
     public static final musicInfos:Map<String, MusicInfo>=[
+        ""=>{ //default fallback in-case of music stopping. or other bs, idk.
+            path: 'none',
+            internalName: "None",
+            name: "",
+            artist: "[NO MUSIC PLAYING]",
+            sections: [],
+            versionInfo: {NewestVersion: "", OldestVersion: "", AvailableVersions: [""]},
+            BPM: 0
+        },
         "CellCompilation"=>{ //(Main Menu Theme)
             path: 'assets/audio/music/CellCompilation-p${#if(sys)'.ogg'#else'.mp3'#end}',
             internalName: "CellCompilation",
@@ -105,18 +114,18 @@ class Music {
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 100
         },
-        "lithiumdegredation"=>{ //(Death Theme)
-            path: 'assets/audio/music/lithiumdegredation-p${#if(sys)'.ogg'#else'.mp3'#end}',
-            internalName: "lithiumdegredation",
+        "LithiumDegredation"=>{ //(Death Theme)
+            path: 'assets/audio/music/LithiumDegredation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "LithiumDegredation",
             name: "Lithium Degredation",
             artist: "ChickenSwimmer2020",
             sections: [],
             versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
             BPM: 100
         },
-        "miscalculation"=>{ //(Death Theme (Relocation Failed Death EasterEgg))
-            path: 'assets/audio/music/miscalculation-p${#if(sys)'.ogg'#else'.mp3'#end}',
-            internalName: "miscalculation",
+        "Miscalculation"=>{ //(Death Theme (Relocation Failed Death EasterEgg))
+            path: 'assets/audio/music/Miscalculation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "Miscalculation",
             name: "Miscalculation",
             artist: "ChickenSwimmer2020",
             sections: [],
@@ -124,7 +133,16 @@ class Music {
             BPM: 90
         },
         //"colbaltenhancement"=>{ //(Low Health Theme (health under 50%))
-        //}
+        //},
+        "HallOfHeros"=>{ //acvhiements gallery theme
+            path: 'assets/audio/music/HallOfHeros-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            internalName: "HallOfHeros",
+            name: "Hall of Heros",
+            artist: "ChickenSwimmer2020",
+            sections: [],
+            versionInfo: {NewestVersion: "p", OldestVersion: "p", AvailableVersions: ["p"]},
+            BPM: 90
+        }
     ];
     /**
      * if the correct path is input for a song, it will automatically replace the postfix with whatever the default/requested version is
@@ -390,14 +408,14 @@ class Music {
             FlxG.sound.music.looped=true;
         //}
     }   
-    public static function deathFadeOut(?time:Float=1.1231) {
+    public static function deathFadeOut(time:Float=1.1231, stop:Bool=true) {
         overrideSpecialTileAudioVolume=true;
         stopLoops();
         FlxG.sound.music.fadeOut(time, 0, (_)->{
-            stopMusic();
+            if(stop) stopMusic();
         });   
     }
-    public static function deathFadeIn(?time:Float=1.1231) { //ONLY CALL THIS IF FlxG.sound.music IS PLAYING, OTHERWISE NULL ACCESS
+    public static function deathFadeIn(time:Float=1.1231) { //ONLY CALL THIS IF FlxG.sound.music IS PLAYING, OTHERWISE NULL ACCESS
         overrideSpecialTileAudioVolume=false;
         FlxG.sound.music.fadeIn(time, 0, 1);
     }

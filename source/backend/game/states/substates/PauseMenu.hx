@@ -58,18 +58,18 @@ class PauseMenu extends FlxSubState {
                     Main.Trace(INFO, 'Time since player last saved: ${Player.SLS}');
                     if(Player.SLS > Flags.SLS_WARNING_THRESHOLD) {
                         GameState.inGame=false;
-                        FlxG.switchState(MainMenuState.new);
+                        FlxG.switchState(()->new MainMenuState(false));
                     }else{
                         var popup:Popup = new Popup(
                             Language.getTranslatedKey("pause.exitnosave.popup.title", null),
                             Language.getTranslatedKey("pause.exitnosave.popup.message", null),
                             [
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exitunsafe", null), f:()->{
-                                    FlxG.switchState(MainMenuState.new);
+                                    FlxG.switchState(()->new MainMenuState(false));
                                 }, c:true},
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.exit", null), f:()->{
                                     Player.instance.SAVED(); //save the player stuff hopefully.
-                                    FlxG.switchState(MainMenuState.new);
+                                    FlxG.switchState(()->new MainMenuState(false));
                                 }, c:true},
                                 {l: Language.getTranslatedKey("pause.exitnosave.popup.options.cancel", null), c:true}
                             ], false, "", false, FlxPoint.weak(0, 0)
@@ -79,7 +79,7 @@ class PauseMenu extends FlxSubState {
                 },
                 ()->{
                     GameState.inGame=false;
-                    FlxG.switchState(MainMenuState.new);
+                    FlxG.switchState(()->new MainMenuState(false));
                 }
             ][i]);
             button.camera = pauseCamera;

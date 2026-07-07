@@ -93,7 +93,7 @@ class Debugger extends FlxState {
         textBoxSelected = Functions.anyTrue([mainView.errorMenu.findComponent("errInOut", HUITextField, true, "id").focus]);
 
         if(!textBoxSelected && FlxG.keys.justPressed.BACKSPACE) {
-            FlxG.switchState(MainMenuState.new);
+            FlxG.switchState(()->new MainMenuState(false));
         }
     }
 }

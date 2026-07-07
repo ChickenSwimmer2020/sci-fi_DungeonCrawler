@@ -28,7 +28,8 @@ class GameMap extends FlxTypedGroup<Dynamic> {
     var playerSpawnPoint:FlxPoint=new FlxPoint();
 
     var gameFlash:FlxSprite;
-    public function generate(testingState:Bool=false){
+    public function generate(testingState:Bool=false) {
+        if(!GameState.generatedCameras) GameState.generateCameras(); //force gameState to regenerate cameras before anything. because the game likes to throw a fit if these cameras dont exist.
         for(tile in tiles){
             add(generateObjectViaTile(tile));
         }
@@ -128,6 +129,8 @@ class GameMap extends FlxTypedGroup<Dynamic> {
             t.checkNeighbors();
             if(testingState) t.editorMode(); //allow to click for information.
         }
+        FlxG.worldBounds.set(0, 0, 0+(TILE_SIZE*file.size.w), 0+(TILE_SIZE*file.size.h));
+        //#if (debug) Main.DEBUG_updateMapsInfo(file.size.w, file.size.h, file.tiles); #end
     }
     var tileToBeAdded:Tile;
     private inline function generateObjectViaTile(type:TileData):Tile{

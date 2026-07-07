@@ -286,7 +286,7 @@ class Main extends openfl.display.Sprite {
         
         Application.current.window.alert(Message, Title);
         if(close) Sys.exit(1);
-        if(gotomenu) FlxG.switchState(MainMenuState.new);
+        if(gotomenu) FlxG.switchState(()->new MainMenuState(false));
     }
     
     public static var saveFile:Save = new Save();

@@ -28,7 +28,7 @@ class GameState extends FlxState {
         super();
         if(!generatedCameras) generateCameras();
 
-        if(LoadingFromSave!=true){
+        if(!LoadingFromSave){
             Save.createNewFile("fucker", Flags.DEFAULT_SAVEFILE, ()->{
                 MapGenerator.generateMap(100, 100, 0);
                 add(MapGenerator.createMap('depth_0'));
@@ -39,14 +39,14 @@ class GameState extends FlxState {
                 Main.Trace(ERROR, 'SaveFile name input is empty!! something went wrong.');
                 return;
             }else{
-                //var saveFile:SaveFile = Save.readSaveFile(Main.FILE); //just realized i can do this lol.
-                //var map:GameMap = Save.getMapFromSaveFile(Main.FILE, "depth_0"/*saveFile.maps[saveFile.meta.depth].name*/);
-                //add(map);
-
-                //TODO: loading from saves n sthif
-
-                MapGenerator.generateMap(100, 100, 0);
-                add(MapGenerator.createMap('depth_0')); //fuck it we ball !THIS IS FOR TESTING!
+                Main.saveFile.readSaveFile(saveName); //should probably call this LOL.
+                var m:GameMap = Main.saveFile.getMap('depth_${Main.saveFile.data.meta.depth}');
+                if(m!=null) add(m);
+                else{
+                    Main.Trace(ERROR, 'SaveFile is missing the map at depth ${Main.saveFile.data.meta.depth}!! something went wrong.');
+                    Main.showError('MAPNULL', 'depth_${Main.saveFile.data.meta.depth}', null, haxe.CallStack.toString(haxe.CallStack.callStack()));
+                    return;
+                }
             }
         }
         Music.stopMusic();
