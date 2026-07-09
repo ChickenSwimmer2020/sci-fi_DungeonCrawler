@@ -128,26 +128,26 @@ class Save {
     public static function buildIni(dat:Dynamic):String {
         var buf = new StringBuf();
         buf.add('[ROOT]\n');
-        buf.add('name="${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "name")}"\n');
-        buf.add('difficulty="${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "difficulty")}"\n');
-        buf.add('depth=${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "depth")}\n');
-        buf.add('level=${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "level")}\n');
-        buf.add('money=${Reflect.getProperty(Reflect.getProperty(dat, "meta"), "money")}\n');
-        buf.add('playTime=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "meta"), "playTime"), "H")},${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "meta"), "playTime"), "M")},${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "meta"), "playTime"), "S")};\n');
+        buf.add('name="${dat.meta.name}"\n');
+        buf.add('difficulty="${dat.meta.difficulty}"\n');
+        buf.add('depth=${dat.level.depth}\n');
+        buf.add('level=${dat.level.level}\n');
+        buf.add('money=${dat.level.money}\n');
+        buf.add('playTime=${dat.meta.playTime.H},${dat.meta.playTime.M},${dat.meta.playTime.S};\n');
 
         buf.add('\n[PLAYERSTATE]\n');
-        buf.add('health=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "health")}\n');
-        buf.add('stamina=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "stamina")}\n');
-        buf.add('xp=${Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "xp")}\n');
-        buf.add('posX=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "x")}\n');
-        buf.add('posY=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "y")}\n');
-        buf.add('curLevel=${Reflect.getProperty(Reflect.getProperty(Reflect.getProperty(dat, "playerState"), "position"), "curLevel")}\n'); //WHOOPS I FORGOT THIS TOTALLY OH MY GOD.
+        buf.add('health=${dat.playerState.health}\n');
+        buf.add('stamina=${dat.playerState.stamina}\n');
+        buf.add('xp=${dat.playerState.xp}\n');
+        buf.add('posX=${dat.playerState.position.x}\n');
+        buf.add('posY=${dat.playerState.position.y}\n');
+        buf.add('curLevel=${dat.playerState.position.curLevel}\n'); //WHOOPS I FORGOT THIS TOTALLY OH MY GOD.
         return buf.toString();
     }
 
     public static function buildMapsJson(dat:Dynamic):Dynamic {
         var obj:Dynamic = {};
-        for(map in (Reflect.getProperty(dat, "maps"):Array<Dynamic>)) {
+        for(map in (dat.maps:Array<Dynamic>)) {
             Reflect.setProperty(obj, Reflect.getProperty(map, "name"), map); // just mark existence, same as how parseMaps reads it
         }
         return obj;
@@ -155,9 +155,9 @@ class Save {
 
     public static function buildInvXml(dat:Dynamic):String {
         var buf = new StringBuf();
-        buf.add('<inventory slots="${(Reflect.getProperty(dat, "inventory"):Array<Dynamic>).length}">\n');
-        for(i in 0...(Reflect.getProperty(dat, "inventory"):Array<Dynamic>).length) {
-            var slot = (Reflect.getProperty(dat, "inventory"):Array<Dynamic>)[i];
+        buf.add('<inventory slots="${(dat.inventory:Array<Dynamic>).length}">\n');
+        for(i in 0...(dat.inventory:Array<Dynamic>).length) {
+            var slot = (dat.inventory:Array<Dynamic>)[i];
             if(slot is String) continue; // covers "EMPTY" and any other string placeholders
             var item:Item = cast slot;
             buf.add('  <item name="${item.item}" x="${i % 10}" y="${Math.floor(i / 10)}" />\n');

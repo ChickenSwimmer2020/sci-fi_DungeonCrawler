@@ -95,7 +95,7 @@ class Popup extends FlxSubState {
 
         group.screenCenter();
         for(object in group.members) {
-            if(Reflect.hasField(object, "scrollFactor")) Reflect.setField(object, "scrollFactor", FlxPoint.weak(1, 1));
+            if(Reflect.hasField(object, "scrollFactor")) object.scrollFactor = FlxPoint.weak(1, 1);
         }
         group.scrollFactor.set(1, 1);
 
@@ -116,7 +116,7 @@ class Popup extends FlxSubState {
 
     public function addT(basic:FlxBasic):FlxBasic {
         basic.camera=popupCam;
-        if(Reflect.hasField(basic, "scrollFactor")) Reflect.setField(basic, "scrollFactor", FlxPoint.weak(1, 1));
+        if(Reflect.hasField(basic, "scrollFactor")) basic.scrollFactor = FlxPoint.weak(1, 1);
         add(basic);
         return basic;
     }

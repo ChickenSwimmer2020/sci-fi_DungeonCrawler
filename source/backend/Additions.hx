@@ -38,6 +38,7 @@ final class Functions {
      */
     public static function checkPressedSafe(keys:Array<FlxKey>):Bool {
         var h:Array<FlxKey>=[];
+        trace(keys);
         for(key in keys){
             if(key == NONE) continue;
             else h.push(key);
@@ -132,15 +133,15 @@ final class Functions {
             for(obj in 0...d.length) {
                 var point:Dynamic = d[obj];
                 t.push({
-                    set: Reflect.getProperty(point, "set")??"placeholder",
-                    forcedIndex: Reflect.getProperty(point, "forcedIndex")??-1,
+                    set: point?.set??"placeholder",
+                    forcedIndex: point?.forcedIndex??-1,
                     pos: {
-                        row: Reflect.getProperty(Reflect.getProperty(point, "pos"), "row")??0,
-                        colum: Reflect.getProperty(Reflect.getProperty(point, "pos"), "colum")??0
+                        row: point?.pos?.row??0,
+                        colum: point?.pos?.colum??0
                     },
-                    collides: Reflect.getProperty(point, "collides")??false,
-                    isSpecial: Reflect.getProperty(point, "isSpecial")??false,
-                    specialType: Reflect.getProperty(point, "specialType")??-1
+                    collides: point?.collides??false,
+                    isSpecial: point?.isSpecial??false,
+                    specialType: point?.specialType??-1
                 });
             }
             return t;
@@ -154,11 +155,11 @@ final class Functions {
                 for(anim in 0...(d:Array<Dynamic>).length) {
                     var an:Dynamic = (d:Array<Dynamic>)[anim];
                     a.push({
-                        name: Reflect.getProperty(an, "name")??"ERROR",
-                        frames: (Reflect.getProperty(an, "frames"):Array<Int>)??[0],
-                        fps: Reflect.getProperty(an, "fps")??30,
-                        flipX: Reflect.getProperty(an, "flipX")??false,
-                        flipY: Reflect.getProperty(an, "flipY")??false
+                        name: an?.name??"ERROR",
+                        frames: (an?.frames:Array<Int>)??[0],
+                        fps: an?.fps??30,
+                        flipX: an?.flipX??false,
+                        flipY: an?.flipy??false
                     });
                 }
 
@@ -169,17 +170,17 @@ final class Functions {
                 var point:Dynamic = (d:Array<Dynamic>)[obj];
 
                 o.push({
-                    object: Reflect.getProperty(point, "object")??"FALLBACK",
+                    object: point?.object??"FALLBACK",
                     size: {
-                        w: Reflect.getProperty(Reflect.getProperty(point, "size"), "w")??1,
-                        h: Reflect.getProperty(Reflect.getProperty(point, "size"), "h")??1
+                        w: point?.size?.w??1,
+                        h: point?.size?.h??1
                     },
                     pos: {
-                        x: Reflect.getProperty(Reflect.getProperty(point, "pos"), "x")??0,
-                        y: Reflect.getProperty(Reflect.getProperty(point, "pos"), "y")??0
+                        x: point?.pos?.x??0,
+                        y: point?.pos?.y??0
                     },
-                    isAnimated: Reflect.getProperty(point, "isAnimated"),
-                    animations: getAnims((Reflect.getProperty(d, "animations"):Array<Dynamic>))
+                    isAnimated: point?.isAnimated??false,
+                    animations: getAnims((point?.animations?:Array<Dynamic>)??[])
                 });
             }
 
@@ -187,17 +188,17 @@ final class Functions {
         }
 
         map = {
-            name: Reflect.getProperty(d, "name")??"ERROR",
+            name: d?.name??"ERROR",
             size: {
-                w: Reflect.getProperty(Reflect.getProperty(d, "size"), "w")??0,
-                h: Reflect.getProperty(Reflect.getProperty(d, "size"), "h")??0
+                w: d?.size?.w??0,
+                h: d?.size?.h??0
             },
             spawn: {
-                x: Reflect.getProperty(Reflect.getProperty(d, "spawn"), "x")??0,
-                y: Reflect.getProperty(Reflect.getProperty(d, "spawn"), "y")??0
+                x: d?.spawn?.x??0,
+                y: d?.spawn?.y??0
             },
-            tiles: getTiles(Reflect.getProperty(d, "tiles")??[]),
-            objects: getObjects(Reflect.getProperty(d, "objects")),
+            tiles: getTiles(d?.tiles??[]),
+            objects: getObjects(d?.objects??[]),
             enemies: [], //TBA
             npcs: [] //TBA
         };
@@ -393,8 +394,8 @@ final class Additions{
     //actual objects.
     public static function center(spr:FlxSprite, on:OneOfTwo<FlxObject, ExtendedCamera>, ?offs:FlxPoint):FlxSprite {
         if(offs==null) offs=FlxPoint.weak(0, 0);
-        spr.x = (Reflect.getProperty(on, "x")+Reflect.getProperty(on, "width")/2-spr.width/2)+(offs.x);
-        spr.y = (Reflect.getProperty(on, "y")+Reflect.getProperty(on, "height")/2-spr.height/2)+(offs.y);
+        spr.x = (on.x+on.width/2-spr.width/2)+(offs.x);
+        spr.y = (on.y+on.height/2-spr.height/2)+(offs.y);
         return spr;
     }
 }

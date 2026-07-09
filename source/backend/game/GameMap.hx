@@ -51,20 +51,17 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                 if(group is Array) {
                     var a:Array<Dynamic>=cast(group); //because i have to do this.
                     for(object in a) {
-                        if(Reflect.hasField(object, 'frozen')) {
-                            Reflect.setProperty(object, 'frozen', true);
-                        }else{
+                        if(Reflect.hasField(object, 'frozen'))
+                            object.frozen=true;
+                        else{
                             if(Reflect.hasField(object, 'velocity')) {
-                                Reflect.setProperty(object, 'velocity', FlxPoint.weak(0, 0));
+                                object.velocity = FlxPoint.weak(0, 0);
                             }
-
-
                         }
                     }
                 }else{
-                    if(Reflect.hasField(group, 'velocity')) {
-                        Reflect.setProperty(group, 'velocity', FlxPoint.weak(0, 0));
-                    }
+                    if(Reflect.hasField(group, 'velocity'))
+                        group.velocity = FlxPoint.weak(0, 0);
                     if(group is Player) {
                         var s:Player = cast(group);
                         s.freeze();
