@@ -180,7 +180,7 @@ final class Functions {
                         y: point?.pos?.y??0
                     },
                     isAnimated: point?.isAnimated??false,
-                    animations: getAnims((point?.animations?:Array<Dynamic>)??[])
+                    animations: getAnims((point?.animations:Array<Dynamic>)??[])
                 });
             }
 
