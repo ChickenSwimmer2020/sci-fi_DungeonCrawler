@@ -34,6 +34,17 @@ start every "*" with a Capital letter, and end with a period
 * Fixed a single bug on solar's end that made his program crash when trying to play LITERALLY ANY default flixel sfx.
 * Fixed pulling grig.audio
 * Reloading a save after closing one doesnt cause cameras to die anymore.
+* `Functions.anyTrue` is now properly checking every single value inside.
+* FINALLY FIXED THAT STUPID CAMERA CRASH WITH NULL ACCESS.X
+* `Player` saving is finally functional
+* `Debugger` support for modifying save files reading them functional again.
+* `Pickup` now saves for the player every time you pick something up
+* `Tile` only has the code for checking editor mode in debug builds
+* `Player` can save
+* `LoadGameSubstate` is no longer based on save internal name, rather using file name now.
+* Added saving to pause menu
+* Removed `Additions.combine`
+* charges and durability are now tracked in inventory save files
 
 ## Prototype Update 0.04.1.05 (fixes and moves)
 
