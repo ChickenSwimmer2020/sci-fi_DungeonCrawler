@@ -138,9 +138,11 @@ class Player extends FlxSprite {
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
+        #if debug
         if(testingMode) {
             if(Main.loadedTestedState) testingMode = false;
         }
+        #end
 
         if(isWeapon){
             if(weaponTextTextTarget!='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}')

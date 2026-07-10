@@ -2,14 +2,85 @@ package;
 
 class Flags {
     public static final DEFAULT_PREFERENCES_FILE:String = '{
-    "autoPause": true,
+    "lastLoadedSave": "",
     "musicPF": "D",
-    "flashingLights": true,
-    "shaders": true,
-    "controls": [],
+    "autoPause": false,
     "language": "EN_US",
-    "precacheShaders": false,
-    "lastLoadedSave": ""
+    "shaders": true,
+    "controls": [
+        {
+            "c": "moveUP",
+            "keys": [
+                38,
+                87
+            ]
+        },
+        {
+            "c": "zoomOUT",
+            "keys": [
+                34,
+                -1
+            ]
+        },
+        {
+            "c": "moveLEFT",
+            "keys": [
+                37,
+                65
+            ]
+        },
+        {
+            "c": "moveRIGHT",
+            "keys": [
+                39,
+                68
+            ]
+        },
+        {
+            "c": "sprint",
+            "keys": [
+                16,
+                -1
+            ]
+        },
+        {
+            "c": "interact",
+            "keys": [
+                69,
+                13
+            ]
+        },
+        {
+            "c": "pause",
+            "keys": [
+                27,
+                8
+            ]
+        },
+        {
+            "c": "zoomIN",
+            "keys": [
+                33,
+                -1
+            ]
+        },
+        {
+            "c": "moveDOWN",
+            "keys": [
+                40,
+                83
+            ]
+        },
+        {
+            "c": "inventory",
+            "keys": [
+                73,
+                -1
+            ]
+        }
+    ],
+    "flashingLights": true,
+    "precacheShaders": true
 }';
 
 

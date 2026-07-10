@@ -14,6 +14,19 @@ start every "*" with a Capital letter, and end with a period
 ** Prototype Update {add "_MAJOR" or "_HOTFIX" as needed} [VERSION] ([GENERAL NAME])
 -->
 
+## Prototype Update 0.04.1.06 (fixes, fft vis) -- ZSolarDev
+
+> We'll have to replace the sound tray sound asset with a custom one eventually.
+
+* Removed all default flixel built-in sound assets
+* Added null key checks in `Additions.checkJustPressedSafe` and `Additions.checkPressedSafe`
+* Default uPrefs.json now has controls filled out
+* Fixed dynamic music
+* Dynamic FFT Vis in sound tray
+* Main.Trace now uses `Sys.println` instead of trace on non-html5 targets
+* Truss animation on `AwardsGalleryState` is now functional
+* Shelf animation on `AwardsGalleryState` is not functional, I can't figure it out for the life of me and it's 3:25 am and im tired.
+
 ## Prototype Update 0.04.1.05 (fixes and moves)
 
 > trying to actually start fixing features and whatnot, trying to get some stuff working properly that was implemented

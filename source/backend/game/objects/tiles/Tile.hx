@@ -104,7 +104,7 @@ class Tile extends FlxSprite {
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
-        if(inEditorMode && !Main.loadedTestedState) {
+        if(inEditorMode #if debug && !Main.loadedTestedState #end) {
             if(FlxG.mouse.overlaps(this, Main.camGame) && FlxG.mouse.justPressedRight) {
                 var myNotif:Notification = new Notification();
                 myNotif.notificationData = {

@@ -1,4 +1,7 @@
 package backend;
+
+import funkin.vis.dsp.SpectralAnalyzerR;
+
 /**
  * music info, this typedef is for storing information about music tracks.
  */
@@ -144,6 +147,12 @@ class Music {
             BPM: 90
         }
     ];
+    public static var currentFFTFrame:Array<Float> = [];
+    public static var normalizedCurrentFFTFrame:Array<Float> = [];
+    public static var analyzer:SpectralAnalyzerR;
+    public static var analyzerBars:Int = 50;
+    public static var analyzerSound:FlxSound;
+
     /**
      * if the correct path is input for a song, it will automatically replace the postfix with whatever the default/requested version is
      * with support for automatic fallback to newer versions should a requested version not support
@@ -222,19 +231,19 @@ class Music {
         var songInfo:MusicInfo = musicInfos.get(song);
         if(songInfo==null) return;
         if(SST) currentlyPlayingSong=songInfo.internalName;
-        activeMusicObjects.set(name,
-            new FlxSound()
-                .loadEmbedded(
-                    resolvePostfix(songInfo.internalName),
-                    true,
-                    false
-                )
-                .play(
-                    false,
-                    getLoopSection(songInfo.internalName, startSection),
-                    getLoopSection(songInfo.internalName, endSection)
-                )
+        var sound:FlxSound = new FlxSound()
+        .loadEmbedded(
+            resolvePostfix(songInfo.internalName),
+            true,
+            false
+        )
+        .play(
+            false,
+            getLoopSection(songInfo.internalName, startSection),
+            getLoopSection(songInfo.internalName, endSection)
         );
+        activeMusicObjects.set(name, sound);
+        reloadAnalyzer(sound);
     }
     static var startedChecker:Bool=false;
     static var checkingForMusicSection:Bool=false;
@@ -282,6 +291,37 @@ class Music {
                 checkingForMusicSection = false;
             }
         }
+
+        if (analyzerSound != null && analyzerSound.playing && analyzer != null) {
+            var bars = analyzer.getLevels();
+			currentFFTFrame = [];
+			for (bar in bars)
+				currentFFTFrame.push(bar.value);
+
+            normalizedCurrentFFTFrame = [];
+
+            var frameMin = Math.POSITIVE_INFINITY;
+            var frameMax = Math.NEGATIVE_INFINITY;
+
+            for (v in currentFFTFrame) {
+                frameMin = Math.min(frameMin, v);
+                frameMax = Math.max(frameMax, v);
+            }
+
+            var range = frameMax - frameMin;
+            if (range == 0) range = 1;
+
+            var absMinDb = -100.0;
+            var absMaxDb = 0.0;
+            var absRange = absMaxDb - absMinDb;
+
+            for (v in currentFFTFrame) {
+                var frameNorm = (v - frameMin) / range;
+                var absNorm = (v - absMinDb) / absRange;
+                var finalNorm = frameNorm * absNorm;
+                normalizedCurrentFFTFrame.push(finalNorm);
+            }
+        }
     }
     /**
      * play an audio file once, starting from startSection, and ending at endSection. also allows for an onFinish callback.
@@ -296,20 +336,52 @@ class Music {
         if(songInfo==null) return;
         
         currentlyPlayingSong = songInfo.internalName; //automatically do this because i realized that i should do it.
-        activeMusicObjects.set(name, new FlxSound()
-            .loadEmbedded(resolvePostfix(songInfo.internalName), false, true, ()->{
-                onFinish();
-                activeMusicObjects.remove(name);
-            }).play(
-                false,
-                getLoopSection(songInfo.internalName, startSection),
-                getLoopSection(songInfo.internalName, endSection??null)
-            )
+        var sound = new FlxSound()
+        .loadEmbedded(resolvePostfix(songInfo.internalName), false, true, ()->{
+            onFinish();
+            activeMusicObjects.remove(name);
+        }).play(
+            false,
+            getLoopSection(songInfo.internalName, startSection),
+            getLoopSection(songInfo.internalName, endSection??null)
         );
+        activeMusicObjects.set(name, sound);
+        reloadAnalyzer(sound);
         Main.Trace(DEBUG, activeMusicObjects);
     }
 
     public static function onSectionReached() {} //TODO
+
+    /**
+     * Reloads the spectral analyzer. The sound must be playing for this to work.
+     * @param smoothingTimeConstant 
+     */
+    public static function reloadAnalyzer(?sound:FlxSound, ?smoothingTimeConstant:Float = 0.1)
+	{
+        if (sound == null)
+            sound = FlxG.sound.music;
+        if (sound == null) return;
+        if (!sound.playing) return;
+
+		@:privateAccess
+		var channel = sound._channel;
+		var source = null;
+		if (channel == null)
+		{
+			var oldVol = sound.volume;
+			@:privateAccess
+			source = sound._channel.__audioSource;
+		}
+		else
+		{
+			@:privateAccess
+			source = channel.__audioSource;
+		}
+        analyzerSound = sound;
+		analyzer = new SpectralAnalyzerR(source, analyzerBars, smoothingTimeConstant, 30);
+        currentFFTFrame = [];
+        normalizedCurrentFFTFrame = [];
+	}
 
     public static function onSectionReachedMusic(s:OneOfTwo<String,Float>, f:Void->Void) {
         Main.Trace(INFO, 'added listener for section $s in $currentlyPlayingSong');
@@ -336,8 +408,7 @@ class Music {
         startedChecker = false;
         currentlyPlayingSong = songInfo.internalName;
         lastMusicVolume = FlxG.sound.music != null ? FlxG.sound.music.volume : 1.0;
-        FlxG.sound.music.stop();
-        FlxG.sound.music.destroy();
+        FlxG.sound.music = null;
 
         var startTime = getLoopSection(songInfo.internalName, startSection);
         FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), lastMusicVolume, false);
@@ -347,6 +418,9 @@ class Music {
         FlxG.sound.music.time = FlxG.sound.music.loopTime = startTime;
         FlxG.sound.music.endTime = endTime;
         FlxG.sound.music.onComplete = onFinish;
+        // To ovewrwrite the old music instance with this new one
+        Conductor.targetAudioObject = FlxG.sound.music;
+        reloadAnalyzer();
     }
 
     public static function makeSureThatSoundsArentLooping() {
@@ -384,6 +458,7 @@ class Music {
 
             Main.Trace(INFO, 'looping music "$song" should loop: ${FlxG.sound.music.looped}');
         //}
+        reloadAnalyzer();
     }
     private static final GLITCH_TIME:Int = 30;
     private static final AUDIOPITCHVARIENCE:Float = FlxG.random.float(0.95, 1.15); //just for some varience on the death themes n shtuff.
@@ -456,6 +531,7 @@ class Music {
             FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, loopSection);
             if(endSection!=null) FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection);
             if(!playfull) FlxG.sound.music.time = getLoopSection(songInfo.internalName, section);
+            reloadAnalyzer();
         }
     }
     /**

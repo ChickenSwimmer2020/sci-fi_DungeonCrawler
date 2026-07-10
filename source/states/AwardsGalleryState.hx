@@ -4,41 +4,194 @@ typedef GalleryShelf = {
     var truss:Array<FlxSprite>;
     var shelfs:Array<FlxSprite>;
     var awards:Array<Dynamic>; //TODO: award class.
+    var tweens:Array<FlxTween>;
+    var baseX:Array<Float>;
 };
 
 class AwardsGalleryState extends FlxState {
     var GalleryIndex(default, set):Int = 0;
+    var previousGalleryIndex:Int = 0;
+    var scrollDirection:Int = 1;
     function set_GalleryIndex(value:Int):Int {
+        previousGalleryIndex = GalleryIndex;
         GalleryIndex = value;
-        for(i in 0...shelves.length) {
-            var shelf:GalleryShelf = shelves[i];
-            var targetScale:Float = 1.0 - (i * 0.1); 
-            if (targetScale < 0.1) targetScale = 0.1; // Prevent inversion/negative scale
-            var targetAlpha:Float = 1.0 - (i * 0.25);
-            if (targetAlpha < 0.0) targetAlpha = 0.0;
 
-            if(shelf == shelves[GalleryIndex]) {
+        var order:Array<Int> = [for (i in 0...shelves.length) i];
+        order.sort((a, b) -> {
+            var slotA = ((a - GalleryIndex) % shelves.length + shelves.length) % shelves.length;
+            var slotB = ((b - GalleryIndex) % shelves.length + shelves.length) % shelves.length;
+            return slotB - slotA;
+        });
+
+        for (i in order) {
+            var shelf:GalleryShelf = shelves[i];
+
+            for (t in shelf.tweens) {
+                if (t != null) t.cancel();
+            }
+            shelf.tweens = [];
+
+            var slot:Int = ((i - GalleryIndex) % shelves.length + shelves.length) % shelves.length;
+            var previousSlot:Int = ((i - previousGalleryIndex) % shelves.length + shelves.length) % shelves.length;
+
+            if (scrollDirection == 1) {
+                var prevScale:Float = 1.0 - (previousSlot * 0.1);
+                if (prevScale < 0.1) prevScale = 0.1;
+                var prevAlpha:Float = 1.0 - (previousSlot * 0.25);
+                if (prevAlpha < 0.0) prevAlpha = 0.0;
+                if (previousSlot == 0) prevAlpha = 1;
+                var prevCenterShift:Float = previousSlot * 25;
+
+                for (j in 0...shelf.truss.length) {
+                    var truss = shelf.truss[j];
+                    var prevLeftX:Float = (159 * 1.2) + prevCenterShift*2;
+                    var prevRightX:Float = FlxG.width - (159 * 1.2) - prevCenterShift;
+                    var prevTargetX:Float = [prevLeftX-159, prevRightX][j];
+
+                    truss.x = prevTargetX;
+                    truss.scale.set(prevScale, prevScale);
+                    truss.alpha = prevAlpha;
+                    truss.updateHitbox();
+                }
+                for (shelfSprite in shelf.shelfs) {
+                    shelfSprite.scale.set(prevScale, prevScale);
+                    shelfSprite.alpha = prevAlpha;
+                    shelfSprite.updateHitbox();
+                }
+            }
+
+            var leavingFront:Bool = (previousSlot == 0 && slot != 0);
+            var enteringFront:Bool = (previousSlot != 0 && slot == 0);
+
+            var doOvershootOut:Bool = leavingFront && scrollDirection == 1;
+            var doOvershootIn:Bool = enteringFront && scrollDirection == -1;
+
+            var targetScale:Float = 1.0 - (slot * 0.1); 
+            if (targetScale < 0.1) targetScale = 0.1;
+            var targetAlpha:Float = 1.0 - (slot * 0.25);
+            if (targetAlpha < 0.0) targetAlpha = 0.0;
+            var centerShift:Float = slot * 25;
+
+            if(slot == 0) {
                 targetAlpha = 1;
             }else{
                 
             }
 
-            for(truss in shelf.truss) {
-                truss.scale.set(targetScale, targetScale);
-                truss.updateHitbox();
-                truss.alpha = targetAlpha;
+            var overshootScale:Float = 1.0 + 0.25;
+            var overshootCenterShift:Float = -25;
+            var overshootLeftX:Float = (159 * 1.2) + overshootCenterShift*2;
+            var overshootRightX:Float = FlxG.width - (159 * 1.2) - overshootCenterShift;
+
+            for (j in 0...shelf.truss.length) {
+                var truss = shelf.truss[j];
+
+                remove(truss);
+                add(truss);
+
+                var leftX:Float = (159 * 1.2) + centerShift*2;
+                var rightX:Float = FlxG.width - (159 * 1.2) - centerShift;
+                var targetX:Float = [leftX-159, rightX][j];
+                var overshootTargetX:Float = [overshootLeftX-159, overshootRightX][j];
+
+                if (doOvershootOut) {
+                    var t1 = FlxTween.tween(truss.scale, {x: overshootScale, y: overshootScale}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onUpdate: (_) -> truss.updateHitbox()
+                    });
+                    var tX = FlxTween.tween(truss, {x: overshootTargetX}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut
+                    });
+                    var tAlpha = FlxTween.tween(truss, {alpha: 0}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onComplete: (_) -> {
+                            truss.x = targetX;
+                            truss.scale.set(targetScale, targetScale);
+                            truss.updateHitbox();
+
+                            var tAlpha2 = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME * 0.65, {ease: FlxEase.expoOut});
+                            shelf.tweens.push(tAlpha2);
+                        }
+                    });
+                    shelf.tweens.push(t1);
+                    shelf.tweens.push(tX);
+                    shelf.tweens.push(tAlpha);
+                } else if (doOvershootIn) {
+                    truss.x = overshootTargetX;
+                    truss.scale.set(overshootScale, overshootScale);
+                    truss.alpha = 0;
+                    truss.updateHitbox();
+
+                    var t1 = FlxTween.tween(truss.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onUpdate: (_) -> truss.updateHitbox()
+                    });
+                    var tX = FlxTween.tween(truss, {x: targetX}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    var tAlpha = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    shelf.tweens.push(t1);
+                    shelf.tweens.push(tX);
+                    shelf.tweens.push(tAlpha);
+                } else {
+                    var t1 = FlxTween.tween(truss.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onUpdate: (_) -> truss.updateHitbox()
+                    });
+                    var tAlpha = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    var tX = FlxTween.tween(truss, {x: targetX}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    shelf.tweens.push(t1);
+                    shelf.tweens.push(tAlpha);
+                    shelf.tweens.push(tX);
+                }
             }
-            for(shelfSprite in shelf.shelfs) {
-                shelfSprite.scale.set(targetScale, targetScale);
-                shelfSprite.updateHitbox();
-                shelfSprite.alpha = targetAlpha;
+
+            for (shelfSprite in shelf.shelfs) {
+                remove(shelfSprite);
+                add(shelfSprite);
+
+                if (doOvershootOut) {
+                    var t1 = FlxTween.tween(shelfSprite.scale, {x: overshootScale, y: overshootScale}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onUpdate: (_) -> shelfSprite.updateHitbox()
+                    });
+                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: 0}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onComplete: (_) -> {
+                            shelfSprite.scale.set(targetScale, targetScale);
+                            shelfSprite.updateHitbox();
+
+                            var tAlpha2 = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME * 0.65, {ease: FlxEase.expoOut});
+                            shelf.tweens.push(tAlpha2);
+                        }
+                    });
+                    shelf.tweens.push(t1);
+                    shelf.tweens.push(tAlpha);
+                } else if (doOvershootIn) {
+                    shelfSprite.scale.set(overshootScale, overshootScale);
+                    shelfSprite.alpha = 0;
+                    shelfSprite.updateHitbox();
+
+                    var t1 = FlxTween.tween(shelfSprite.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onUpdate: (_) -> shelfSprite.updateHitbox()
+                    });
+                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    shelf.tweens.push(t1);
+                    shelf.tweens.push(tAlpha);
+                } else {
+                    var t1 = FlxTween.tween(shelfSprite.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                        ease: FlxEase.expoOut,
+                        onUpdate: (_) -> shelfSprite.updateHitbox()
+                    });
+                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    shelf.tweens.push(t1);
+                    shelf.tweens.push(tAlpha);
+                }
             }
         }
         return value;
     }
     public static final GALLERY_TRANSITION_TIME:Float = 1.2;
-    final GALLERY_MAX_SHELVES:Int = 5; // how many shelves of achivements are ther.
-    final GALLERY_SHELF_SPACING:Int = 100; //how much space between each shelf of achivements. (on the Z axis, so scrolling is forward and backwards >:3)
+    final GALLERY_MAX_SHELVES:Int = 5;
 
     var shelves:Array<GalleryShelf> = [];
     public function new() {
@@ -51,60 +204,63 @@ class AwardsGalleryState extends FlxState {
         });
 
         Music.playLoopingMusic("HallOfHeros");
-        Music.deathFadeIn(GALLERY_TRANSITION_TIME+(GALLERY_TRANSITION_TIME/2)); //hehe, fades!
+        Music.deathFadeIn(GALLERY_TRANSITION_TIME+(GALLERY_TRANSITION_TIME/2));
 
-        add(new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xFFFF00FF)); //this is just a test.
+        add(new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xFFFF00FF));
 
 
         for(i in 0...GALLERY_MAX_SHELVES) {
-            // 1. Calculate the progressive modifiers based on the current row
-            var centerShift:Float = i * 25; // Moves 25 pixels closer to center per row
+            var centerShift:Float = i * 25;
             
-            // Smoothly scale down (e.g., loses 10% scale per row)
             var targetScale:Float = 1.0 - (i * 0.1); 
-            if (targetScale < 0.1) targetScale = 0.1; // Prevent inversion/negative scale
+            if (targetScale < 0.1) targetScale = 0.1;
             
-            // Smoothly drop alpha (e.g., loses 15% opacity per row)
             var targetAlpha:Float = 1.0 - (i * 0.25);
             if (targetAlpha < 0.0) targetAlpha = 0.0;
 
             var trusses:Array<FlxSprite> = [];
             var awardShelves:Array<FlxSprite> = [];
+            var baseXs:Array<Float> = [];
 
-            for(j in 0...1) { //2
-                // 2. Apply the centerShift to the X coordinates
-                // Left side moves RIGHT (+ centerShift), Right side moves LEFT (- centerShift)
+            for(j in 0...2) {
                 var leftX:Float = (159 * 1.2) + centerShift*2;
                 var rightX:Float = FlxG.width - (159 * 1.2) - centerShift;
                 var targetX:Float = [leftX-159, rightX][j];
 
-                // 3. Create the sprite
                 var truss:FlxSprite = new FlxSprite(targetX, 0).loadGraphic(Paths.image('ui/awards/gallery', 'truss'));
                 add(truss);
                 
-                // 4. Apply the visual transformations
                 truss.scale.set(targetScale, targetScale);
-                truss.updateHitbox(); // Update hitbox immediately after scaling so positioning calculations stay accurate
+                truss.updateHitbox();
                 
                 truss.alpha = targetAlpha;
                 trusses.push(truss);
+                baseXs.push(targetX);
             }
 
-            //for(s in 0...3) {
-            //    var shelf:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('ui/awards/gallery', 'shelf'));
-            //    shelf.scale.set(targetScale, targetScale);
-            //    shelf.updateHitbox();
-            //    shelf.x = (FlxG.width/2) - (shelf.width/2); // Center the shelf horizontally
-            //    shelf.y = (FlxG.height - (shelf.height * targetScale)) - (i * GALLERY_SHELF_SPACING)-(s*250); // Position based on row and spacing
-            //    shelf.alpha = targetAlpha;
-            //    add(shelf);
-            //    awardShelves.push(shelf);
-            //}
+            for(s in 0...3) {
+                var shelf:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image('ui/awards/gallery', 'shelf'));
+                shelf.scale.set(targetScale, targetScale);
+                shelf.updateHitbox();
+                shelf.x = (FlxG.width/2) - (shelf.width/2);
+
+                var topMargin:Float = FlxG.height * 0.15;
+                var bottomMargin:Float = FlxG.height * 0.15;
+                var usableHeight:Float = FlxG.height - topMargin - bottomMargin - shelf.height;
+                var spacing:Float = usableHeight / 2;
+
+                shelf.y = topMargin + (s * spacing);
+                shelf.alpha = targetAlpha;
+                //add(shelf);
+                awardShelves.push(shelf);
+            }
 
             shelves.push({
-                truss: trusses, // Assuming one truss per shelf for now
-                shelfs: awardShelves, // Assuming one shelf per row for now
-                awards: [] // Placeholder for awards, to be populated later
+                truss: trusses,
+                shelfs: [],//awardShelves,
+                awards: [],
+                tweens: [],
+                baseX: baseXs
             });
         }
 
@@ -113,13 +269,14 @@ class AwardsGalleryState extends FlxState {
 
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        trace(GalleryIndex);
-        if(FlxG.keys.justPressed.UP) {
+        if(FlxG.keys.justPressed.DOWN) {
+            scrollDirection = -1;
             if(GalleryIndex>0) {
                 GalleryIndex--;
             }else GalleryIndex=GALLERY_MAX_SHELVES-1;
         }
-        if(FlxG.keys.justPressed.DOWN) {
+        if(FlxG.keys.justPressed.UP) {
+            scrollDirection = 1;
             if(GalleryIndex<GALLERY_MAX_SHELVES-1) {
                 GalleryIndex++;
             }else GalleryIndex=0;

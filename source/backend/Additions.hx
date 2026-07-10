@@ -25,6 +25,8 @@ final class Functions {
      */
     public static function checkJustPressedSafe(keys:Array<FlxKey>):Bool {
         var h:Array<FlxKey>=[];
+        if (keys == null)
+            return false;
         for(key in keys){
             if(key == NONE) continue;
             else h.push(key);
@@ -38,6 +40,8 @@ final class Functions {
      */
     public static function checkPressedSafe(keys:Array<FlxKey>):Bool {
         var h:Array<FlxKey>=[];
+        if (keys == null)
+            return false;
         for(key in keys){
             if(key == NONE) continue;
             else h.push(key);
@@ -366,6 +370,40 @@ final class Additions{
      * @return it just returns an empty array lol.
      */
     public static function clear(a:Array<Dynamic>):Array<Dynamic> return a=[];
+    /**
+     * Resamples an array to a new resolution (1D)
+     * @param input 
+     * @param target 
+     * @return Array<Float>
+     */
+    public static function resample(input:Array<Float>, target:Int):Array<Float>
+	{
+		if (input == null || input.length == 0 || target <= 0)
+			return [];
+
+		var result:Array<Float> = [];
+		var scale:Float = (input.length - 1) / (target - 1);
+
+		for (i in 0...target)
+		{
+			var pos:Float = i * scale;
+			var index:Int = Math.floor(pos);
+			var frac:Float = pos - index;
+
+			if (index >= input.length - 1)
+			{
+				result.push(input[input.length - 1]);
+			}
+			else
+			{
+				var a = input[index];
+				var b = input[index + 1];
+				result.push(a + (b - a) * frac);
+			}
+		}
+
+		return result;
+	}
     /**
      * Specifically made for the inventory system as im implementing item movement between slots in a very basic way now.
      * @param a inventory array (must be Array<OneOfTwo<String, Item>>)
