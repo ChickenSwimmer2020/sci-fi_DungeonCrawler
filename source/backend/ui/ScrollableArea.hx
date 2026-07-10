@@ -1,8 +1,5 @@
 package backend.ui;
 
-import flixel.FlxBasic;
-import backend.extensions.ExtendedCamera;
-
 class ScrollableArea extends ExtendedCamera {
     public var trackedObjects:Array<FlxBasic>=[];
     public var scrollIndex:FlxPoint=FlxPoint.weak(0, 0);

@@ -6,12 +6,6 @@ package debugging;
  *! Draggable components all reset to 0, 0 in preview when resized: Unknown
  *! Draggable components dont update internal x, y position when moved in preview: Unknown.
  */
-
-import haxe.ui.components.Label;
-import haxe.ui.dragdrop.DragManager;
-import haxe.ui.components.Image;
-import haxe.ui.events.UIEvent;
-import debugging.ui.cc.MainView;
 #if debug
 class CutsceneMaker extends FlxState {  
     public static var instance:CutsceneMaker;
@@ -21,11 +15,11 @@ class CutsceneMaker extends FlxState {
 
     public var trackedObjects:Map<String, {?obj:Dynamic, type:Class<Dynamic>,x:Float,y:Float,name:String,path:String,isNested:Bool,grpName:String}>=[];
     public var trackedUIObjects:Map<String, OneOfTwo<Image, Label>>=[];
-    var ViewPort:MainView;
+    var ViewPort:CutsceneMakerMainView;
     public function new() {
         super();
         instance = this;
-        add(ViewPort = new MainView()); //lets inline this shit
+        add(ViewPort = new CutsceneMakerMainView()); //lets inline this shit
         //make it so draggable sprites will automatically scale and fit to the current thingy.
         ViewPort.PreviewSplitter.registerEvent(UIEvent.RESIZE, function(e:UIEvent) { //this will allow us to both re-size objects, but also to fix scaling problems.
             Main.Trace(INFO, 'SPLITTER_PREVIEW: x | y | width | height\n ${ViewPort.PreviewSplitter.x} | ${ViewPort.PreviewSplitter.y} | ${ViewPort.PreviewSplitter.width} | ${ViewPort.PreviewSplitter.height}');

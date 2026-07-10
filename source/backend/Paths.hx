@@ -1,19 +1,6 @@
 package backend;
 
-import flixel.util.typeLimit.OneOfThree;
-
 class Paths {
-    //public static final paths:Map<String,String>=[
-    //    "tiles"=>"assets/tiles",
-    //    "lang"=>"assets/lang",
-    //    "item"=>"assets/items",
-    //    "weapon"=>"assets/items/weapons",
-    //    "music"=>"assets/audio/music",
-    //    "sfx"=>"assets/audio/sfx",
-    //    "cutscene"=>"assets/cutscenes",
-    //    #if(debug)"debug"=>"assets/debug"#end
-    //];
-
     public static inline function save(f:String):String return 'assets/saves/$f.sf';
 
     public static inline function data(path:String):Dynamic {return null;};

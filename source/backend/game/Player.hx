@@ -1,7 +1,5 @@
 package backend.game;
 
-import debugging.GameDebugger;
-
 class Player extends FlxSprite {
     public static function resetVars() { //only for varibles actually touched by the death system.
         overrideCameraZoom=false;
@@ -139,6 +137,10 @@ class Player extends FlxSprite {
     var weaponTextTextTarget:String="THIS IS PLACEHOLDER TEXT. THIS SHOULD NEVER BE SEEN LOL";
     override public function update(elapsed:Float) {
         super.update(elapsed);
+
+        if(testingMode) {
+            if(Main.loadedTestedState) testingMode = false;
+        }
 
         if(isWeapon){
             if(weaponTextTextTarget!='${Language.getTranslatedKey('${inventory?.selectedItem?.weaponType==NULL?"":"weapon."}${inventory?.selectedItem?.item}', null)}\n${inventory?.selectedItem?.charges}/{M}|${inventory?.selectedItem?.durability}')

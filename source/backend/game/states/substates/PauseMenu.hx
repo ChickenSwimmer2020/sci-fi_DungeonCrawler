@@ -1,7 +1,5 @@
 package backend.game.states.substates;
 
-import backend.extensions.ExtendedCamera;
-
 class PauseMenu extends FlxSubState {
     var pauseCamera:ExtendedCamera;
     var menuBG:FlxSprite;

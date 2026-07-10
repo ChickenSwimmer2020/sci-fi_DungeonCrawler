@@ -1,7 +1,5 @@
 package backend.shaders;
 
-import flixel.addons.display.FlxRuntimeShader;
-
 class ScreenShake extends FlxRuntimeShader {
     public function new(int:Float = 0.0, spd:Float = 0.0, sts:Bool = false){
         super('

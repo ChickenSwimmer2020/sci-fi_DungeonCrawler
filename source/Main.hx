@@ -1,14 +1,5 @@
 package;
 
-import backend.extensions.ExtendedText;
-import backend.Preferences;
-import flixel.util.typeLimit.NextState.InitialState;
-import haxe.PosInfos;
-import haxe.CallStack;
-import haxe.ui.Toolkit;
-import backend.extensions.ExtendedCamera;
-
-
 enum TRACETYPES {
     INFO;
     ERROR;
@@ -44,7 +35,13 @@ class Main extends openfl.display.Sprite {
         //i hope this works.
         #if (debug)
             //yeah this probably works better.
-            Application.current.window.onClose.add(()->discord!=null?discord.close():null);
+            //Application.current.window.onClose.add(()->discord!=null?discord.close():null);
+            Application.current.window.onClose.add(
+                ()->{
+                    trace('closing lol.');
+                }
+            );
+            
             Application.current.window.stage.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, (event:UncaughtErrorEvent) -> { //TODO: make this work, tis supposed to be a "crash handler".
                 var errorMessage:String = "An unexpected error has occurred:\n";
                 if (Std.isOfType(event.error, Error)) {
@@ -66,6 +63,7 @@ class Main extends openfl.display.Sprite {
         
         curLanguage = Preferences.getPref('language');
         musicPostfix = Preferences.getPref('musicPF');// saveFile.data.preferences.musicPF??"D"; //default to default if the musicPF is null.
+        controls = Preferences.getControls();
         Application.current.window.title = Language.languageInformation.get(curLanguage).get("application_title");
         
 
@@ -91,6 +89,9 @@ class Main extends openfl.display.Sprite {
         game = new flixel.FlxGame(0, 0, startState, 60, 60, false, false);
         @:privateAccess game._customSoundTray = SoundTray;
         addChild(game);
+        #if(windows)
+            
+        #end
         #if (windows||hl)
             //discord = new Discord("1487613766077120724"); //TODO: fix this.
             //discord.setActivity("IPC RICH PRESENCE TEST 01");

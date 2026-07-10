@@ -1,11 +1,5 @@
 package backend.save;
 
-import backend.game.Player;
-import haxe.io.Bytes;
-import haxe.zip.Entry;
-import haxe.io.BytesInput;
-import haxe.zip.Reader;
-
 typedef SaveFile = {
     var meta:{
         name:String,

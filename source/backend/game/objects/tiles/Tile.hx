@@ -1,8 +1,5 @@
 package backend.game.objects.tiles;
-import haxe.ui.util.Timer;
-import haxe.ui.notifications.Notification;
-import haxe.ui.notifications.NotificationManager;
-import haxe.ui.notifications.NotificationType;
+
 class Tile extends FlxSprite {
     public var checkedNeighbors:Bool=false;
     public var bulletCollisionRect:FlxRect;
@@ -72,7 +69,6 @@ class Tile extends FlxSprite {
 
 
         var k:String = '${(solid(0, -1)?"U":"")}${(solid(0, 1)?"D":"")}${(solid(-1, 0)?"L":"")}${(solid(1, 0)?"R":"")}';
-        Main.Trace(INFO, 'tile at index ${allTiles.indexOf(this)} surround key: $k');
         var suround:String = switch(k) {
             case "UDLR": "all";
             case "U": "up";
@@ -108,23 +104,20 @@ class Tile extends FlxSprite {
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
-        if(inEditorMode) {
-            if(FlxG.mouse.overlaps(this, Main.camGame) && FlxG.mouse.justPressed) {
-                Functions.wait(0.25, (_)->{
-                    if(FlxG.mouse.pressed) return; //cancel because the camera is being panned.
-                    var myNotif:Notification = new Notification();
-                    myNotif.notificationData = {
-                        title: "Info",
-                        body: 'Tile at X/Y ${x}/${y} with surround: ${animation.name}',
-                        type: NotificationType.Info,
-                        expiryMs: 3000
-                    };
-                    @:privateAccess NotificationManager.instance.pushNotification(myNotif);
-                    Timer.delay(function () {
-                        myNotif.left = 20;
-                        myNotif.top = (Screen.instance.height-20) - myNotif.height;
-                    }, 15);
-                });
+        if(inEditorMode && !Main.loadedTestedState) {
+            if(FlxG.mouse.overlaps(this, Main.camGame) && FlxG.mouse.justPressedRight) {
+                var myNotif:Notification = new Notification();
+                myNotif.notificationData = {
+                    title: "Info",
+                    body: 'Tile at X/Y ${x}/${y} with surround: ${animation.name}',
+                    type: NotificationType.Info,
+                    expiryMs: 3000
+                };
+                @:privateAccess NotificationManager.instance.pushNotification(myNotif);
+                Timer.delay(function () {
+                    myNotif.left = 20;
+                    myNotif.top = (Screen.instance.height-20) - myNotif.height;
+                }, 15);
             }
         }
     }

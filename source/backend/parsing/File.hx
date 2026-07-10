@@ -1,6 +1,5 @@
 package backend.parsing;
 
-import haxe.io.Bytes;
 #if sys
     class File {
         public static inline function saveContent(path:String, content:String):Void return sys.io.File.saveContent(path, content);

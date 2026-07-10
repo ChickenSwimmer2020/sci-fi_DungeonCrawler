@@ -1,5 +1,4 @@
 package backend;
-
 /**
  * music info, this typedef is for storing information about music tracks.
  */
@@ -33,6 +32,7 @@ typedef MusicInfo = {
      */
     var BPM:Int;
 } 
+
 /**
  * Music, this controls game music audio. for SFX, see SFX.hx.
  * @since 0.03.2
@@ -53,7 +53,7 @@ class Music {
             BPM: 0
         },
         "CellCompilation"=>{ //(Main Menu Theme)
-            path: 'assets/audio/music/CellCompilation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/CellCompilation-p.ogg',
             internalName: "CellCompilation",
             name: "Cell Compilation",
             artist: "ChickenSwimmer2020",
@@ -64,7 +64,7 @@ class Music {
             BPM: 185
         },
         "ProtocolValidation"=>{ //(Security Theme)
-            path: 'assets/audio/music/ProtocolValidation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/ProtocolValidation-p.ogg',
             internalName: "ProtocolValidation",
             name: "Protocol Validation",
             artist: "ChickenSwimmer2020",
@@ -81,7 +81,7 @@ class Music {
             BPM: 175
         },
         "SubLayers"=>{ //(Idle Theme)
-            path: 'assets/audio/music/SubLayers-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/SubLayers-p.ogg',
             internalName: "SubLayers",
             name: "SubLayers",
             artist: "ChickenSwimmer2020",
@@ -101,7 +101,7 @@ class Music {
             BPM: 109
         },
         "PowerCells"=>{ //(Exposition Theme)
-            path: 'assets/audio/music/PowerCells-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/PowerCells-p.ogg',
             internalName: "PowerCells",
             name: "PowerCells",
             artist: "ChickenSwimmer2020",
@@ -115,7 +115,7 @@ class Music {
             BPM: 100
         },
         "LithiumDegredation"=>{ //(Death Theme)
-            path: 'assets/audio/music/LithiumDegredation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/LithiumDegredation-p.ogg',
             internalName: "LithiumDegredation",
             name: "Lithium Degredation",
             artist: "ChickenSwimmer2020",
@@ -124,7 +124,7 @@ class Music {
             BPM: 100
         },
         "Miscalculation"=>{ //(Death Theme (Relocation Failed Death EasterEgg))
-            path: 'assets/audio/music/Miscalculation-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/Miscalculation-p${'.ogg'}',
             internalName: "Miscalculation",
             name: "Miscalculation",
             artist: "ChickenSwimmer2020",
@@ -135,7 +135,7 @@ class Music {
         //"colbaltenhancement"=>{ //(Low Health Theme (health under 50%))
         //},
         "HallOfHeros"=>{ //acvhiements gallery theme
-            path: 'assets/audio/music/HallOfHeros-p${#if(sys)'.ogg'#else'.mp3'#end}',
+            path: 'assets/audio/music/HallOfHeros-p.ogg',
             internalName: "HallOfHeros",
             name: "Hall of Heros",
             artist: "ChickenSwimmer2020",
@@ -164,8 +164,8 @@ class Music {
                 truePostFix = songInfo.versionInfo.AvailableVersions[0]; //the first one is always the newest.
             }
         }
-        Main.Trace(INFO, 'returned path from ResolvePostfix: ${Paths.getPath('audio/music', '$name-$truePostFix', #if(sys)'ogg'#else'mp3'#end)}');
-        return '${Paths.getPath('audio/music', '$name-$truePostFix', #if(sys)'ogg'#else'mp3'#end)}';
+        Main.Trace(INFO, 'returned path from ResolvePostfix: ${Paths.getPath('audio/music', '$name-$truePostFix', 'ogg')}');
+        return '${Paths.getPath('audio/music', '$name-$truePostFix', 'ogg')}';
     }
 
     public static function playSfx(name:String, looped:Bool=false, ?onComplete:Void->Void) {
@@ -240,6 +240,7 @@ class Music {
     static var checkingForMusicSection:Bool=false;
     static var MUSIC_targetFunctionSection:String="";
     static var MUSIC_targetFunctionSectionFunc:Void->Void;
+
     /**
      * just for updating the invidual audio objects, since i cant automatically update them from FlxG, i call Event.ENTER_FRAME in Main to update these manually.
      * @param elapsed 
@@ -327,20 +328,25 @@ class Music {
      * @param onFinish what to do when song is finished.
      */
     public static function playOnceMusic(song:String, startSection:OneOfTwo<String,Float>, endSection:OneOfTwo<String,Float>=null, onFinish:Void->Void) {
-        lastMusicVolume=FlxG.sound.music.volume;
         var songInfo:MusicInfo = musicInfos.get(song);
         if(songInfo==null){
             Main.Trace(ERROR, 'null song info for $song');
             return;
         }
-        startedChecker=false;
-        currentlyPlayingSong = songInfo.internalName; //automatically do this because i realized that i should do it.
-        FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), 1.0, false);
+        startedChecker = false;
+        currentlyPlayingSong = songInfo.internalName;
+        lastMusicVolume = FlxG.sound.music != null ? FlxG.sound.music.volume : 1.0;
+        FlxG.sound.music.stop();
+        FlxG.sound.music.destroy();
+
+        var startTime = getLoopSection(songInfo.internalName, startSection);
+        FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), lastMusicVolume, false);
+        var endTime = getLoopSection(songInfo.internalName, endSection??FlxG.sound.music.length);
+        //if (FlxG.sound.music != null) FlxG.sound.music.pause();
+        //FlxG.sound.music.play(false, startTime, endTime);
+        FlxG.sound.music.time = FlxG.sound.music.loopTime = startTime;
+        FlxG.sound.music.endTime = endTime;
         FlxG.sound.music.onComplete = onFinish;
-        FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection); //just realized this is useless :/
-        FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection);
-        FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??FlxG.sound.music.length);
-        FlxG.sound.music.volume = lastMusicVolume; //so dynamic music doesnt bug in the pause menu.
     }
 
     public static function makeSureThatSoundsArentLooping() {
@@ -373,7 +379,7 @@ class Music {
             FlxG.sound.playMusic(resolvePostfix(songInfo.internalName), 1.0, true);
             FlxG.sound.music.looped=true; //apparently this doesnt get properly set after doDeathGlitch??
             FlxG.sound.music.loopTime = getLoopSection(songInfo.internalName, startSection??0);
-            FlxG.sound.music.time = getLoopSection(songInfo.internalName, startSection??0);
+            FlxG.sound.music.time = FlxG.sound.music.loopTime;
             FlxG.sound.music.endTime = getLoopSection(songInfo.internalName, endSection??FlxG.sound.music.length);
 
             Main.Trace(INFO, 'looping music "$song" should loop: ${FlxG.sound.music.looped}');
@@ -538,29 +544,50 @@ class Music {
     }
 }
 
-class DynamicMusic {
+class DynamicMusic { //tis a little fucky, but works again!
     public static var onSectionEnd:Void->Void;
     public static var curDynamicSong:String="";
-    private static function playRandomSection(song:String) {
-        if(Music.musicInfos.get(curDynamicSong)!=null) {
-            var info:MusicInfo = Music.musicInfos.get(curDynamicSong);
-            var random:Int = FlxG.random.int(0, Lambda.count(info.sections));
-            for(choice in [for(section=>time in info.sections) section]) {
-                if(choice == [for(section=>time in info.sections) section][random]) {
-                    Main.Trace(DEBUG, 'chose $choice in dynamic music $curDynamicSong, next section should be ${[for(section=>time in info.sections) section][random+1]}');
-                    Music.playOnceMusic(song, choice, [for(section=>time in info.sections) section][random+1], ()->{
-                        if(onSectionEnd!=null) onSectionEnd();
-                        playRandomSection(song);
-                    });
-                }
-            }
+
+    private static var lastSection:String="";
+    private static function playRandomSection() {
+        var info:MusicInfo = Music.musicInfos.get(curDynamicSong);
+        if(info == null) return;
+
+        // Build (key, time) pairs and sort chronologically by actual time value
+        var sorted = [for(section=>time in info.sections) {key: section, time: time}];
+        sorted.sort((a, b) -> a.time < b.time ? -1 : (a.time > b.time ? 1 : 0));
+
+        // "random" = what plays next (a purely random pick, independent of ordering)
+        var randomIndex:Int = FlxG.random.int(0, sorted.length - 1);
+        var choice = sorted[randomIndex].key;
+        while(choice == lastSection && sorted.length > 1) { //re-iterate until we have a section that ISNT the last one we played.
+            randomIndex = FlxG.random.int(0, sorted.length - 1);
+            choice = sorted[randomIndex].key;
         }
+
+
+        // "endTime" = chronologically-next timestamp after `choice`'s own position,
+        // used ONLY to know when `choice`'s audio content ends — not what plays next.
+        var choicePosInSorted = sorted.indexOf(sorted[randomIndex]);
+        var endTime:Float = (choicePosInSorted + 1 < sorted.length)
+            ? sorted[choicePosInSorted + 1].time
+            : FlxG.sound.music.length; // last section: play to end of file
+
+        Main.Trace(DEBUG, 'chose $choice in dynamic music $curDynamicSong, ends at $endTime');
+
+        Music.playOnceMusic(curDynamicSong, choice, endTime, ()->{
+            if(onSectionEnd!=null) onSectionEnd();
+            playRandomSection();
+        });
+        lastSection = choice;
     }
     public static function playDynamicMusic(song:String, startSection:OneOfTwo<String, Float>, endSection:OneOfTwo<String, Float>) {
         Music.playOnceMusic(song, startSection, endSection, ()->{
             if(onSectionEnd!=null) onSectionEnd();
-            playRandomSection(song);
+            trace('MUSIC: Playing Random Section.');
+            playRandomSection();
         });
         Music.currentlyPlayingSong = curDynamicSong = song;
+        trace('MUSIC: Playing Dynamic Music');
     }
 }

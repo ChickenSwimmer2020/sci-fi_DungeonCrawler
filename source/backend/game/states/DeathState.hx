@@ -1,7 +1,5 @@
 package backend.game.states;
 
-import flixel.util.FlxGradient;
-
 class DeathState extends FlxState {
     private static var OFFSET:Float = 6.8;
     var labBG:FlxSprite;

@@ -14,6 +14,41 @@ start every "*" with a Capital letter, and end with a period
 ** Prototype Update {add "_MAJOR" or "_HOTFIX" as needed} [VERSION] ([GENERAL NAME])
 -->
 
+## Prototype Update 0.04.1.05 (fixes and moves)
+
+> trying to actually start fixing features and whatnot, trying to get some stuff working properly that was implemented
+> a WHILE ago lmao.
+
+* Moved all imports to Import.hx, wondering if we can put typedefs/enums in there to move some clutter away from other files
+* `TestingState` is functional again. finally.
+* `Breaker`'s audio no longer plays at half volume when first loading into a map
+* `Tile`'s info notif now only works in map editor and when right clicked
+* `Player` overrides **`testingMode`** if `Main.loadedTestingState` is true.
+* `GameState` no longer makes two instances of maps and players if loading into `TestingState`
+* Removed some "#if(sys)#else" conditionals from `Music`
+* `DynamicMusic` is fucked.
+* * Solar please fix.
+* Removed an old unused map from `Paths`
+* `Preferences` now properly loads controls from last game session
+* Changed `Popup`'s old **`throw`** error to use `Main.Trace()`
+* Renamed `source\debugging\ui\MainView.hx` to `source\debugging\ui\DebuggerMainView.hx`.
+* Client now loads controls from uPrefs file instead of defaulting every session.
+* Attempted updated to `AwardsGalleryState` to make cool transitions
+* * Solar please fix
+* `TestingState` was made functional again.
+* When moving an item in the inventory, the graphic will now load correctly.
+* `SpecialTile` no longer hides cursor while the inspect popup is visible.
+
+## Prototype Update 0.04.1.04.1 (save error type) -- ZSolarDev
+
+> Added new error type if a save fails to save correctly
+> CurruptSave
+
+* Added Error type for if a save fails to save like a save should save.
+* * yes that is gramatically correct.
+* * * no do not fact check me.
+* Changed a bunch of Reflect calls so that windows doesnt have explosive diarrhea and fucking die.
+
 ## Prototype Update 0.04.1.04 (general fixes & shiz)
 
 > Trying to make a lot of stuff actually work, mostly saves. but yeah its uhhh.

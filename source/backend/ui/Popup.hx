@@ -1,8 +1,5 @@
 package backend.ui;
 
-import backend.extensions.ExtendedCamera;
-import flixel.FlxBasic;
-
 class Popup extends FlxSubState {
     public var background:FlxUI9SliceSprite;
     public var background2:FlxUI9SliceSprite;
@@ -17,7 +14,7 @@ class Popup extends FlxSubState {
     public function new(title:String, b:String, buttons:Array<{l:String,?f:Null<Void->Void>,c:Bool}>, ?itemPreview:Bool=false, object:String, objectIsAnimated:Bool=false, frameSize:FlxPoint, ?skipIntroTween:Bool=false, colorable:Bool=false) {
         super();
         if(buttons.length>4){
-            throw Error.Custom("Value outside of bounds. (4 buttons max!)");
+            Main.Trace(ERROR, "Popup can only have a maximum of 4 buttons.");
             return;
         }
         popupCam = new ExtendedCamera(0,0,FlxG.width,FlxG.height,1);

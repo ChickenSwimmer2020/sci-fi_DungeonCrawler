@@ -1,7 +1,5 @@
 package backend.game.states;
 
-import backend.extensions.ExtendedCamera;
-
 class GameState extends FlxState {
     public static var inGame:Bool=false; //for disabling changing difficulty settings in-game.
 
@@ -18,34 +16,38 @@ class GameState extends FlxState {
     public static function beginCountdown() {
         FlxG.sound.music.volume=1;//??
         Main.Trace(DEBUG, 'sooo is this working??');
+        Music.stopMusic();
+        Music.stopLoops(true); //do i need to do this before playing?
         Music.playOnceMusic("ProtocolValidation", "mainloop", null, ()->{
             Main.Trace(DEBUG, 'makes me wonder. are you doing things when you shouldnt be?');
             Music.stopMusic();
             Music.stopLoops(true);
         });
     }
-    public function new(LoadingFromSave:Bool=false, loadLastAvailableSave:Bool = true, saveName:String="") {
+    public function new(LoadingFromSave:Bool=false, loadLastAvailableSave:Bool = true, saveName:String="", ?testingMode:Bool=false) {
         super();
         if(!generatedCameras) generateCameras();
 
-        if(!LoadingFromSave){
-            Save.createNewFile("fucker", Flags.DEFAULT_SAVEFILE, ()->{
-                MapGenerator.generateMap(100, 100, 0);
-                add(MapGenerator.createMap('depth_0'));
-            });
-            //showIntroCutscene();
-        }else{ //now properly loads the map at DEPTH that the player was at.
-            if(saveName == "") {
-                Main.Trace(ERROR, 'SaveFile name input is empty!! something went wrong.');
-                return;
-            }else{
-                Main.saveFile.readSaveFile(saveName); //should probably call this LOL.
-                var m:GameMap = Main.saveFile.getMap('depth_${Main.saveFile.data.meta.depth}');
-                if(m!=null) add(m);
-                else{
-                    Main.Trace(ERROR, 'SaveFile is missing the map at depth ${Main.saveFile.data.meta.depth}!! something went wrong.');
-                    Main.showError('MAPNULL', 'depth_${Main.saveFile.data.meta.depth}', null, haxe.CallStack.toString(haxe.CallStack.callStack()));
+        if(!testingMode){
+            if(!LoadingFromSave){
+                Save.createNewFile("fucker", Flags.DEFAULT_SAVEFILE, ()->{
+                    MapGenerator.generateMap(100, 100, 0);
+                    add(MapGenerator.createMap('depth_0'));
+                });
+                //showIntroCutscene();
+            }else{ //now properly loads the map at DEPTH that the player was at.
+                if(saveName == "") {
+                    Main.Trace(ERROR, 'SaveFile name input is empty!! something went wrong.');
                     return;
+                }else{
+                    Main.saveFile.readSaveFile(saveName); //should probably call this LOL.
+                    var m:GameMap = Main.saveFile.getMap('depth_${Main.saveFile.data.meta.depth}');
+                    if(m!=null) add(m);
+                    else{
+                        Main.Trace(ERROR, 'SaveFile is missing the map at depth ${Main.saveFile.data.meta.depth}!! something went wrong.');
+                        Main.showError('MAPNULL', 'depth_${Main.saveFile.data.meta.depth}', null, haxe.CallStack.toString(haxe.CallStack.callStack()));
+                        return;
+                    }
                 }
             }
         }

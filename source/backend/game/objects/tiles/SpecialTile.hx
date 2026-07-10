@@ -6,6 +6,7 @@ class SpecialTile extends Tile {
     public static final INTERACTION_RANGE:Int = 4; //in tiles.
     public var playerWithinRange:Bool=false;
     public var options:Map<String, Void->Void>=[];
+    public var canInteract:Bool = true;
 
     private var rightclickOptionsOpen:Bool=true;
     private static var specialTileTextHoverbox:ExtendedText;
@@ -29,24 +30,34 @@ class SpecialTile extends Tile {
             (Math.abs(Math.floor(GameMap.instance.plr?.x/GameMap.TILE_SIZE) - Math.floor(x/GameMap.TILE_SIZE))) <= INTERACTION_RANGE
             &&(Math.abs(Math.floor(GameMap.instance.plr?.y/GameMap.TILE_SIZE) - Math.floor(y/GameMap.TILE_SIZE))) <= INTERACTION_RANGE);
 
-        if(rightclickOptionsOpen){
-            if(specialTileTextHoverbox.visible) specialTileTextHoverbox.visible = false;
-            if(buttonsOverlapRect!=null && !buttonsOverlapRect.containsPoint(FlxG.mouse.getViewPosition(Main.camOther)) || FlxG.keys.justPressed.ANY){ 
-                openOptions(); //close if ANY input happens.
-            }
-        }else{
-            if(playerWithinRange && FlxG.mouse.overlaps(this, Main.camGame)) {
-                if(!specialTileTextHoverbox.visible) specialTileTextHoverbox.visible = true;
-                specialTileTextHoverbox.setPosition(FlxG.mouse.x, FlxG.mouse.y);
-                specialTileTextHoverbox.text = tileName;
-                if(FlxG.mouse.justPressedRight) {
-                    openOptions();
-                }
-            }else {
+        if(canInteract){
+            if(rightclickOptionsOpen){
                 if(specialTileTextHoverbox.visible) specialTileTextHoverbox.visible = false;
+                if(buttonsOverlapRect!=null && !buttonsOverlapRect.containsPoint(FlxG.mouse.getViewPosition(Main.camOther)) || FlxG.keys.justPressed.ANY){ 
+                    openOptions(); //close if ANY input happens.
+                }
+            }else{
+                if(playerWithinRange && FlxG.mouse.overlaps(this, Main.camGame)) {
+                    if(!specialTileTextHoverbox.visible) specialTileTextHoverbox.visible = true;
+                    specialTileTextHoverbox.setPosition(FlxG.mouse.x, FlxG.mouse.y);
+                    specialTileTextHoverbox.text = tileName;
+                    if(FlxG.mouse.justPressedRight) {
+                        openOptions();
+                    }
+                }else {
+                    if(specialTileTextHoverbox.visible) specialTileTextHoverbox.visible = false;
+                }
             }
         }
-        FlxG.mouse.visible = !specialTileTextHoverbox.visible;
+        
+        if(Main.InspectPopupVisible){
+            canInteract = false;
+            specialTileTextHoverbox.visible = false;
+            FlxG.mouse.visible = true;
+        }else{
+            canInteract = true;
+            FlxG.mouse.visible = !specialTileTextHoverbox.visible;
+        }
     }
     var buttonsOverlapRect:FlxRect;
     var buttons:Array<FlxButton>=[];

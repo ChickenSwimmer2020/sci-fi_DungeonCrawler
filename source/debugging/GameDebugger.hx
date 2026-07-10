@@ -1,8 +1,5 @@
 package debugging;
 
-import debugging.ui.CreatePopup;
-import flixel.group.FlxGroup;
-import flixel.FlxBasic;
 #if(debug)
 class GameDebugger extends FlxSubState {
     public static var isOpen:Bool=false;

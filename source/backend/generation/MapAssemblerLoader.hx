@@ -1,8 +1,5 @@
 package backend.generation;
 
-import backend.generation.MapAssembler;
-import backend.generation.MapAssembler.Structure;
-
 class MapAssemblerLoader {
     public static function loadAssambler(data:String):MapAssembler
     {

@@ -1,7 +1,4 @@
 package states;
-import flixel.addons.display.FlxBackdrop;
-import flixel.util.FlxGradient;
-#if(debug)import debugging.Debugger;#end
 
 class MainMenuState extends FlxState {
     var logo:FlxSprite;

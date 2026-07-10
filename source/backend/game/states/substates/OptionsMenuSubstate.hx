@@ -1,7 +1,5 @@
 package backend.game.states.substates;
 
-import flixel.addons.ui.interfaces.IFlxUIButton;
-
 //TODO: make this into a haxeui window.
 class OptionsMenuSubstate extends FlxUISubState{
     private var total_Controls:Int=0;

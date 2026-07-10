@@ -101,7 +101,10 @@ class Breaker extends SpecialTile {
             if(playerWithinRange && !GameState.pulledBreaker) {
                 FlxG.sound.music.volume = ((FlxMath.distanceToPoint(GameMap.instance.plr, getGraphicMidpoint()).clampf(0, 100))/100).toPositive()-0.33;
                 loopedMusicObject.volume = 1-((FlxMath.distanceToPoint(GameMap.instance.plr, getGraphicMidpoint()).clampf(0, 100))/100).toPositive()+0.33;
-            }else FlxG.sound.music.volume=1.0;
+            }else{
+                FlxG.sound.music.volume=1.0;
+                loopedMusicObject.volume = 0.0; //force the loop to not be audible when not near it, fixes a bug when first loading a map this would be at 0.5.
+            }
         }
     }
 

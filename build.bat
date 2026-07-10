@@ -87,6 +87,7 @@ IF %ERRORLEVEL% neq 0 (
     haxelib install hxcpp 4.3.2
     haxelib install haxeui-core 1.7.0
     haxelib install haxeui-flixel 1.7.0
+    haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git
 
     ECHO Libraries installed... loading autobuilder...
     CLS

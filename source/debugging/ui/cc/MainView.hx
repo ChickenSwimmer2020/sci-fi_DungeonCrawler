@@ -1,13 +1,5 @@
 package debugging.ui.cc;
 
-import haxe.ui.core.Component;
-import haxe.ui.components.Label;
-import haxe.ui.components.Image;
-import haxe.ui.notifications.NotificationType;
-import haxe.ui.notifications.NotificationManager;
-import haxe.ui.containers.SideBar;
-using haxe.ui.animation.AnimationTools;
-
 @:build(haxe.ui.macros.ComponentMacros.build("assets/views/CutsceneEditor.xml"))
 class MainView extends VBox {
     public var onObjectCreate:(type:Class<Dynamic>,x:Float,y:Float,name:String,path:String,isNested:Bool,grpName:String)->Void;

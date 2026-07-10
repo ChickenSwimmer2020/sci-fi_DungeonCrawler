@@ -1,8 +1,5 @@
 package states;
 
-import backend.game.cutscenes.Cutscene;
-
-
 class GameIntroState extends FlxState {
     public function new() {
         super();

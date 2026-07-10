@@ -1,8 +1,5 @@
 package backend.game;
 
-import backend.shaders.Invert;
-import backend.game.states.DeathState;
-
 class GameMap extends FlxTypedGroup<Dynamic> {
     public static function reset() {
         isDying=false;
@@ -103,12 +100,16 @@ class GameMap extends FlxTypedGroup<Dynamic> {
             //add(testEnemy);
             //testEnemy.camera=Main.camGame;
 
-            //add(generateObjectViaTile({ //also broken :/
-            //    type: "",
-            //    collides: true,
-            //    special: true,
-            //    specialType: BREAKER
-            //}, Math.floor((playerSpawnPoint.x/TILE_SIZE) + 1), Math.floor((playerSpawnPoint.y/TILE_SIZE))));
+            add(generateObjectViaTile({
+                pos: {
+                    row: 5,
+                    colum: 0
+                },
+                set: "",
+                collides: true,
+                isSpecial: true,
+                specialType: BREAKER
+            }));
             
             add(new Pickup(playerSpawnPoint.x, playerSpawnPoint.y-50, {type: RANGED,item: "pistol",damage: []}));
             add(new Pickup(playerSpawnPoint.x+50, playerSpawnPoint.y-50, {type: RANGED,item: "railgun",damage: []}));

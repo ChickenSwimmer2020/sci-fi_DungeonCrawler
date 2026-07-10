@@ -104,7 +104,7 @@ class MapGenerator {
         }
 
         var map:GameMap = new GameMap(hasMap?mf??save.maps[index]:null);
-        map.generate(false);
+        map.generate(ds);
         return map;
     }
 

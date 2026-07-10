@@ -1,7 +1,5 @@
 package backend;
 
-import openfl.display.Sprite;
-
 class SoundTray extends FlxSoundTray {
     var _timeText:TextField;
 	var record:Sprite;

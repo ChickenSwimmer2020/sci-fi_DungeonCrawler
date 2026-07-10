@@ -1,9 +1,5 @@
 package backend;
 
-import flixel.addons.display.FlxRuntimeShader;
-import openfl.display.ShaderParameter;
-import backend.shaders.Invert;
-
 class ShaderCache extends FlxState{
     var sprites:Array<FlxSprite>=[];
     var shaders:Array<OneOfTwo<FlxRuntimeShader, flixel.system.FlxAssets.FlxShader>> = [];
@@ -13,22 +9,24 @@ class ShaderCache extends FlxState{
         ["useless."],                   //invert
         [0.25, 60.0],                   //railfire
         [0.25, 60.0, false],            //screenshake
-        [0.75, 120.0, true]              //static
+        [0.75, 120.0, true],            //static
+        [2.0]                             //distort
     ];
     public function new() {
         super();
 
-        add(new ExtendedText(((FlxG.width/2)-(200)), 0, 400, "Preloading shaders, please wait.", 24, true));
+        add(new ExtendedText(((FlxG.width/2)-(200)), 0, 500, "Preloading shaders, please wait.", 24, true));
 
-        for(i in 0...4) {
-            var testSprite:FlxSprite = new FlxSprite(0+(37*i), ((i%(FlxG.width/(25)))+(20*i))).loadGraphic(Paths.image('items/images', "DEBUGCONSUMABLE"));
+        for(i in 0...5) {
+            var testSprite:FlxSprite = new FlxSprite(0+(37*i), ((i%(FlxG.width/(25)))+(20*i))).loadGraphic(Paths.image('ui', "shaderTestSprite"));
             add(testSprite);
             sprites.push(testSprite);
             shaders.push([ //love that i have to do it like this.
                 new Invert(),
                 new RailFire(shaderProps[1][0], shaderProps[1][1]),
                 new ScreenShake(shaderProps[2][0], shaderProps[2][1], shaderProps[2][2]),
-                new ScreenShake(shaderProps[3][0], shaderProps[3][1], shaderProps[3][2]) //static
+                new ScreenShake(shaderProps[3][0], shaderProps[3][1], shaderProps[3][2]), //static
+                new Distort(shaderProps[4][0]) //static
             ][i]);
             testSprite.shader = shaders[i];
         }
@@ -48,8 +46,10 @@ class ShaderCache extends FlxState{
         for(shader in shaders) {
             if(Std.isOfType(shader, FlxRuntimeShader)) { //ignore FlxShader, because the only one that uses it DOESNT have iTime
                 var shad:FlxRuntimeShader = cast(shader);
-                shad.setFloat("iTime", shaderTime);
-                trace(shaderTime);
+                if(shad.getFloat('iTime') != null){
+                    shad.setFloat("iTime", shaderTime);
+                    trace(shaderTime);
+                }
             }
         }
     }

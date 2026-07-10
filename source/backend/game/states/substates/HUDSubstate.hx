@@ -1,7 +1,5 @@
 package backend.game.states.substates;
 
-import debugging.GameDebugger;
-
 enum abstract ItemType(String) from String to String {
     var ITEM="ITEM";
     var CONSUMABLE="CONSUMABLE";
@@ -385,6 +383,10 @@ class HUDSubstate extends FlxSubState {
                 if(FileSystem.exists(Paths.image('ui/items', Main.curHeldItem.item))) {
                     Main.heldItemGraphic.loadGraphic(Paths.image('ui/items', Main.curHeldItem.item));
                     Main.heldItemGraphic.setGraphicSize(32, 32);
+                    Main.heldItemGraphic.updateHitbox();
+                }else if(FileSystem.exists(Paths.image('items/images', Main.curHeldItem.item))){
+                    Main.heldItemGraphic.loadGraphic(Paths.image('items/images', Main.curHeldItem.item));
+                    Main.heldItemGraphic.setGraphicSize(-1, 32);
                     Main.heldItemGraphic.updateHitbox();
                 }else Main.heldItemGraphic.makeGraphic(16, 16, 0xFFFF00FF);
                 Main.heldItemGraphic.camera=Main.camHUD;

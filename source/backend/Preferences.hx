@@ -1,7 +1,5 @@
 package backend;
 
-import haxe.DynamicAccess;
-
 class Preferences {
     public static var prefs:Map<String, Dynamic> = []; //for proper prefs storage
 
@@ -15,6 +13,17 @@ class Preferences {
         writePrefsFile(); //auto do this.
 
         return true;
+    }
+    public static function getControls():Map<String, Array<FlxKey>> {
+        var controlsReturn:Map<String, Array<FlxKey>> = [];
+
+        for(object in (getPref('controls'):Array<Dynamic>)) {
+            var keys:Array<FlxKey> = []; 
+            for(k in (Reflect.getProperty(object, 'keys'):Array<Int>)) keys.push(Functions.FlxKeyFromInt(k));
+            controlsReturn.set(Reflect.getProperty(object, 'c'), keys);
+        }
+        Main.Trace(INFO, 'got $controlsReturn controls setup from uPrefs file!');
+        return controlsReturn;
     }
 
 

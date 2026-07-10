@@ -1,5 +1,5 @@
 package;
-import openfl.filesystem.File as OpenFLFile;
+
 class Flags {
     public static final DEFAULT_PREFERENCES_FILE:String = '{
     "autoPause": true,

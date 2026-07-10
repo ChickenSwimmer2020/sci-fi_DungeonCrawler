@@ -6,6 +6,7 @@ enum abstract Lang(String) from String to String {
     var ES="ES"; //spanish
 }
 
+
 class Language {
     public static final languageInformation:Map<String,Dynamic>=[
         "EN_US"=>[

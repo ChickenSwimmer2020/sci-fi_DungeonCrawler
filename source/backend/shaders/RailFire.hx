@@ -1,7 +1,5 @@
 package backend.shaders;
 
-import flixel.addons.display.FlxRuntimeShader;
-
 class RailFire extends FlxRuntimeShader {
     public function new(ibnt:Float = 0.0, spd:Float = 0.0){
         super('

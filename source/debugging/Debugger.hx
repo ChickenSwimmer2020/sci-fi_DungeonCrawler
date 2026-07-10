@@ -1,14 +1,5 @@
 package debugging;
 
-import lime.text.Font;
-import haxe.ui.containers.menus.MenuCheckBox;
-import haxe.ui.notifications.NotificationType;
-import haxe.ui.notifications.NotificationManager;
-import haxe.ui.containers.menus.MenuItem;
-import haxe.ui.containers.menus.MenuSeparator;
-import haxe.ui.containers.windows.WindowManager;
-import debugging.ui.MainView.DebuggerMainView;
-
 /**
  * every. single. debugger.
  * minus of course: CutsceneMaker, GameDebugger

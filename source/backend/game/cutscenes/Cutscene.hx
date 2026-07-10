@@ -1,7 +1,5 @@
 package backend.game.cutscenes;
 
-import backend.game.cutscenes.CObject;
-
 /**
  * Keyframe-based cutscene runtime.
  * Can run as a substate (full test) OR be embedded directly into the editor

@@ -1,6 +1,5 @@
 package debugging;
 
-import backend.game.Player;
 #if (debug)
 class MapDebugger extends FlxUIState{
     var mainView:MapEditorView;

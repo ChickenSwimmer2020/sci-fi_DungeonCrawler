@@ -1,6 +1,5 @@
 package debugging.ui;
 
-import backend.game.Player;
 #if debug
 class CreatePopup extends Popup {
     var textInput:FlxUIInputText;
