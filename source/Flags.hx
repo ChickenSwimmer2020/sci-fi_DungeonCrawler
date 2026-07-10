@@ -34,6 +34,7 @@ class Flags {
         "IOERROR"=>["error.nullio.title", "error.nullio.message"],
         "RENDERFAILURE"=>["error.renderfailure.title", "error.renderfailure.message"],
         "SAVENOTCACHED"=>["error.cachefault.title", "error.cachefault.message"],
+        "CORRUPTSAVE"=>["error.corruptsave.title", "error.corruptsave.message"],
         "MISSINGLANG"=>["error.languagemissing.title", "error.languagemissing.message"],
         //"MISSINGMAP"=>["error.mapnotfound", "error.mapnotfound.message"], //!CUT CONTENT (removed in 0.02)
         "NULLITEM"=>["error.nullitem.title", "error.nullitem.message"],

@@ -128,25 +128,27 @@ class Save {
     public static function buildIni(dat:Dynamic):String {
         var buf = new StringBuf();
         buf.add('[ROOT]\n');
-        buf.add('name="${dat.meta.name}"\n');
-        buf.add('difficulty="${dat.meta.difficulty}"\n');
-        buf.add('depth=${dat.level.depth}\n');
-        buf.add('level=${dat.level.level}\n');
-        buf.add('money=${dat.level.money}\n');
-        buf.add('playTime=${dat.meta.playTime.H},${dat.meta.playTime.M},${dat.meta.playTime.S};\n');
+        buf.add('name="${dat?.meta?.name}"\n');
+        buf.add('difficulty="${dat?.meta?.difficulty}"\n');
+        buf.add('depth=${dat?.level?.depth}\n');
+        buf.add('level=${dat?.level?.level}\n');
+        buf.add('money=${dat?.level?.money}\n');
+        buf.add('playTime=${dat?.meta?.playTime.H},${dat?.meta?.playTime.M},${dat?.meta?.playTime.S};\n');
 
         buf.add('\n[PLAYERSTATE]\n');
-        buf.add('health=${dat.playerState.health}\n');
-        buf.add('stamina=${dat.playerState.stamina}\n');
-        buf.add('xp=${dat.playerState.xp}\n');
-        buf.add('posX=${dat.playerState.position.x}\n');
-        buf.add('posY=${dat.playerState.position.y}\n');
-        buf.add('curLevel=${dat.playerState.position.curLevel}\n'); //WHOOPS I FORGOT THIS TOTALLY OH MY GOD.
+        buf.add('health=${dat?.playerState?.health}\n');
+        buf.add('stamina=${dat?.playerState?.stamina}\n');
+        buf.add('xp=${dat?.playerState?.xp}\n');
+        buf.add('posX=${dat?.playerState?.position?.x}\n');
+        buf.add('posY=${dat?.playerState?.position?.y}\n');
+        buf.add('curLevel=${dat?.playerState?.position?.curLevel}\n'); //WHOOPS I FORGOT THIS TOTALLY OH MY GOD.
         return buf.toString();
     }
 
     public static function buildMapsJson(dat:Dynamic):Dynamic {
         var obj:Dynamic = {};
+        if (dat == null) return obj;
+        if (dat.maps == null) return obj;
         for(map in (dat.maps:Array<Dynamic>)) {
             Reflect.setProperty(obj, Reflect.getProperty(map, "name"), map); // just mark existence, same as how parseMaps reads it
         }
@@ -155,6 +157,7 @@ class Save {
 
     public static function buildInvXml(dat:Dynamic):String {
         var buf = new StringBuf();
+        if (dat == null) return buf.toString();
         buf.add('<inventory slots="${(dat.inventory:Array<Dynamic>).length}">\n');
         for(i in 0...(dat.inventory:Array<Dynamic>).length) {
             var slot = (dat.inventory:Array<Dynamic>)[i];
@@ -481,6 +484,10 @@ class SaveReader { //okay, its a zip file. fine.
 
     public static function getSaveFile(file:String):SaveFile {
         if(FileSystem.exists(Paths.save(file))) {
+            if (File.getContent(Paths.save(file)) == "TEST STRING, this gets overwritten lol.") {
+                Main.showError("CORRUPTSAVE", file, null, "");
+                return null;
+            }
             Main.FILE = file; //should work?
             var out:SaveFile = Flags.DEFAULT_SAVEFILE;
             var r:Reader = new Reader(new BytesInput(File.getBytes(Paths.save(file))));

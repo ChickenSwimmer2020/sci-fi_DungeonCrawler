@@ -38,7 +38,6 @@ final class Functions {
      */
     public static function checkPressedSafe(keys:Array<FlxKey>):Bool {
         var h:Array<FlxKey>=[];
-        trace(keys);
         for(key in keys){
             if(key == NONE) continue;
             else h.push(key);
@@ -394,8 +393,8 @@ final class Additions{
     //actual objects.
     public static function center(spr:FlxSprite, on:OneOfTwo<FlxObject, ExtendedCamera>, ?offs:FlxPoint):FlxSprite {
         if(offs==null) offs=FlxPoint.weak(0, 0);
-        spr.x = (on.x+on.width/2-spr.width/2)+(offs.x);
-        spr.y = (on.y+on.height/2-spr.height/2)+(offs.y);
+        spr.x = (Reflect.getProperty(on, "x")+Reflect.getProperty(on, "width")/2-spr.width/2)+(offs.x);
+        spr.y = (Reflect.getProperty(on, "y")+Reflect.getProperty(on, "height")/2-spr.height/2)+(offs.y);
         return spr;
     }
 }

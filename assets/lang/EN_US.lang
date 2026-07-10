@@ -312,7 +312,11 @@
         },
         "cachefault": {
             "title": "Save Cache Fault",
-            "message": "The save file \"{OBJ}\" could not be loaded as it was not found in memory.\nTo fix this error, please plase the .SAV in assets/saves\nand restart the game.{STK}"
+            "message": "The save file \"{OBJ}\" could not be loaded as it was not found in memory.\nTo fix this error, please place the .sf in assets/saves\nand restart the game.{STK}"
+        },
+        "corruptsave": {
+            "title": "Save Corrupted",
+            "message": "The save file \"{OBJ}\" didn't finish saving and cannot be loaded.{STK}"
         },
         "languagemissing": {
             "title": "Language Fault",

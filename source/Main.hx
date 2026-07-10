@@ -37,7 +37,7 @@ class Main extends openfl.display.Sprite {
 
     //VARIBLES
     public function new() {
-        super();    
+        super();
         Toolkit.init(); //init haxe-ui, this is important i think.
         Toolkit.theme = "dark";
         FlxSprite.defaultAntialiasing=false;
