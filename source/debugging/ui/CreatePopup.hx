@@ -15,6 +15,7 @@ class CreatePopup extends Popup {
     var scrolling:ScrollableArea;
     var hintText:ExtendedText;
     public function new() {
+        //* REMINDER. DONT MAKE WEAPONS WITHOUT THE CORRECT SETTINGS OR THE GAME WILL CRASH.
         super(Language.getTranslatedKey("game.debugger.create.pickup.title", null), "", [], false, "", false, FlxPoint.weak(0, 0), true);
         body.visible=body.active=false; //no body text, because everything is getting moved around n shtuff.
         for(butt in butts) butt.visible=butt.active=false; //also no buttons, because we need to manually make the button.

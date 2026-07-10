@@ -23,22 +23,24 @@ class GameMap extends FlxTypedGroup<Dynamic> {
         if(file!=null) tiles = file.tiles;
     }
     var playerSpawnPoint:FlxPoint=new FlxPoint();
+    var targetSparnLocation:FlxPoint = FlxPoint.weak();
 
     var gameFlash:FlxSprite;
     public function generate(testingState:Bool=false) {
-        if(!GameState.generatedCameras) GameState.generateCameras(); //force gameState to regenerate cameras before anything. because the game likes to throw a fit if these cameras dont exist.
+        if(!GameState.instance.generatedCameras) GameState.generateCameras(); //force gameState to regenerate cameras before anything. because the game likes to throw a fit if these cameras dont exist.
         for(tile in tiles){
             add(generateObjectViaTile(tile));
         }
 
-        
-
-
         GameState.inGame=!testingState;
         add(plr = new Player());
-        plr.setPosition(playerSpawnPoint.x, playerSpawnPoint.y);
+        plr.setPosition(targetSparnLocation.x, targetSparnLocation.y);
         plr.camera = Main.camGame;
         plr.testingMode = testingState;
+        plr.onFinishLoading = ()->{
+            Player.loadFromFile(); //load all the shtuff from the current save file.
+        };
+
         Player.onDeath = ()->{
             Conductor.bopCamera=false;
             isDying=true;
@@ -145,6 +147,13 @@ class GameMap extends FlxTypedGroup<Dynamic> {
                         tileToBeAdded.color=0x7100FF00;
                     #end
                     playerSpawnPoint=FlxPoint.weak(tileToBeAdded.x, tileToBeAdded.y);
+                    
+                    //if the player save file dictates a different position, go there instead.
+                    if(Main.saveFile.data.playerState.position.x == -1 || Main.saveFile.data.playerState.position.y == -1) {
+                        targetSparnLocation = playerSpawnPoint;
+                    }else{
+                        targetSparnLocation = FlxPoint.weak(Main.saveFile.data.playerState.position.x, Main.saveFile.data.playerState.position.y);
+                    }
                     //createElevator() 
                 case WALKABLEAREA: #if (debug) tileToBeAdded.color = 0xFF00FF00; #end
                 case BREAKER:

@@ -27,6 +27,14 @@ start every "*" with a Capital letter, and end with a period
 * Truss animation on `AwardsGalleryState` is now functional
 * Shelf animation on `AwardsGalleryState` is not functional, I can't figure it out for the life of me and it's 3:25 am and im tired.
 
+> ChickenSwimmer2020's changes
+
+* Building without the **`-debug`** argument actually functions now.
+* Simplfied assets importing
+* Fixed a single bug on solar's end that made his program crash when trying to play LITERALLY ANY default flixel sfx.
+* Fixed pulling grig.audio
+* Reloading a save after closing one doesnt cause cameras to die anymore.
+
 ## Prototype Update 0.04.1.05 (fixes and moves)
 
 > trying to actually start fixing features and whatnot, trying to get some stuff working properly that was implemented

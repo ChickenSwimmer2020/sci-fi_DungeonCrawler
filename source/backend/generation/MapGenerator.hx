@@ -74,7 +74,7 @@ class MapGenerator {
         toMapFile.tiles = outputTiles;
         if(!r){
             Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${(Main.saveFile.get("", "maps"):Array<MapFile>).length}');
-            Main.saveFile.set("", "maps", (Main.saveFile.get("", "maps"):Array<MapFile>).combine([toMapFile])); //boom.
+            Main.saveFile.set("", "maps", (Main.saveFile.get("", "maps"):Array<MapFile>).concat([toMapFile])); //boom.
             Main.Trace(DEBUG, '${Main.FILE}\'s maps array: ${(Main.saveFile.get("", "maps"):Array<MapFile>).length} after adding map ${toMapFile.name}');
         }
         return toMapFile;

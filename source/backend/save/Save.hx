@@ -35,7 +35,7 @@ class Save {
         //data = SaveReader.getSaveFile(Flags.DEFAULT_SAVE);
     }
 
-    public static inline function createNewFile(name:String, ?data:SaveFile, onComplete:Void->Void):Bool return SaveReader.createSave(name, data, onComplete);
+    public static inline function createNewFile(name:String, ?d:SaveFile, onComplete:Void->Void):Bool return SaveReader.createSave(name, d, onComplete);
 
     public function readSaveFile(name:String):Bool {
         data = SaveReader.getSaveFile(name);
@@ -157,7 +157,7 @@ class Save {
             var slot = (dat.inventory:Array<Dynamic>)[i];
             if(slot is String) continue; // covers "EMPTY" and any other string placeholders
             var item:Item = cast slot;
-            buf.add('  <item name="${item.item}" x="${i % 10}" y="${Math.floor(i / 10)}" />\n');
+            buf.add('  <item name="${item.item}" x="${i % 10}" y="${Math.floor(i / 10)}" durability="${item.durability}" charges="${item.charges}"/>\n');
         }
         buf.add('</inventory>');
         return buf.toString();
@@ -588,14 +588,12 @@ class SaveReader { //okay, its a zip file. fine.
                     };
                     var itemName:String = node.get('name');
                     returnItem.item = itemName;
-                    if(Paths.weaponExists(itemName)) {
-                        returnItem = WeaponParser.buildWeaponItemPointer(WeaponParser.parse(Paths.weapon(itemName)));
-                    }else{
-                        var total:Int = (node.get('x').toInt()+(node.get('y').toInt()*10)).floor();
-                        out[total] = returnItem;
-                    }
+                    if(Paths.weaponExists(itemName)) returnItem = WeaponParser.buildWeaponItemPointer(WeaponParser.parse(itemName));
+
+                    var a:Int = (node.get('x').toInt()+(node.get('y').toInt()*10)).floor();
+                    out[a] = returnItem;
                     
-                    Main.Trace(DEBUG, 'ITEM: $node');
+                    Main.Trace(DEBUG, 'ITEM: $node output index: ${(node.get('x').toInt()+(node.get('y').toInt()*10)).floor()}');
                 default: Main.Trace(INFO, node);
             }
         }

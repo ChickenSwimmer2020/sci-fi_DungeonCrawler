@@ -11,14 +11,14 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
     private var healthBar:FlxUIBar;
     private var staminaBar:FlxUIBar;
     private var xpBar:FlxUIBar;
-    public function new(x:Float,y:Float,cam:FlxCamera) {
+    public function new(x:Float,y:Float,cam:FlxCamera,fileName:String) {
         super(x,y);
 
         BG=new FlxUI9SliceSprite(0, 0, Paths.image('ui', 'chrome_light'), new Rectangle(0, 0, 380, 100), [5,5,8,8]);
         CUTOUT=new FlxUI9SliceSprite(5, 5, Paths.image('ui', 'chrome_inset'), new Rectangle(0, 0, 90, 90), [5,5,8,8]);
         text=new FlxUIText(100, 5, BG.width-105, '{NAME} - {DIFFICULTY}\n{H}:{M}:{S} || {DEPTH}\n{LEVEL}', 14, true);
         loadButton=new FlxUIButton(BG.width-85, BG.height-25, Language.getTranslatedKey("menu.save.loadsave", loadButton), ()->{
-            Main.FILE=text.text.split('-')[0].trim(); //should work?
+            Main.FILE=fileName; //should work?
             Main.Trace(INFO, 'main file: ${Main.FILE}');
             Preferences.setPref("lastLoadedSave", Main.FILE); //boom.
             FlxG.switchState(()->new GameState(true, false, Main.FILE)); //should work?
@@ -28,16 +28,16 @@ class SaveBox extends FlxTypedSpriteGroup<FlxSprite> {
         loadButton.autoCenterLabel();
         deleteButton=new FlxUIButton(BG.width-105, BG.height-25, "", ()->{
             if(FlxG.keys.pressed.SHIFT){ //just straight up delete the save if you hold shift.
-                onSaveDestroyed(text.text.split('-')[0].trim());
-                Save.deleteSave(text.text.split('-')[0].trim());
-                Main.Trace(INFO, 'attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${Save.exists(text.text.split('-')[0].trim())} (this should be null.)');
+                onSaveDestroyed(fileName);
+                Save.deleteSave(fileName);
+                Main.Trace(INFO, 'attempted to get save file: $fileName and got: ${Save.exists(fileName)} (this should be null.)');
             }else{
-                requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>text.text.split('-')[0].trim()]), [
+                requestSubstateOpen(Language.getTranslatedKey("menu.save.delete.popup.title", null), Language.getTranslatedKey("menu.save.delete.popup.message", null, ["SVE"=>fileName]), [
                     {l:Language.getTranslatedKey("menu.save.delete.popup.options.cancel", null), c:true},
                     {l:Language.getTranslatedKey("menu.save.delete.popup.options.delete", null), f: ()->{
-                        onSaveDestroyed(text.text.split('-')[0].trim());
-                        Save.deleteSave(text.text.split('-')[0].trim());
-                        Main.Trace(INFO, 'attempted to get save file: ${text.text.split('-')[0].trim()} and got: ${Save.exists(text.text.split('-')[0].trim())} (this should be null.)');
+                        onSaveDestroyed(fileName);
+                        Save.deleteSave(fileName);
+                        Main.Trace(INFO, 'attempted to get save file: $fileName and got: ${Save.exists(fileName)} (this should be null.)');
                     }, c:true}
                 ]);
             }
@@ -110,7 +110,7 @@ class LoadGameSubstate extends FlxUISubState { //doing this now because i wanna 
         for(save in Main.saveFiles) {
             if(Save.isValid(save)) {
                 #if(debug) Main.Trace(INFO, 'valid save file, ${save} loading...'); #end
-                var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam);
+                var box:SaveBox = new SaveBox(5, (5+(105*loadedSaves)), scrollCam, save);
                 add(box);
                 saveBoxes.push(box);
                 box.setData(SaveReader.getSaveFile(save));

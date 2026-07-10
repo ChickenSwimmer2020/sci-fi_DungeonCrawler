@@ -17,6 +17,9 @@ class Player extends FlxSprite {
     public var difficulty:String="MISSING DIFFICULTY!!(ERROR)";
     public var depth:Int=0;
     public var money:Int=0;
+    public var currentMap:String = "";
+
+    public var onFinishLoading:Void->Void;
 
     public static var overrideCameraZoom:Bool=false;
 
@@ -117,6 +120,41 @@ class Player extends FlxSprite {
         velocity.set();
     }
 
+    public static function loadFromFile() {
+        Player.instance.name = Main.saveFile.data.meta.name;
+        Player.instance.difficulty = Main.saveFile.data.meta.difficulty;
+        Player.instance.depth = Main.saveFile.data.meta.depth;
+        Player.instance.level = Main.saveFile.data.meta.level;
+        Player.instance.money = Main.saveFile.data.meta.money;
+
+        Player.instance.health = Main.saveFile.data.playerState.health;
+        Player.instance.stamina = Main.saveFile.data.playerState.stamina;
+        Player.instance.xp = Main.saveFile.data.playerState.xp;
+        Player.instance.setPosition(Main.saveFile.data.playerState.position.x, Main.saveFile.data.playerState.position.y);
+        Player.instance.currentMap = Main.saveFile.data.playerState.position.curLevel;
+        Player.instance.inventory.inventory = Main.saveFile.data.inventory;
+    }
+
+    public static function save() {
+        Main.saveFile.data.meta.playTime = {H: 6, M: 9, S: 420}; //placeholder
+        Main.saveFile.data.meta.name = Player.instance.name;
+        Main.saveFile.data.meta.difficulty = Player.instance.difficulty;
+        Main.saveFile.data.meta.depth = Player.instance.depth;
+        Main.saveFile.data.meta.level = Player.instance.level;
+        Main.saveFile.data.meta.money = Player.instance.money;
+        Main.saveFile.data.playerState.health = Player.instance.health;
+        Main.saveFile.data.playerState.stamina = Player.instance.stamina;
+        Main.saveFile.data.playerState.xp = Player.instance.xp;
+        Main.saveFile.data.playerState.position = {
+            x: Player.instance.getPosition().x,
+            y: Player.instance.getPosition().y,
+            curLevel: Player.instance.currentMap
+        };
+        Main.saveFile.data.inventory = Player.instance.inventory.inventory;
+
+        Main.Trace(INFO, 'saved ${Main.FILE} correctly? ${Main.saveFile.flush()}');
+    }
+
     #if (debug)
         function addWatchObjects() {
             FlxG.watch.addQuick("camera zoom: ", Main.camGame?.zoom); //i forgot i can do this!
@@ -135,13 +173,16 @@ class Player extends FlxSprite {
     public var weaponKickback:FlxPoint=FlxPoint.weak(0, 0);
     var isWeapon:Bool=false;
     var weaponTextTextTarget:String="THIS IS PLACEHOLDER TEXT. THIS SHOULD NEVER BE SEEN LOL";
+    var ranOnLoadFunction:Bool=false;
+
+    var reloadCamScrollSystem:Bool = true;
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
         #if debug
-        if(testingMode) {
-            if(Main.loadedTestedState) testingMode = false;
-        }
+            if(testingMode) {
+                if(Main.loadedTestedState) testingMode = false;
+            }
         #end
 
         if(isWeapon){
@@ -150,8 +191,11 @@ class Player extends FlxSprite {
         }
         if(Main.camGame!=null){
             if(mousePosition==null) mousePosition = new FlxPoint(0, 0); //JUST in-case.
-            //Hours wasted trying to fix `null acces .x`: 8
-            FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0); //! SOLAR PLEASE FIX THIS STUPID GOD-DAMN ERROR I CANT FOR THE LIFE OF ME GET IT.
+            if(reloadCamScrollSystem){
+                //Hours wasted trying to fix `null acces .x`: 8
+                FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0); //! SOLAR PLEASE FIX THIS STUPID GOD-DAMN ERROR I CANT FOR THE LIFE OF ME GET IT.
+                reloadCamScrollSystem = false;
+            }
         }
         //lerp velocity to mimic friction (THE MIMICCCCCCCCCCC)
         if(weaponKickback.x > 0 || weaponKickback.x < 0) weaponKickback.x=FlxMath.lerp(0, weaponKickback.x, Math.exp(-elapsed * 3.126 * 4 * 1));
@@ -205,6 +249,12 @@ class Player extends FlxSprite {
                 weapon.angle = Math.atan2(mousePosition.y-weapon.y, mousePosition.x-weapon.x) * 180 / Math.PI;
             }
         }
+
+        if(((weapon!=null && inventory!=null) && !ranOnLoadFunction) && onFinishLoading!=null){
+            onFinishLoading();
+            ranOnLoadFunction = true;
+        }
+        
         if(!testingMode) Main.camGame.follow(this, FlxCameraFollowStyle.LOCKON, 0.25);
 
         #if(debug)
@@ -217,7 +267,8 @@ class Player extends FlxSprite {
             }
         #end
 
-        if(health==0#if(debug) || FlxG.keys.justPressed.SEMICOLON#end){
+        if(health==0#if(debug) || FlxG.keys.justPressed.BACKSLASH#end){
+            health=-1; //so it only calls once.
             onDeath();
         }
 

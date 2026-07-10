@@ -1,5 +1,6 @@
 # TODO
 
+
 * awards menu
 * make settings not stutter on window open
 * swap all game uis minus in-game to HaxeUI
@@ -26,3 +27,7 @@
 * when clicked, flash the object corrispondant on the cutscene preview. [MainView.hx](source/debugging/ui/cc/MainView.hx#L143) {half done}
 * button that opens the properties sidebar [MainView.hx](source/debugging/ui/cc/MainView.hx#L144)
 * find way to only apply to the header. [MainView.hx](source/debugging/ui/cc/MainView.hx#L145)
+
+## BUGS
+
+* Looped music doesnt loop

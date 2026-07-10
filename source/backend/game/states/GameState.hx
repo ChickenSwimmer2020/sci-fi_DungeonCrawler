@@ -1,9 +1,10 @@
 package backend.game.states;
 
 class GameState extends FlxState {
+    public static var instance:GameState;
     public static var inGame:Bool=false; //for disabling changing difficulty settings in-game.
 
-    public static var generatedCameras:Bool=false;
+    public var generatedCameras:Bool=false;
     public static var securitySystemActivated:Bool=false;
     public static var timeLeftUntilSecuritySystemActive:Float=0;
     public static var pulledBreaker(default, set):Bool=false;
@@ -26,7 +27,8 @@ class GameState extends FlxState {
     }
     public function new(LoadingFromSave:Bool=false, loadLastAvailableSave:Bool = true, saveName:String="", ?testingMode:Bool=false) {
         super();
-        if(!generatedCameras) generateCameras();
+        instance = this;
+        if(!GameState.instance.generatedCameras) generateCameras();
 
         if(!testingMode){
             if(!LoadingFromSave){
@@ -56,18 +58,8 @@ class GameState extends FlxState {
     }
 
     public static function generateCameras() {
-        if(Main.camGame!=null){
-            Main.camGame.destroy();
-            Main.camGame = null;
-        }
-        if(Main.camHUD!=null) {
-            Main.camHUD.destroy();
-            Main.camHUD = null;
-        }
-        if(Main.camOther!=null) {
-            Main.camOther.destroy();
-            Main.camOther = null;
-        }   
+        degenerateCameras();
+        
         Main.camGame = new ExtendedCamera(0, 0, FlxG.width, FlxG.height, 1);
         Main.camGame.bgColor=0x00FFFFFF;
         Main.camGame.filters=[];
@@ -82,7 +74,7 @@ class GameState extends FlxState {
         Main.camOther.bgColor=0x00FFFFFF;
         Main.camOther.filters=[];
         Main.addCameraToGame(Main.camOther, "other");
-        generatedCameras=true;
+        GameState.instance.generatedCameras=true;
     }
 
     public static function degenerateCameras() {
@@ -98,7 +90,7 @@ class GameState extends FlxState {
             Main.camOther.destroy();
             Main.camOther = null;
         }
-        generatedCameras=false;
+        GameState.instance.generatedCameras=false;
     }
 
     //reset all the static varibles n shit.

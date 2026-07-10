@@ -24,10 +24,10 @@ class GameIntroState extends FlxState {
                         money: 0
                     },
                     playerState:{
-                        health: 0,
-                        stamina: 0,
+                        health: 100,
+                        stamina: 100,
                         xp: 0,
-                        position:{x:0, y:0, curLevel: ""},
+                        position:{x:-1, y:-1, curLevel: ""},
                     },
                     inventory: [],
                     maps: [],

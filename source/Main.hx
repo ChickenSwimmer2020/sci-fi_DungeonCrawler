@@ -246,15 +246,14 @@ class Main extends openfl.display.Sprite {
 
     //hehe we can store static varibles here to be accessed EVERYWHERE.
     public static function Trace(type:TRACETYPES, message:Dynamic, ?p:PosInfos) {
-        var tracefunc = (#if html5 trace #else Sys.println #end);
         switch(type) {
-            case INFO:  tracefunc('\x1b[34m[- INFO -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
-            case ERROR: tracefunc('\033[48;2;255;0;0m[- ERROR -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
-            case WARN:  tracefunc('\x1b[33m[- WARN -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
-            case DEBUG: tracefunc('\x1b[32m[- DEBUG -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
-            case TODO:  tracefunc('\033[48;2;255;165;0m[- TODO -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
-            case EG:    tracefunc('\033[38;2;0;0;255m\033[48;2;255;0;0m[- R_F--EASTER EGG!!! -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
-            default:    tracefunc(message);
+            case INFO:  Sys.println('\x1b[34m[- INFO -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+            case ERROR: Sys.println('\033[48;2;255;0;0m[- ERROR -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+            case WARN:  Sys.println('\x1b[33m[- WARN -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+            case DEBUG: Sys.println('\x1b[32m[- DEBUG -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+            case TODO:  Sys.println('\033[48;2;255;165;0m[- TODO -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+            case EG:    Sys.println('\033[38;2;0;0;255m\033[48;2;255;0;0m[- R_F--EASTER EGG!!! -]:\x1b[0m $message (${p.fileName} line ${p.lineNumber})');
+            default:    Sys.println(message);
         }
     }
 

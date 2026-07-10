@@ -29,17 +29,13 @@ PLATFORM_ANDROID_NOT_SUPPORTED" if="android" />
     <haxelib name="haxeui-core" version="1.7.0"/>
     <haxelib name="haxeui-flixel" version="1.7.0"/>
     <haxelib name="funkin.vis" /> <!--haxelib git funkin.vis https://github.com/FunkinCrew/funkVis -->
-    <haxelib name="grig.audio" /> <!--haxelib git grig.audio https://gitlab.com/haxe-grig/grig.audio.git cbf91e2180fd2e374924fe74844086aab7891666 -->
+    <haxelib name="grig.audio" /> <!--haxelib git grig.audio https://github.com/FunkinCrew/grig.audio -->
     
 
     <source path="source" />
     <source path="source/debug" if="debug"/>
-    <section if="html5">
-        <assets path="assets" embed="true"/>
-    </section>
-    <section if="hl||windows">
-        <assets path="assets"/>
-    </section>
+    <assets path="assets"/>
+    
     <section if="windows">
         <haxelib name="hxdiscord_rpc" version="git"/>
     </section>

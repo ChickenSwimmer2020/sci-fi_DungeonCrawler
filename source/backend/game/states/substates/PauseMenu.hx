@@ -41,7 +41,7 @@ class PauseMenu extends FlxSubState {
             var button:FlxButton = new FlxButton(FlxG.width-85, FlxG.height, [
                 Language.getTranslatedKey("pause.resume", buttons[i]),
                 Language.getTranslatedKey("pause.settings", buttons[i]),
-                "",
+                Language.getTranslatedKey("pause.save", buttons[i]),
                 Language.getTranslatedKey("pause.exit", buttons[i]),
                 Language.getTranslatedKey("pause.debug.exittestingstate", buttons[i])
             ][i], [
@@ -51,7 +51,9 @@ class PauseMenu extends FlxSubState {
                     options.camera = Main.camHUD;
                     openSubState(options);
                 },
-                ()->{},
+                ()->{
+                    Player.save(); //actually does all the saving lol.
+                },
                 ()->{
                     Main.Trace(INFO, 'Time since player last saved: ${Player.SLS}');
                     if(Player.SLS > Flags.SLS_WARNING_THRESHOLD) {

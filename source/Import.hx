@@ -161,6 +161,8 @@ import states.MainMenuState;
     import debugging.MapDebugger;
     import debugging.ui.CreatePopup;
     import debugging.ui.DebuggerMainView;
+    import debugging.ui.DebuggerSaveReaderWindow;
+    import debugging.ui.DebuggerSaveWriterWindow;
     import debugging.ui.cc.Layer;
     import debugging.ui.cc.MainView as CutsceneMakerMainView;
 #end

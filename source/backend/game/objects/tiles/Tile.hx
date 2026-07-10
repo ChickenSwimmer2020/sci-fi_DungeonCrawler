@@ -104,22 +104,24 @@ class Tile extends FlxSprite {
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
-        if(inEditorMode #if debug && !Main.loadedTestedState #end) {
-            if(FlxG.mouse.overlaps(this, Main.camGame) && FlxG.mouse.justPressedRight) {
-                var myNotif:Notification = new Notification();
-                myNotif.notificationData = {
-                    title: "Info",
-                    body: 'Tile at X/Y ${x}/${y} with surround: ${animation.name}',
-                    type: NotificationType.Info,
-                    expiryMs: 3000
-                };
-                @:privateAccess NotificationManager.instance.pushNotification(myNotif);
-                Timer.delay(function () {
-                    myNotif.left = 20;
-                    myNotif.top = (Screen.instance.height-20) - myNotif.height;
-                }, 15);
+        #if(debug)
+            if(inEditorMode && !Main.loadedTestedState) {
+                if(FlxG.mouse.overlaps(this, Main.camGame) && FlxG.mouse.justPressedRight) {
+                    var myNotif:Notification = new Notification();
+                    myNotif.notificationData = {
+                        title: "Info",
+                        body: 'Tile at X/Y ${x}/${y} with surround: ${animation.name}',
+                        type: NotificationType.Info,
+                        expiryMs: 3000
+                    };
+                    @:privateAccess NotificationManager.instance.pushNotification(myNotif);
+                    Timer.delay(function () {
+                        myNotif.left = 20;
+                        myNotif.top = (Screen.instance.height-20) - myNotif.height;
+                    }, 15);
+                }
             }
-        }
+        #end
     }
     
     private function initTileGraphic(image:String) {

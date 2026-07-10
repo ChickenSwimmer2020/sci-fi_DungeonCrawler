@@ -53,6 +53,7 @@ class Pickup extends FlxSprite {
                     sendToInventory(data);
                     destroy();
                     interactionPopup(false);
+                    Player.save(); //automatically save the player stats. kinda like an autosave but worse.
                 }else{
                     var popup:Popup = new Popup(    
                         Language.getTranslatedKey("inventory.full.title", null),

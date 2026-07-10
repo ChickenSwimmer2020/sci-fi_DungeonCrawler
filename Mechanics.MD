@@ -9,6 +9,7 @@
 * * If a critical subsystem is damaged, well you die. simple, as critical are limited to keeping the biological side alive.
 * * If a subsystem is either destroyed or damaged too much, you must find a repair kit and repair the subsystem.
 * * If the subsystem was critical though, you die instantly.
+* * In survival you have to track all organs, limbs, and cybernetic subsystems.
 
 * Security system starts up after enabling level power (REQUIRES FUZE (HARDMODE EXCLUSIVE))
 * fog of war

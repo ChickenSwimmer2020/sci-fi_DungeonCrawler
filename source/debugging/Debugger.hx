@@ -20,17 +20,17 @@ class Debugger extends FlxState {
         mang.container = mainView;
         mainView.windowListA.windowManager = mang;
         mainView.saveReader = ()->{
-            var window = new SaveDebuggerWindow(Main.saveFiles);
+            var window = new DebuggerSaveReaderWindow(Main.saveFiles);
             window.left = 10;
             window.top = 80;
             mang.addWindow(window);
         };
-        //mainView.saveWriter = ()->{
-        //    var window = new SaveDebuggerEditorWindow(Main.saveFiles);
-        //    window.left = 10;
-        //    window.top = 80;
-        //    mang.addWindow(window);
-        //};
+        mainView.saveWriter = ()->{
+            var window = new DebuggerSaveWriterWindow(Main.saveFiles);
+            window.left = 10;
+            window.top = 80;
+            mang.addWindow(window);
+        };
         mainView.alphabetViewer = ()->{
             var window = new AlphabetViewerWindow();
             window.left = 10;
@@ -81,140 +81,15 @@ class Debugger extends FlxState {
     var textBoxSelected:Bool=false;
     override public function update(elapsed:Float) {
         super.update(elapsed);
-        textBoxSelected = Functions.anyTrue([mainView.errorMenu.findComponent("errInOut", HUITextField, true, "id").focus]);
+        textBoxSelected = Functions.anyTrue([
+            mainView.errorMenu.findComponent("errInOut", HUITextField, true, "id").focus,
+        ].concat([for(window in mang.windows) window.active])); //if any windows are active, dont let you close.
 
         if(!textBoxSelected && FlxG.keys.justPressed.BACKSPACE) {
             FlxG.switchState(()->new MainMenuState(false));
         }
     }
 }
-
-//------------------------------------------
-//              SAVE DEBUGGING
-//------------------------------------------
-@:xml('
-<window title="Save Reader" width="350">
-    <window-title width="100%">
-        <dropdown id="savesDropdown" width="100"/>
-    </window-title>
-
-    <tree-view id="properties" width="100%" height="100%" styleName="full-width">
-        <item-renderer layout="horizontal" width="100%">
-            <label id="text" verticalAlign="center" width="100%" />
-        </item-renderer>
-    </tree-view>    
-</window>
-')
-class SaveDebuggerWindow extends haxe.ui.containers.windows.Window {
-    public function new(saves:Array<String>){
-        super();
-        title=Language.getTranslatedKey("debugger.windows.save.reader", null);
-        for(save in saves) {
-            savesDropdown.dataSource.add(save);
-        }
-        savesDropdown.onChange = (_:UIEvent)->{
-            Main.Trace(INFO, 'Selected: ${savesDropdown.selectedItem}');
-            properties.clearNodes();
-
-            var targetSave:SaveFile = Main.saveFile.data;
-            for(field in Reflect.fields(targetSave)) { //maps are handled WAY differently between HTML5 and windows.
-                if(field == "maps"){
-                    properties.addNode({text: '$field => ${(Reflect.getProperty(targetSave, field):Array<Dynamic>).length>0?"populated (this is good)":"[] (this is bad.)"}'});
-                    continue; //skip it.
-                }
-                switch(field) {
-                    default: properties.addNode({text: '$field => ${Reflect.getProperty(targetSave, field)}'});
-                }
-            }
-        }
-    }
-}
-//@:xml('
-//<window title="Save Editor" width="350">
-//    <window-title width="100%">
-//        <dropdown id="savesDropdown" width="100"/>
-//    </window-title>
-//
-//    <tree-view id="properties" width="100%" height="100%" styleName="full-width">
-//        <item-renderer layout="horizontal" width="100%">
-//            <label id="text" verticalAlign="center" width="100%" />
-//            <image resource="assets/ui/menu/icon_reassign" id="butt" verticalAlign="right" width="15%" />
-//        </item-renderer>
-//    </tree-view>    
-//</window>
-//')
-//class SaveDebuggerEditorWindow extends haxe.ui.containers.windows.Window {
-//    public function new(saves:Array<String>) {
-//        super();
-//        title=Language.getTranslatedKey("debugger.windows.save.editor", null);
-//        for(save in saves) {
-//            savesDropdown.dataSource.add(save);
-//        }
-//        savesDropdown.onChange = (_:UIEvent)->{
-//            Main.Trace(DEBUG, 'Selected: ${savesDropdown.selectedItem}');
-//            properties.clearNodes();
-//
-//            var targetSave:SaveFile;
-//            #if(windows||hl)
-//                targetSave = Main.saveFile.data;
-//            #else
-//                targetSave = (Main.saveFile.data.saves:Map<String,SaveFile>).get(savesDropdown.selectedItem);
-//            #end
-//            final targetFields:Array<String>=[
-//                "meta", "health", "stamina", "xp", "position", "inventory"
-//            ];
-//            for(property in targetFields) {
-//                var node:TreeViewNode = properties.addNode({text: '$property => ${Reflect.getProperty(targetSave, property)}'});
-//                node.onClick = (_:MouseEvent)->{
-//                    var dialog = new SaveDebuggerEditorEditPopup(savesDropdown.selectedItem, property);
-//                    dialog.onDialogClosed = function(e:DialogEvent) {
-//                        if(e.button.toString().toUpperCase()=="{{APPLY}}") {
-//                            var propertyToChange:Dynamic = Reflect.getProperty(targetSave, property);
-//                            if(propertyToChange is Int) {
-//                                Reflect.setProperty(targetSave, property, dialog.toChange.text.toInt());
-//                            }else if(propertyToChange is Float) {
-//                                Reflect.setProperty(targetSave, property, dialog.toChange.text.toFloat());
-//                            }else if(propertyToChange is String) {
-//                                Reflect.setProperty(targetSave, property, dialog.toChange.text);
-//                            }else{
-//                                Main.Trace(WARN, 'no clue what the property class is :/ $property]');
-//                            }
-//                            #if(windows||hl)
-//                                Main.saveFile.flush();
-//                            #else
-//                                Save.writeSaveFile(); //should automatically save everything properly, hopefully.
-//                            #end
-//                            savesDropdown.dispatch(new UIEvent(UIEvent.CHANGE, false, null)); //actually, i think thisll work.
-//                        }
-//                    }
-//                    dialog.showDialog();
-//                    Main.Trace(INFO, 'hehehehaw! ($property)');
-//                };
-//            }
-//            var node = properties.addNode({text: 'maps => ${if(targetSave.maps!=null)"populated"else"empty"}'});  
-//            node.onClick = (_:MouseEvent)->{
-//                Main.Trace(INFO, 'hehehehaw! (maps)');
-//            };
-//        }
-//    }
-//}
-//@:xml('
-//  <dialog id="diaroot" width="500" height="200" title="DEBUG LOLZ">
-//      <textfield id="toChange" width="100%" height="100%" placeholder="Value" />
-//  </dialog>
-//')
-//class SaveDebuggerEditorEditPopup extends Dialog {
-//    var o:String;
-//    var p:String;
-//    public function new(obj:String, property:String) {
-//        super();
-//        buttons = DialogButton.CANCEL | DialogButton.APPLY;
-//        title = '"$obj": Enter New Value for: $property';
-//
-//        o = obj;
-//        p = property;
-//    }
-//}
 //------------------------------------------
 //                ALPHABET
 //------------------------------------------

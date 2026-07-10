@@ -107,7 +107,10 @@ final class Functions {
     public static function anyTrue(toCheck:Array<Bool>):Bool {
         for(thingy in toCheck) {
             if(thingy) return true;
-            else return false;
+            else{
+                if(thingy == toCheck[toCheck.length-1]) return false;
+                else continue;
+            }
         }
         return false;
     }
@@ -351,19 +354,6 @@ final class Additions{
         return toReturn;
     }
 
-    //arrays
-    /**
-     * combine two arrays
-     * @param a original array
-     * @param b secondary array
-     * @return both arrays combined, a then b
-     */
-    public static function combine(a:Array<Dynamic>, b:Array<Dynamic>):Array<Dynamic> {
-        var returnArray:Array<Dynamic>=[];
-        for(item in a) returnArray.push(item);
-        for(item in b) returnArray.push(item);
-        return returnArray;
-    }
     /**
      * clear an array
      * @param a original array
