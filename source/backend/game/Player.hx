@@ -133,26 +133,36 @@ class Player extends FlxSprite {
         Player.instance.setPosition(Main.saveFile.data.playerState.position.x, Main.saveFile.data.playerState.position.y);
         Player.instance.currentMap = Main.saveFile.data.playerState.position.curLevel;
         Player.instance.inventory.inventory = Main.saveFile.data.inventory;
+
+        for(slot in 0...Player.INVENTORY_SLOTS) {
+            if(Player.instance.inventory.inventory[slot]==null && !(Player.instance.inventory.inventory[slot] is Dynamic)) {
+                Player.instance.inventory.inventory[slot] = "EMPTY";
+            }
+        }
     }
 
     public static function save() {
-        Main.saveFile.data.meta.playTime = {H: 6, M: 9, S: 420}; //placeholder
-        Main.saveFile.data.meta.name = Player.instance.name;
-        Main.saveFile.data.meta.difficulty = Player.instance.difficulty;
-        Main.saveFile.data.meta.depth = Player.instance.depth;
-        Main.saveFile.data.meta.level = Player.instance.level;
-        Main.saveFile.data.meta.money = Player.instance.money;
-        Main.saveFile.data.playerState.health = Player.instance.health;
-        Main.saveFile.data.playerState.stamina = Player.instance.stamina;
-        Main.saveFile.data.playerState.xp = Player.instance.xp;
-        Main.saveFile.data.playerState.position = {
-            x: Player.instance.getPosition().x,
-            y: Player.instance.getPosition().y,
-            curLevel: Player.instance.currentMap
-        };
-        Main.saveFile.data.inventory = Player.instance.inventory.inventory;
+        if(#if(debug)!Main.loadedTestedState#else true#end){
+            Main.saveFile.data.meta.playTime = {H: 6, M: 9, S: 420}; //placeholder
+            Main.saveFile.data.meta.name = Player.instance.name;
+            Main.saveFile.data.meta.difficulty = Player.instance.difficulty;
+            Main.saveFile.data.meta.depth = Player.instance.depth;
+            Main.saveFile.data.meta.level = Player.instance.level;
+            Main.saveFile.data.meta.money = Player.instance.money;
+            Main.saveFile.data.playerState.health = Player.instance.health;
+            Main.saveFile.data.playerState.stamina = Player.instance.stamina;
+            Main.saveFile.data.playerState.xp = Player.instance.xp;
+            Main.saveFile.data.playerState.position = {
+                x: Player.instance.getPosition().x,
+                y: Player.instance.getPosition().y,
+                curLevel: Player.instance.currentMap
+            };
+            Main.saveFile.data.inventory = Player.instance.inventory.inventory;
 
-        Main.Trace(INFO, 'saved ${Main.FILE} correctly? ${Main.saveFile.flush()}');
+            Main.Trace(INFO, 'saved ${Main.FILE} correctly? ${Main.saveFile.flush()}');
+        }else{
+            Main.Trace(ERROR, 'Game tried to save to ${Main.FILE}.. but testing state restricts saving!');
+        }
     }
 
     #if (debug)
@@ -192,8 +202,7 @@ class Player extends FlxSprite {
         if(Main.camGame!=null){
             if(mousePosition==null) mousePosition = new FlxPoint(0, 0); //JUST in-case.
             if(reloadCamScrollSystem){
-                //Hours wasted trying to fix `null acces .x`: 8
-                FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0); //! SOLAR PLEASE FIX THIS STUPID GOD-DAMN ERROR I CANT FOR THE LIFE OF ME GET IT.
+                FlxG.mouse.getWorldPosition(Main.camGame, mousePosition)??FlxPoint.weak(0, 0);
                 reloadCamScrollSystem = false;
             }
         }

@@ -147,7 +147,7 @@ import backend.game.objects.tiles.Tile;
 import backend.game.states.DeathState;
 import backend.game.states.GameState;
 import backend.game.states.substates.LoadGameSubstate;
-import backend.game.states.substates.OptionsMenuSubstate;
+import backend.game.states.substates.OptionsMenu;
 import backend.game.states.substates.PauseMenu;
 import backend.game.states.substates.HUDSubstate;
 import states.AwardsGalleryState;

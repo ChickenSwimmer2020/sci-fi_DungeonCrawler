@@ -81,7 +81,7 @@ class AwardsGalleryState extends FlxState {
             var overshootScale:Float = 1.0 + 0.25;
             var overshootCenterShift:Float = -25;
             var overshootLeftX:Float = (159 * 1.2) + overshootCenterShift*2;
-            var overshootRightX:Float = FlxG.width - (159 * 1.2) - overshootCenterShift;
+            var overshootRightX:Float = FlxG.width - (159 / 2) - overshootCenterShift;
 
             for (j in 0...shelf.truss.length) {
                 var truss = shelf.truss[j];
@@ -92,24 +92,24 @@ class AwardsGalleryState extends FlxState {
                 var leftX:Float = (159 * 1.2) + centerShift*2;
                 var rightX:Float = FlxG.width - (159 * 1.2) - centerShift;
                 var targetX:Float = [leftX-159, rightX][j];
-                var overshootTargetX:Float = [overshootLeftX-159, overshootRightX][j];
+                var overshootTargetX:Float = [overshootLeftX-(159*2), overshootRightX][j];
 
                 if (doOvershootOut) {
-                    var t1 = FlxTween.tween(truss.scale, {x: overshootScale, y: overshootScale}, GALLERY_TRANSITION_TIME, {
+                    var t1 = FlxTween.tween(truss.scale, {x: overshootScale, y: overshootScale}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onUpdate: (_) -> truss.updateHitbox()
                     });
-                    var tX = FlxTween.tween(truss, {x: overshootTargetX}, GALLERY_TRANSITION_TIME, {
+                    var tX = FlxTween.tween(truss, {x: overshootTargetX}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut
                     });
-                    var tAlpha = FlxTween.tween(truss, {alpha: 0}, GALLERY_TRANSITION_TIME, {
+                    var tAlpha = FlxTween.tween(truss, {alpha: 0}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onComplete: (_) -> {
                             truss.x = targetX;
                             truss.scale.set(targetScale, targetScale);
                             truss.updateHitbox();
 
-                            var tAlpha2 = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME * 0.65, {ease: FlxEase.expoOut});
+                            var tAlpha2 = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_SHELF_TIME * 0.65, {ease: FlxEase.expoOut});
                             shelf.tweens.push(tAlpha2);
                         }
                     });
@@ -122,22 +122,22 @@ class AwardsGalleryState extends FlxState {
                     truss.alpha = 0;
                     truss.updateHitbox();
 
-                    var t1 = FlxTween.tween(truss.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                    var t1 = FlxTween.tween(truss.scale, {x: targetScale, y: targetScale}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onUpdate: (_) -> truss.updateHitbox()
                     });
-                    var tX = FlxTween.tween(truss, {x: targetX}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
-                    var tAlpha = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    var tX = FlxTween.tween(truss, {x: targetX}, GALLERY_SHELF_TIME, {ease: FlxEase.expoOut});
+                    var tAlpha = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_SHELF_TIME, {ease: FlxEase.expoOut});
                     shelf.tweens.push(t1);
                     shelf.tweens.push(tX);
                     shelf.tweens.push(tAlpha);
                 } else {
-                    var t1 = FlxTween.tween(truss.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                    var t1 = FlxTween.tween(truss.scale, {x: targetScale, y: targetScale}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onUpdate: (_) -> truss.updateHitbox()
                     });
-                    var tAlpha = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
-                    var tX = FlxTween.tween(truss, {x: targetX}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    var tAlpha = FlxTween.tween(truss, {alpha: targetAlpha}, GALLERY_SHELF_TIME, {ease: FlxEase.expoOut});
+                    var tX = FlxTween.tween(truss, {x: targetX}, GALLERY_SHELF_TIME, {ease: FlxEase.expoOut});
                     shelf.tweens.push(t1);
                     shelf.tweens.push(tAlpha);
                     shelf.tweens.push(tX);
@@ -149,17 +149,17 @@ class AwardsGalleryState extends FlxState {
                 add(shelfSprite);
 
                 if (doOvershootOut) {
-                    var t1 = FlxTween.tween(shelfSprite.scale, {x: overshootScale, y: overshootScale}, GALLERY_TRANSITION_TIME, {
+                    var t1 = FlxTween.tween(shelfSprite.scale, {x: overshootScale, y: overshootScale}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onUpdate: (_) -> shelfSprite.updateHitbox()
                     });
-                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: 0}, GALLERY_TRANSITION_TIME, {
+                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: 0}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onComplete: (_) -> {
                             shelfSprite.scale.set(targetScale, targetScale);
                             shelfSprite.updateHitbox();
 
-                            var tAlpha2 = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME * 0.65, {ease: FlxEase.expoOut});
+                            var tAlpha2 = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_SHELF_TIME * 0.65, {ease: FlxEase.expoOut});
                             shelf.tweens.push(tAlpha2);
                         }
                     });
@@ -170,19 +170,19 @@ class AwardsGalleryState extends FlxState {
                     shelfSprite.alpha = 0;
                     shelfSprite.updateHitbox();
 
-                    var t1 = FlxTween.tween(shelfSprite.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                    var t1 = FlxTween.tween(shelfSprite.scale, {x: targetScale, y: targetScale}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onUpdate: (_) -> shelfSprite.updateHitbox()
                     });
-                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_SHELF_TIME, {ease: FlxEase.expoOut});
                     shelf.tweens.push(t1);
                     shelf.tweens.push(tAlpha);
                 } else {
-                    var t1 = FlxTween.tween(shelfSprite.scale, {x: targetScale, y: targetScale}, GALLERY_TRANSITION_TIME, {
+                    var t1 = FlxTween.tween(shelfSprite.scale, {x: targetScale, y: targetScale}, GALLERY_SHELF_TIME, {
                         ease: FlxEase.expoOut,
                         onUpdate: (_) -> shelfSprite.updateHitbox()
                     });
-                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_TRANSITION_TIME, {ease: FlxEase.expoOut});
+                    var tAlpha = FlxTween.tween(shelfSprite, {alpha: targetAlpha}, GALLERY_SHELF_TIME, {ease: FlxEase.expoOut});
                     shelf.tweens.push(t1);
                     shelf.tweens.push(tAlpha);
                 }
@@ -190,7 +190,9 @@ class AwardsGalleryState extends FlxState {
         }
         return value;
     }
-    public static final GALLERY_TRANSITION_TIME:Float = 1.2;
+
+    public static final GALLERY_TRANSITION_TIME:Float = 1.2; //state enter/exit time.
+    public static final GALLERY_SHELF_TIME:Float = 0.86456; //shelf transition time
     final GALLERY_MAX_SHELVES:Int = 5;
 
     var shelves:Array<GalleryShelf> = [];

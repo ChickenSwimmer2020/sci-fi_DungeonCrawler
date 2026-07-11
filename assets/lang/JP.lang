@@ -118,7 +118,9 @@
         "quit": "終了",
         "debug": {
             "debugger": "デバッガー"
-        }
+        },
+        "vprefix": "プロトタイプ",
+        "version": "{PF}: {V}"
     },
     "debugger": {
         "title":"デバッガーシステム",

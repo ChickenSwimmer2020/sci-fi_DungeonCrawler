@@ -70,7 +70,14 @@ class Pickup extends FlxSprite {
             interactionPopup(false);
         }
     }
-    private function inventoryFull():Bool return (Player.instance.inventory.inventory.length<Player.INVENTORY_SLOTS);
+    private function inventoryFull():Bool{
+        var fullSlots:Array<Bool> = [];
+        for(object in Player.instance.inventory.inventory) {
+            if(object is String) continue;
+            else fullSlots.push(true);
+        }
+        return (fullSlots.length>=Player.INVENTORY_SLOTS);
+    }
     private function sendToInventory(item:Item) {
         var inv:Array<OneOfTwo<String, Item>> = Player.instance.inventory.inventory;
         var it:Item = item;

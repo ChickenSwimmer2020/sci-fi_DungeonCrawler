@@ -47,9 +47,7 @@ class PauseMenu extends FlxSubState {
             ][i], [
                 ()->exit(),
                 ()->{
-                    var options:FlxSubState = new OptionsMenuSubstate();
-                    options.camera = Main.camHUD;
-                    openSubState(options);
+                    new OptionsMenu().showDialog(false);
                 },
                 ()->{
                     Player.save(); //actually does all the saving lol.

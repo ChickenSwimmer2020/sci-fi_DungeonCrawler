@@ -238,9 +238,11 @@ class Main extends openfl.display.Sprite {
             case EN_US: "Nokia Cellphone FC Small";
             case JP: "assets/fonts/k8x12L.ttf";
             case ES: "Nokia Cellphone FC Small";
+            default: "Nokia Cellphone FC Small";
         }
         ExtendedText.globalFont = FlxAssets.FONT_DEFAULT;
 
+        Flags.VERSION_PREFIX = Language.getTranslatedKey("menu.vprefix", null);
         return value;
     }
 

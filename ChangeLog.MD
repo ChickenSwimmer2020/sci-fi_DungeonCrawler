@@ -14,6 +14,24 @@ start every "*" with a Capital letter, and end with a period
 ** Prototype Update {add "_MAJOR" or "_HOTFIX" as needed} [VERSION] ([GENERAL NAME])
 -->
 
+## Prototype Update 0.04.1.06.1 (random bits and bobs)
+
+> Kinda just a general fuck around update, trying to make some backend features work properly.
+
+* Changed some stuff in `AwardsGalleryState`.
+* Updated some lang stuff
+* `Build.bat` now installes funkin.vis and grig.audio
+* Added null safety for GameState.generatedCameras
+* Pickup actually scans for a full inventory
+* Player no longer has a problem with loading inventory file
+* OptionsMenu is now based on haxeUI
+* Language has a debug override to show only language keys
+* Removed an unused flag **`DEFAULT_JSON_RECURSIVE_CHECKS`**
+* MapDebugger is *somewhat* functional again
+* * Solar please fix
+* Game now translate Version_Prefix
+* TestingState is dumb
+
 ## Prototype Update 0.04.1.06 (fixes, fft vis) -- ZSolarDev
 
 > We'll have to replace the sound tray sound asset with a custom one eventually.

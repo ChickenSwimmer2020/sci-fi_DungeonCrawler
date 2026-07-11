@@ -34,17 +34,13 @@ class MapDebugger extends FlxUIState{
         mainView.focusonplr.onClick = (_)->Main.camGame.focusOn(FlxPoint.weak(map.plr.x, map.plr.y));
 
         mainView.generate_btn.onClick = (_)->{
-            try{
-                remove(map);
-                map.destroy();
-                map = MapGenerator.createMap(null, MapGenerator.generateMap(mainView.wstepper.value, mainView.hstepper.value, 0, true), true);
-                add(map);
-                Player.instance.testingMode = true;
-                crosshair.x = ((((FlxG.width.getPercentage(75).floor()))/2)-(crosshair.width/2));
-                crosshair.y = ((FlxG.height/2)-(crosshair.height/2));
-            }catch(e) {
-                trace(e.stack);
-            }
+            remove(map);
+            map.destroy();
+            map = MapGenerator.createMap("", MapGenerator.generateMap(mainView.wstepper.value, mainView.hstepper.value, 0, true), true);
+            add(map);
+            Player.instance.testingMode = true;
+            crosshair.x = ((((FlxG.width.getPercentage(75).floor()))/2)-(crosshair.width/2));
+            crosshair.y = ((FlxG.height/2)-(crosshair.height/2));
         };
 
         posText = new FlxText(0, 0, 0, "X/Y: [X], [Y]");

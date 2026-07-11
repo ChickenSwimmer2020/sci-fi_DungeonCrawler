@@ -74,7 +74,7 @@ class GameState extends FlxState {
         Main.camOther.bgColor=0x00FFFFFF;
         Main.camOther.filters=[];
         Main.addCameraToGame(Main.camOther, "other");
-        GameState.instance.generatedCameras=true;
+        if(GameState.instance != null) GameState.instance.generatedCameras=true;
     }
 
     public static function degenerateCameras() {
@@ -90,7 +90,7 @@ class GameState extends FlxState {
             Main.camOther.destroy();
             Main.camOther = null;
         }
-        GameState.instance.generatedCameras=false;
+        if(GameState.instance != null) GameState.instance.generatedCameras=false;
     }
 
     //reset all the static varibles n shit.

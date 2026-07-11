@@ -385,6 +385,10 @@ class SaveReader { //okay, its a zip file. fine.
         var path = Paths.save(name);
         if(!FileSystem.exists(path)) File.saveContent(path, "TEST STRING, this gets overwritten lol."); //make an empty file.
         else {
+            if(forceOverwrite) {
+
+
+            }            
             //TODO: ask if you would like to overwrite the save file.
             //TODO: find way to make this NOT overflow the stack because thats a uhhhh, really bad thing.
             //if(forceOverwrite) return createSave(name, dat, onComplete, true); //exit the block, by just running internally and forcing :3 

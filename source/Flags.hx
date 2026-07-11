@@ -98,7 +98,7 @@ class Flags {
         public static var CC_THEREISAPOPUPOPENDONOTUSECUTSCENECONTROLS:Bool=false;
         public static final CC_DEFAULTLOADPATH:String = '${OpenFLFile.applicationDirectory.nativePath}/assets/cutscenes/';
     #end
-    public static final VERSION_PREFIX:String = "PROTOTYPE: ";
+    public static var VERSION_PREFIX:String = "PROTOTYPE";
     public static final SLS_WARNING_THRESHOLD:Int=120; //this is in seconds. (120=2 minutes)
     public static final ERROR_MESSAGES:Map<String, Array<String>>=[
         "TEST"=>["window title", "message box"],
@@ -125,7 +125,6 @@ class Flags {
         "interact" => [E, ENTER],
         "sprint" => [SHIFT, FlxKey.NONE],
     ];
-    public static final DEFAULT_JSON_RECURSION_CHECKS:Int = 20;
     public static final CONDUCTOR_BPM_CHECK_INTERVAL:Int=1;
     public static final FALLBACK_WEAPON:WeaponData = {
         animations: [],

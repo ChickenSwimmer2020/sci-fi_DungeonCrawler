@@ -87,7 +87,10 @@ IF %ERRORLEVEL% neq 0 (
     haxelib install hxcpp 4.3.2
     haxelib install haxeui-core 1.7.0
     haxelib install haxeui-flixel 1.7.0
-    haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git
+	REM this is kinda buggy for some reason and freezes? we should figure out why that is..
+    haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git 
+	haxelib git funkin.vis https://github.com/FunkinCrew/funkVis
+	haxelib git grig.audio https://github.com/FunkinCrew/grig.audio
 
     ECHO Libraries installed... loading autobuilder...
     CLS

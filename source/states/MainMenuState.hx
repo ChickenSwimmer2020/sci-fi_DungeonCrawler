@@ -40,7 +40,7 @@ class MainMenuState extends FlxState {
 
 
 
-        var vText:ExtendedText = new ExtendedText(0, 0, 0, '${Flags.VERSION_PREFIX}${Application.current.meta.get('version')}', 12, true);
+        var vText:ExtendedText = new ExtendedText(0, 0, 0, Language.getTranslatedKey("menu.version", null, ["{PF}"=>Flags.VERSION_PREFIX, "{V}"=>Application.current.meta.get('version')]), 12, true);
         add(vText);
         vText.setPosition(FlxG.width-vText.width, FlxG.height-vText.height);
 
@@ -58,7 +58,7 @@ class MainMenuState extends FlxState {
                 });
             },
             ()->{openSubState(new LoadGameSubstate());},
-            ()->{openSubState(new OptionsMenuSubstate());},
+            ()->{new OptionsMenu().showDialog();},
             ()->{
                 Music.deathFadeOut(AwardsGalleryState.GALLERY_TRANSITION_TIME, false); //so, funnily enough, we can use this lol.
                 FlxTween.tween(FlxG.camera, {y: -FlxG.height}, AwardsGalleryState.GALLERY_TRANSITION_TIME, {ease: FlxEase.expoIn, onComplete:(_)->{

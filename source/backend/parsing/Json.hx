@@ -4,7 +4,6 @@ class Json {
     public static inline function stringify(value:Dynamic, ?replacer:(key:Dynamic, value:Dynamic)->Dynamic, ?space:String):String return haxe.Json.stringify(value, replacer, space);
     public static inline function parse(text:String):Dynamic return haxe.Json.parse(text);
 
-    static var attempts:Int = Flags.DEFAULT_JSON_RECURSION_CHECKS;
     public static function checkRecursive(data:Dynamic, key:String):Dynamic {
         var current:Dynamic = data;
         for (part in key.toLowerCase().split(".")) {

@@ -27,7 +27,7 @@ class GameMap extends FlxTypedGroup<Dynamic> {
 
     var gameFlash:FlxSprite;
     public function generate(testingState:Bool=false) {
-        if(!GameState.instance.generatedCameras) GameState.generateCameras(); //force gameState to regenerate cameras before anything. because the game likes to throw a fit if these cameras dont exist.
+        if(GameState.instance!=null && !GameState.instance.generatedCameras) GameState.generateCameras(); //force gameState to regenerate cameras before anything. because the game likes to throw a fit if these cameras dont exist.
         for(tile in tiles){
             add(generateObjectViaTile(tile));
         }
